@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core" 
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+    <body>
+
+
+        <ui:composition template="/templates/navbar1Layout.xhtml">
+
+            <!-- highlight "preferences" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
+
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+            <ui:define name="content">
+
+
+                <!-- List of future offers for this driver -->
+
+                <p:panel header="#{msgs.rideActiveOffers}">
+
+                    <!-- primefaces dynamic accordion COOL!  -->
+                    <p:accordionPanel  activeIndex="-1" value="#{driverride.futureDrives}" var="drive">                  
+
+                        <p:tab title=" #{drive.updatedShortcut} #{drive.startDateFormatted} #{drive.endptAddressShort}">
+
+                            <div class="formLabel"> #{msgs.rideOffer} #{drive.rideId} </div>
+                            
+                            <!-- show message if ride is updated -->
+                            <ui:fragment rendered="#{drive.driveUpdated}">
+                                <div class="formLabel">
+                                    <h:graphicImage library="images" name="updated.gif" width="20" height="20" />
+                                    #{msgs.updatedRide}
+                                </div>
+                            </ui:fragment>
+
+                            <!-- show link only if there are matches -->
+                            <ui:fragment rendered="#{drive.hasMatches}">
+                                <div class="formLabel">
+                                    <h:form>
+                                        <h:commandLink action="driver.driveMatchingsList" value="#{msgs.rideMatchesShowRequests}">
+                                            <f:param   name="#{crud.paramNameCrudId}"   value="#{drive.rideId}"/>
+                                            <f:param   name="#{webflow.getParamBack()}" value="driver"              />
+                                        </h:commandLink>
+                                    </h:form>
+                                </div>
+                            </ui:fragment>
+
+                            <h:form>
+                                <table> <!-- nested three column table -->
+
+                                    <tr>
+                                        <td colspan="3">
+                                            <span class="formLabel">
+                                                <h:commandLink action="driver.driveDisplay" value="#{msgs.formDisplay}">
+                                                    <f:param  name="#{crud.paramNameCrudId}" value="#{drive.rideId}"/>
+                                                    <f:param name="#{webflow.getParamBack()}" value="driver"          />
+                                                </h:commandLink>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>                                            
+                                        <td>
+                                            <span class="formLabel">
+                                                #{msgs.rideStarttime}
+                                            </span>
+                                        </td>
+                                        <td class="formLabel"> &nbsp;:&nbsp; </td>
+                                        <td>
+                                            <span class="formInput">
+                                                #{drive.startDateFormatted} 
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="formLabel">  #{msgs.rideStart}  </td>
+                                        <td class="formLabel"> &nbsp;:&nbsp; </td>
+                                        <td class="formInput"> #{drive.startptAddress} </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="formLabel">   #{msgs.rideDestination}  </td>
+                                        <td class="formLabel"> &nbsp;:&nbsp; </td>
+                                        <td class="formInput"> #{drive.endptAddress} </td>
+                                    </tr>
+                                    <tr>
+                                        <td> <span class="formLabel">  #{msgs.rideComment} </span> </td>
+                                        <td> <span class="formLabel"> &nbsp;:&nbsp;                 </span> </td>
+                                        <td>  <span class="formInput">  #{drive.rideComment}            </span> </td>
+                                    </tr>
+                                    <tr>
+                                        <td> <span class="formLabel">  #{msgs.rideNoMatchingRequests} </span> </td>
+                                        <td> <span class="formLabel"> &nbsp;:&nbsp;                 </span> </td>
+                                        <td> <span class="formInput">  #{drive.noMatches}            </span> </td>
+                                    </tr>
+
+                                </table>
+                            </h:form>  
+                        </p:tab>
+                    </p:accordionPanel>
+                </p:panel>
+
+            </ui:define>
+
+
+
+
+        </ui:composition>
+
+        <ui:debug />
+
+
+    </body>
+</html>

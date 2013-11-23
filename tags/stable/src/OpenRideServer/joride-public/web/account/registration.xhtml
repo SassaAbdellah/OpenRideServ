@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+
+
+
+
+
+    <h:head> </h:head>
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+    <h:body>
+        <ui:composition template="/templates/navbar1Layout.xhtml">
+
+            <!-- highlight "accounts" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexAccounts}" />
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+            <ui:define name="content">
+
+                <h1> #{msgs.registrationRegisterNewAccount}</h1>
+
+                <h:form>
+
+                    <!-- given name --> 
+                    <div class="formLabel">
+                        #{msgs.custFirstname}
+                    </div>
+
+                    <div class="formInput">
+                        <h:inputText value="#{registrationRequest.givenName}" />
+                    </div>  
+
+
+                    <!-- given name --> 
+                    <div class="formLabel">
+                        #{msgs.custLastname}
+                    </div>
+
+                    <div class="formInput">
+                        <h:inputText value="#{registrationRequest.surName}" />
+                    </div>  
+
+
+                    <!-- given name --> 
+                    <div class="formLabel">
+                        #{msgs.custEmail}
+                    </div>
+
+                    <div class="formInput">
+                        <h:inputText value="#{registrationRequest.emailAddress}" />
+                    </div>  
+
+
+                    <!-- given name --> 
+                    <div class="formLabel">
+                        #{msgs.custNickname}
+                    </div>
+
+                    <div class="formInput">
+                        <h:inputText value="#{registrationRequest.nickName}" />
+                    </div>  
+
+
+
+                    <h:commandButton  value="#{msgs.registrationSubmit}" action="#{registrationRequest.createRegistration()}">
+
+                        <f:param name="#{webflow.paramFinish}"  value="home" /> 
+                        <p:growl id="growl"  severity="error" />
+
+                    </h:commandButton>
+
+
+
+                </h:form>
+
+            </ui:define>
+
+
+
+
+        </ui:composition>
+
+
+    </h:body>
+
+
+
+</html>
+

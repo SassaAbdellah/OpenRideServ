@@ -1,0 +1,687 @@
+<?xml version="1.0"?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+      http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
+              version="2.0">
+
+
+
+
+    <application>
+        
+        <!-- lists of supported locales -->
+        <locale-config>
+            <default-locale>en</default-locale>
+            <supported-locale>de</supported-locale>
+        </locale-config>
+       
+     
+        <!-- Messages Properties  ******************************* -->
+       
+        <resource-bundle>
+            <base-name>de.avci.joride.messages</base-name>
+            <var>msgs</var>
+        </resource-bundle>
+      
+        <!-- Navigation Properties ******************************* -->
+        <resource-bundle>
+            <base-name>de.avci.joride.navigation</base-name>
+            <var>nav</var>
+        </resource-bundle>
+        
+        <!-- Date/Time Properties ******************************* -->
+        <resource-bundle>
+            <base-name>de.avci.joride.datetime</base-name>
+            <var>datetime</var>
+        </resource-bundle>
+        
+        
+        
+        <!-- update Properties ******************************* -->
+        <resource-bundle>
+            <base-name>de.avci.joride.update</base-name>
+            <var>update</var>
+        </resource-bundle>
+        
+        <!-- operational Properties ******************************* -->
+        <resource-bundle>
+            <base-name>de.avci.joride.operational</base-name>
+            <var>operational</var>
+        </resource-bundle>
+        
+        
+        
+      
+    </application>
+
+
+
+
+
+
+
+    <!-- Navigation Case                                  -->
+    <!-- enable new login (for example after loginFailed) -->
+
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>login</from-outcome>
+            <to-view-id>/faces/public/login.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+ 
+
+
+    <!-- Navigation Case  -->
+    <!-- go home          -->
+
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>home</from-outcome>
+            <to-view-id>/faces/public/index.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+
+
+
+    <!-- Navigation Case                           -->
+    <!-- go to startpage for the rider section     -->
+
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>rider</from-outcome>
+            <to-view-id>/faces/protected/rider/index.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+
+    <!-- Navigation Case                           -->
+    <!-- go to startpage for the rider section     -->
+
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>rider.rideDisplay</from-outcome>
+            <to-view-id>/faces/protected/rider/rideDisplay.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- Navigation Case                           -->
+    <!-- go to startpage for the rider section     -->
+
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>rider.rideCreate</from-outcome>
+            <to-view-id>/faces/protected/rider/rideCreate.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+    <!-- Navigation Case                           -->
+    <!-- list matchings for ride     -->
+
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>rider.rideMatchingsList</from-outcome>
+            <to-view-id>/faces/protected/rider/rideMatchingsList.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    <!-- Navigation Case                                    -->
+    <!-- show display for single matching for given *ride*  -->
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>rider.matchDisplay</from-outcome>
+            <to-view-id>/faces/protected/rider/rideMatchDisplay.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    
+    <!-- page to display rides in the paast -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>rider.riderRateRide</from-outcome>
+            <to-view-id>/faces/protected/rider/rideRateRide.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+   
+
+
+    <!-- Navigation Case                            -->
+    <!-- go to startpage for the driver section     -->
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>driver</from-outcome>
+            <to-view-id>/faces/protected/driver/index.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    <!-- Navigation Case -->
+    <!-- go to page where Drive Entities are displayed     -->
+    
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>driver.driveDisplay</from-outcome>
+            <to-view-id>/faces/protected/driver/driveDisplay.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    <!-- Navigation Case -->
+    <!-- go to page where new Drive Entities get created    -->
+    
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>driver.driveCreate</from-outcome>
+            <to-view-id>/faces/protected/driver/driveCreate.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    <!-- Navigation Case -->
+    <!-- go to page where Drive Entities are displayed     -->
+    
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>driver.driveDisplayNewDrive</from-outcome>
+            <to-view-id>/faces/protected/driver/driveDisplayNewDrive.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    <!-- Navigation Case -->
+    <!-- go to page where Routepoints for new Drive get created   -->
+    
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>driver.driveCreateRoute</from-outcome>
+            <to-view-id>/faces/protected/driver/driveCreateRouteForDrive.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+    
+    <!-- Navigation Case                           -->
+    <!-- list matchings for drive     -->
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>driver.driveMatchingsList</from-outcome>
+            <to-view-id>/faces/protected/driver/driveMatchingsList.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    <!-- Navigation Case                                    -->
+    <!-- show display for single matching for given *drive*  -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>driver.matchDisplay</from-outcome>
+            <to-view-id>/faces/protected/driver/driveMatchDisplay.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+   
+   
+   
+   
+    <!-- ********************************************* -->
+    <!-- *******   Search Navigation Cases     ******* -->
+    <!-- ********************************************* -->
+
+    <!-- page to display rides in the paast -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome> search.requests </from-outcome>
+            <to-view-id>/faces/protected/search/searchRequests.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    <!-- page to display results of searches for rides in the past -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>search.requestsDisplay</from-outcome>
+            <to-view-id>/faces/protected/search/searchRequestsDisplay.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+
+       
+    <!-- page to launch searches for rides in the past -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome> search.drives </from-outcome>
+            <to-view-id>/faces/protected/search/searchDrives.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    <!-- page to display results of searches for drives in the past -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>search.drivesDisplay</from-outcome>
+            <to-view-id>/faces/protected/search/searchDrivesDisplay.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    
+    
+   
+     
+    <!-- ********************************************* -->
+    <!-- ***  End of Search Navigation Cases     ***** -->
+    <!-- ********************************************* -->
+    
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+
+    <!-- Navigation Cases for "Profile and Preferences subsection"                             -->
+    <!-- go to startpage for the preferences section -->
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>preferences</from-outcome>
+            <to-view-id>/faces/protected/preferences/index.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+    <navigation-rule> <!-- navigate to preferences.personalData -->
+        <navigation-case>
+            <from-outcome>preferences.personalData</from-outcome>
+            <to-view-id>faces/protected/preferences/personalData.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+    
+    
+    <navigation-rule> <!-- navigate to preferences.riderPreferences -->
+        <navigation-case>
+            <from-outcome>preferences.riderPreferences</from-outcome>
+            <to-view-id>faces/protected/preferences/riderPreferences.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    
+    
+    <navigation-rule> <!-- navigate to preferences.riderPreferences -->
+        <navigation-case>
+            <from-outcome>preferences.favoritePlaces</from-outcome>
+            <to-view-id>/faces/protected/preferences/favoritePlaces.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+    <navigation-rule> <!-- navigate to preferences.riderPreferences -->
+        <navigation-case>
+            <from-outcome>preferences.favoritePlacesCreate</from-outcome>
+            <to-view-id>/faces/protected/preferences/favoritePlacesCreate.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+       
+    <navigation-rule> <!-- display a favoritePoint -->
+        <navigation-case>
+            <from-outcome>preferences.favoritePlacesDisplay</from-outcome>
+            <to-view-id>/faces/protected/preferences/favoritePlacesDisplay.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    
+
+
+    <navigation-rule> <!-- navigate to preferences.driverPreferences -->
+        <navigation-case>
+            <from-outcome>preferences.driverPreferences</from-outcome>
+            <to-view-id>faces/protected/preferences/driverPreferences.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+
+
+    <navigation-rule> <!-- navigate to preferences.carDetailsCreate (below driver preferences) -->
+        <navigation-case>
+            <from-outcome>preferences.carDetailsCreate</from-outcome>
+            <to-view-id>/faces/protected/preferences/carDetailsCreate.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+    <navigation-rule> <!-- navigate to preferences.carDetailsCreate (below driver preferences) -->
+        <navigation-case>
+            <from-outcome>preferences.carDetailsEdit</from-outcome>
+            <to-view-id>/faces/protected/preferences/carDetailsEdit.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+
+  
+
+    <!-- start page for picking a point    -->
+
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome> pickpoint </from-outcome>
+            <to-view-id>  /faces/public/geocoding/pickpoint.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- geolocate to determine your current position -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome> geolocate </from-outcome>
+            <to-view-id>  /faces/public/geocoding/geolocate.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+    <!-- pick point from list of favorite points -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome> pickfavorite </from-outcome>
+            <to-view-id>  /faces/public/geocoding/pickFavorite.xhtml </to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+
+
+    <!-- go to the nominatim search -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>nominatimq</from-outcome>
+            <to-view-id>/faces/public/geocoding/nominatim/jsonp.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+    
+    <!-- go to the osmmapper page -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>osmmap</from-outcome>
+            <to-view-id>/faces/public/geocoding/nominatim/osmmap.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+    <!-- nominatim via javascript/jsonp -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>jnominatim</from-outcome>
+            <to-view-id>/faces/public/geocoding/nominatim/jasonp.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+
+    
+    <!-- contact page -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>contact</from-outcome>
+            <to-view-id>/faces/public/contact/contact.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+    <!-- email contact form  -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>contactForm</from-outcome>
+            <to-view-id>/faces/public/contact/contactForm.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+
+    <!-- confirm sucessfull sending of mail from contact form or elsewhere -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>SENT_OK</from-outcome>
+            <to-view-id>/faces/public/message/message-confirm.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+
+ 
+	
+        
+        
+        
+       
+    <!-- Go to the page where the password will be set -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>password_change</from-outcome>
+            <to-view-id>/faces/protected/preferences/setPassword.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+      
+      
+    <!-- confirm sucessfull sending of mail from contact form or elsewhere -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>password_change_ok</from-outcome>
+            <to-view-id>/faces/protected/preferences/setPasswordConfirmation.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+  
+        
+    <!-- *** Navigation cases for displaying public profile data **** -->
+        
+  
+        
+              
+    <!-- go to public profile data display for Other people's profile  -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>displayPublicProfile</from-outcome>
+            <to-view-id>/faces/public/publicProfile/publicProfileDisplay.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+        
+    <!-- go to public profile data display for Other people's profile  -->
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>searchPublicProfileByNickName</from-outcome>
+            <to-view-id>/faces/public/publicProfile/searchPublicProfileByNickName.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>   
+   
+        
+    <!-- show ratings for driver -->
+                
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>driverRatingsDisplay</from-outcome>
+            <to-view-id>/faces/public/publicProfile/publicProfileDriverRatingsDisplay.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+        
+    <!-- show ratings for rider -->
+                
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>riderRatingsDisplay</from-outcome>
+            <to-view-id>/faces/public/publicProfile/publicProfileRiderRatingsDisplay.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+        
+        
+    <!-- show updates rides and drives for user -->
+                
+    <navigation-rule>
+        <navigation-case>
+            <from-outcome>updates</from-outcome>
+            <to-view-id>/faces/protected/updates/updates.xhtml</to-view-id>
+        </navigation-case>
+    </navigation-rule>
+        
+        
+      
+                            
+	
+    <!-- ***********************************************************  -->	
+    <!-- *****  Application Section ********************************  -->
+    <!-- ***********************************************************  -->		
+    <!-- *****  Beans Section **************************************  -->
+
+    <!-- ****** HTTPUser Bean ****** -->
+    <managed-bean> 
+        <managed-bean-name>HTTPUser</managed-bean-name>
+        <managed-bean-class>de.avci.joride.session.HTTPUser</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean> 
+    
+                    
+        
+    <!-- ****** Bean for ***exisisting*** offers (JDriverUndertakesRideEntity) , request scoped   ****** -->
+    <!-- ****** Note that there is also a bean for *new* offers, which is session scoped          ******-->
+    <managed-bean> 
+        <managed-bean-name>driverride</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.driverundertakesride.JDriverUndertakesRideEntity</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean> 
+        
+        
+    <!-- ****** Bean for ***new*** offers (JDriverUndertakesRideEntity) , request scoped   ****** -->
+    <!-- ****** Note that there is also a bean for existing offers, which is request scoped          ******-->
+    <managed-bean> 
+        <managed-bean-name>newdriverride</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.driverundertakesride.JDriverUndertakesRideEntity</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean> 
+    
+            
+    <!-- ****** Bean for an offer to be deleted , session scoped   ****** -->
+    <!-- ****** Note that there is also a bean for existing offers, which is request scoped          ******-->
+    <managed-bean> 
+        <managed-bean-name>canceldriverride</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.driverundertakesride.JDriverUndertakesRideEntity</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean> 
+    
+    
+    
+    
+    
+    
+    <!-- ****** Session scoped bean to circumvent JSF Implementation Bugs  connected with         ****** -->
+    <!-- ****** ui:repeat and h:datatable tags. commandlinks from inside these constructs        ****** -->
+    <!-- ****** will only work with request of view scoped data, but not with session scope      ****** -->
+    <!-- ****** Note that there is also a bean for *existing* drives, which is session scoped  ******-->
+    <managed-bean> 
+        <managed-bean-name>rscdriverride</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.driverundertakesride.JDriverUndertakesRideEntity</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean> 
+            
+    
+    <!-- ****** Bean for ***exisisting*** RideRequests (JRiderUndertakesRideEntity) , request scoped   ****** -->
+    <!-- ****** Note that there is also a bean for *new* requests, which is session scoped          ******-->
+    <managed-bean> 
+        <managed-bean-name>ride</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.riderundertakesride.JRiderUndertakesRideEntity</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean> 
+    
+    
+    <!-- ****** Bean for ***rating*** RideRequests (JRiderUndertakesRideEntity) , session scoped   ****** -->
+   
+    <managed-bean> 
+        <managed-bean-name>ratingride</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.riderundertakesride.JRiderUndertakesRideEntity</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean> 
+    
+    
+    
+        
+    <!-- ****** Bean for ***new*** RideRequests (JRiderUndertakesRideEntity) , session scoped   ****** -->
+    <!-- ****** Note that there is also a bean for *existing* requests, which is session scoped          ******-->
+    <managed-bean> 
+        <managed-bean-name>newride</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.riderundertakesride.JRiderUndertakesRideEntity</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean> 
+    
+    
+    <!-- ****** Bean for RideRequests about to be removed , session scoped            ****** -->
+    <!-- ****** Note that there is also a bean for *existing* requests, which is session scoped          ******-->
+    <managed-bean> 
+        <managed-bean-name>cancellingride</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.riderundertakesride.JRiderUndertakesRideEntity</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean> 
+    
+    
+        
+        
+    <!-- ****** Session scoped bean to circumvent JSF Implementation Bugs  connected with         ****** -->
+    <!-- ****** ui:repeat and h:datatable tags. commandlinks from inside these constructs        ****** -->
+    <!-- ****** will only work with request of view scoped data, but not with session scope      ****** -->
+    <!-- ****** Note that there is also a bean for *existing* requests, which is session scoped  ******-->
+    <managed-bean> 
+        <managed-bean-name>rscride</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.riderundertakesride.JRiderUndertakesRideEntity</managed-bean-class>
+        <managed-bean-scope>view</managed-bean-scope>
+    </managed-bean> 
+    
+    
+    
+    
+    <!-- Set of parameters to define searches inside rides and drives -->
+    
+    <managed-bean> 
+        <managed-bean-name>ridesearchparams</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.auxiliary.RideSearchParamsBean</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean> 
+    
+    <!-- Set of parameters to define searches for ratings inside rides and drives -->
+    
+    <managed-bean> 
+        <managed-bean-name>ratingsearchparams</managed-bean-name>
+        <managed-bean-class>de.avci.joride.jbeans.auxiliary.RideSearchParamsBean</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean> 
+
+    
+            
+</faces-config>

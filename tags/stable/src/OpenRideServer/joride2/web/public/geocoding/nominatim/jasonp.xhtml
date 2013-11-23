@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+
+
+
+
+
+    <body>
+
+        <ui:composition template="/templates/simpleLayout.xhtml">
+
+
+
+
+            <ui:define name="windowTitle">
+                #{msgs.geocodeSearchTitle}
+            </ui:define>
+
+            <ui:define name="content">
+
+
+
+
+                <!-- include standard jquery  -->
+
+
+                <h:outputScript library="js" name="jquery-1.4.1.js" />
+
+
+
+                <h:outputScript library="js" name="nominatim-callback.js" /> 
+
+
+
+                <!-- update webflow and point data -->
+
+                #{webflow.smartUpdate()}
+                #{point.smartUpdate()}
+
+
+
+                <h:form >
+
+                    <!-- label and input for poi  *********************************************** -->
+                    <div class="formLabel"> #{msgs.poilabel}   </div>
+                    <div class="formInput">   <h:inputText  value="#{nominatimq.poi}"     /> </div>
+                    <!-- label and input for city  *********************************************** -->
+                    <div class="formLabel"> #{msgs.citylabel}  </div>
+                    <div class="formInput">   <h:inputText  value="#{nominatimq.city}"    /> </div>   
+
+                    <!-- label and input for password  *********************************************** -->
+                    <div class="formLabel"> #{msgs.streetlabel}  </div>
+                    <div class="formInput">  <h:inputText    value="#{nominatimq.street}" /> </div>
+
+                    <!-- we use non JSF html button for submit to eva JSF Navigation Cases *********** -->
+                    <div class="submitbutton"> <h:commandButton value="#{msgs.searchlabel}"   /> </div>
+
+                </h:form>
+
+                <div id="geosearch_out" > </div>
+
+
+                <!-- ************************************************ -->
+                <!-- This chunk of javascript defines parameters that  --> 
+                <!-- will be used in the callback function             -->
+                <!-- ************************************************* -->
+                <script type="text/javascript"> 
+                    // Heading on top of results
+                    var geocodeResultHeader='#{msgs.geocodeResultHeader}';
+                    // Caption on the link to accept a result
+                    var geocodeAcceptLabel='#{msgs.geocodeAcceptLabel}';
+                    // Caption on the link to show a result on map
+                    var geocodeShowInMapLabel='#{msgs.geocodeShowInMapLabel}';
+                
+                
+                    // Name of the parameter to pass longitude in URL
+                    var lonP='#{point.paramLon}';
+                    // Name of the parameter to pass latitude in URL
+                    var latP='#{point.paramLat}';
+              
+                    // Name of the Parameter to pass display String in URL
+                    var displayP='#{point.paramAddress}';
+                    // Name of the Parameter to pass calllerID in URL
+                    var targetP='#{point.paramTarget}';  
+                    // Value of the target to pass
+                    var target='#{point.target}';
+                    
+                    // Name of the Parameter to pass return address in URL
+                    var returnAddressP='#{webflow.paramBack}';
+                    // URL where the mapper is (for displaying results in map)
+                    var mapURL='#{nav.urlOSMMap}';
+                    // Target url: this is where the "accept" link will point to
+                    var targetURL='#{point.targetURL}'
+                    // target is, what helps the webpage decide which
+          
+                    
+                    
+                    
+           
+                </script>
+
+
+                <!--  important to do the jsonp call at the very end of the page  -->
+                <!--  so that DOM Element to be changed by callback function      -->
+                <!--  are already in place when callback function is called!      -->
+
+                <script
+                    type="text/javascript"
+                    src="#{nominatimq.queryString}"
+                ></script>
+
+
+                <div class="webflow">
+
+                    <h:form>
+
+                        <h:commandLink value="#{msgs.back}" action="#{webflow.getBack()}"/>
+                        |
+                        <h:commandLink value="#{msgs.cancel}" action="#{webflow.getCancel()}"/>
+
+                    </h:form>
+
+                </div>
+
+
+
+
+            </ui:define>
+
+        </ui:composition>
+
+
+
+    </body>
+</html>
