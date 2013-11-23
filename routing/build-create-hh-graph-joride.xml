@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="mapsforge-routing-create-hh-graph" default="all">
+	
+
+       <!-- global properties, except input files         -->
+       <import file="build-global-properties.xml" />
+
+       <!-- local (host-specific) database and JVM properties-->
+       <property  file="joride.config.properties" />
+
+
+
+       <!-- property file containing list of input files -->
+       <property file="joride.input.files.properties" />
+
+
+
+
+	<condition property="osmosis" value="osmosis">
+		<os family="unix" />
+	</condition>
+	<condition property="osmosis" value="osmosis.bat">
+		<os family="windows" />
+	</condition>
+	<condition property="psql" value="psql">
+		<os family="unix" />
+	</condition>
+	<condition property="psql" value="psql.exe">
+		<os family="windows" />
+	</condition>	
+
+
+	<!-- directories -->
+	<property name="lib" value="lib/" />
+	<property name="data.osm" value="data/osm/" />
+	<property name="data.binary" value="data/binary/" />
+	<property name="data.temp" value="data/temp/" />
+
+
+	<!-- load contrib tasks -->
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties">
+		<classpath>
+			<pathelement location="lib/ant-contrib-1.0b3.jar" />
+		</classpath>
+	</taskdef>
+
+	
+ 
+        <target name="all">
+               
+  
+        <fail message="    joride.input.files.properties  is missing! -- You will probably have to create one, see included sample file. ">
+            <condition>
+                <not>
+                        <resourcecount count="1">
+                                <fileset id="fs" dir="." includes="joride.input.files.properties"/>
+                        </resourcecount>
+                </not>
+           </condition>
+        </fail>
+
+
+
+           <propertyselector property="infile.list" match="pbf\.infile.*" />
+
+                <echo message="found infile properties : ${infile.list}" />
+
+               <!-- run the create-hh-file task on every pbf file in the list -->  
+
+               <foreach list="${infile.list}" delimiter="," target="create-hh-file"  param="infileprop" />
+
+
+        </target>  <!--  target: name=all -->
+
+
+
+
+
+        <!-- *********************************************************************************** -->
+        <!-- extract rg file, import rg to database, create hh-file (in that order)              -->
+        <!-- *********************************************************************************** -->
+    
+	<target name="create-hh-file">
+
+
+                <echo  message="reading infile from property ${infileprop}   "/>
+                <propertycopy property="file.basename"   from="${infileprop}" />
+                <property name="file" value="${data.osm}/${file.basename}" />
+
+                <echo message="creating routing graph for input ${file}" />
+
+
+                <echo> === starting target extract-rg === </echo>
+		<antcall target="extract-rg">
+			<param name="file" value="${file}" />
+		</antcall>
+
+                <echo> === starting target import-rg === </echo>
+		<antcall target="import-rg">
+			<param name="file" value="${file}" />
+		</antcall>
+
+		<antcall target="produce-offboard-routing-binary">
+			<param name="file" value="${file}" />
+		</antcall>
+       </target>
+
+
+
+
+	<!-- extract routing graph -->
+	<target name="extract-rg">
+
+
+                <mkdir dir="${data.temp}" />
+
+
+		<basename file="${file}" property="basename" suffix=".osm.pbf" />
+		<exec executable="${osmosis}">
+			<arg value="--rb" />
+			<arg value="${file}" />
+			<arg value="--rgw" />
+			<arg value="file=${data.temp}/${basename}.sql" />
+		</exec>
+	</target>
+
+
+
+
+
+
+
+	<!-- import routing graph to database -->
+	<target name="import-rg">
+		<basename file="${file}" property="basename" suffix=".osm.pbf" />
+		<exec executable="${psql}">
+			<env key="PGPASSWORD" value="${db.pass}" />
+			<arg value="-U" />
+			<arg value="${db.user}" />
+			<arg value="-d" />
+			<arg value="${db.name}" />
+			<arg value="-h" />
+			<arg value="${db.host}" />
+			<arg value="-p" />
+			<arg value="${db.port}" />
+			<arg value="-f" />
+			<arg value="${data.temp}/${basename}.sql" />
+		</exec>
+	</target>
+
+
+	<!-- produce offboard routing binary -->
+	<target name="produce-offboard-routing-binary">
+		<basename file="${file}" property="basename" suffix=".osm.pbf" />
+		<java jvmargs="Xmx${xmx}" classname="org.mapsforge.routing.preprocessing.hh.CommandLineUtil">
+			<arg value="${data.binary}/${basename}.hh" />
+			<arg value="--format=server" />
+			<classpath>
+				<pathelement location="${mapsforge.bin}" />
+
+				<fileset dir="lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+		</java>
+	</target>
+
+
+	<!-- delete all data files -->
+	<target name="clean">
+		<delete dir="${data.osm}" />
+		<delete dir="${data.binary}" />
+		<delete dir="${data.temp}" />
+	</target>
+
+</project>

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+    <body>
+
+        <!-- ****************************************** -->
+        <!-- *** Create A Route for a new Drive         -->
+        <!-- ****************************************** -->
+
+        <ui:composition template="/templates/navbar1Layout.xhtml">
+
+
+            <!-- highlight "preferences" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
+
+
+
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+            <ui:define name="content">
+
+
+
+                <table>
+                    <tr>
+                        <td  class="formLabel">   #{msgs.rideStarttime}      </td>
+                        <td> : </td>
+                        <td class="formInput"> #{newdriverride.rideStarttime}   </td>
+                    </tr>
+
+
+                    <!-- property ridecomment currently ommitted -->
+                    <!-- as it -->
+                    <tr>
+                        <td class="formLabel">  #{msgs.rideStartptAddress}     </td>
+                        <td> : </td>
+                        <td class="formInput">  #{newdriverride.startptAddress}   </td>
+                    </tr>
+
+                    <tr>
+                        <td class="formLabel"> #{msgs.geolocationLatitude} </td>
+                        <td> : </td>
+                        <td class="formInput"> #{newdriverride.latitudeStart} </td>
+                    </tr>
+
+                    <tr> 
+                        <td class="formLabel">#{msgs.geolocationLongitude} </td>
+                        <td> : </td>
+                        <td class="formInput"> #{newdriverride.longitudeStart} </td>
+                    </tr>
+
+
+                    <tr>
+                        <td class="formLabel">  #{msgs.rideDestination}        </td>
+                        <td> : </td>
+                        <td class="formInput">  #{newdriverride.endptAddress}     </td>
+                    </tr>
+
+                    <tr> 
+                        <td class="formLabel"> #{msgs.geolocationLatitude} </td>
+                        <td>:</td>
+                        <td class="formInput"> #{newdriverride.latitudeEnd}  </td>
+                    </tr>
+
+                    <tr> 
+                        <td class="formLabel">#{msgs.geolocationLongitude}  </td> 
+                        <td>:</td>
+                        <td class="formInput"> #{newdriverride.longitudeEnd}   </td>
+                    </tr>
+
+
+
+                </table>
+
+
+
+
+
+
+
+
+
+
+
+
+                <!-- Property "rideWeekdays" currently ommitted,        -->
+                <!-- as there currently seems to be no support for this -->
+
+
+                <!-- Property riderUndertakesRideEntityCollection currently ommitted -->
+                <!-- as we could not bring some sense into it *yet*  -->
+
+
+
+
+
+                <!-- include standard jquery  -->
+                <h:outputScript library="js" name="jquery-1.4.1.js" />
+
+                <!-- we may deliver a local OpenLayers version 2.12              -->
+                <!-- alternatively, it can be included from OpenLayers.org   -->
+
+           
+                <!-- h:outputScript library="js" name="OpenLayers.js" /      -->
+                <script src="#{HTTPUser.openLayersURL}"></script>
+                
+                
+                
+                
+                <!-- h:outputScript library="js" name="OpenLayers.js" /      -->
+
+                <!-- include functions for displaying the routing -->
+                <h:outputScript library="js" name="jorideRouting.js" /> 
+
+
+                <!-- **************************************************************************** -->
+                <!-- div to show the map  --> 
+
+                <!-- **************************************************************************** -->
+
+                <div id="mapdiv" style="width:300px; height:300px;" > </div>
+
+                <!-- show routepoints in map -->
+
+                <script>
+               
+                    myroutepoints=#{newdriverride.findRoutePointsAsJSON()};
+                    
+                    myWaypoints=#{driverride.requiredRoutePointsAsJSON};
+                    
+                    createMap("mapdiv", myroutepoints, myWaypoints);
+                             
+                </script>
+
+                <p>
+
+                    #{webflow.smartUpdate()}
+
+                    <h:form>
+                        <h:commandLink value="#{msgs.back}" action="#{webflow.getBack()}"/>
+                    </h:form>
+                </p>
+
+
+
+            </ui:define>
+
+
+
+
+        </ui:composition>
+
+
+
+
+
+    </body>
+</html>

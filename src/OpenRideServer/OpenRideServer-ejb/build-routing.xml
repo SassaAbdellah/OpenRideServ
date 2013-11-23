@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="OpenRideRouting" default="all" basedir=".">
+    
+    <!--
+        This build script is not for compiling the project.
+        It automates the tasks to download map data from osm,
+        and do the complete highway hierarchies preprocessing.
+        This includes extracting the routing graph, computing the hierarchies
+        and creating a binary file which can be used for server side routing.
+    -->
+
+    <!-- vm args -->
+    <property name="vm.arg.Xms" value="256M" />
+    <property name="vm.arg.Xmx" value="1500M" />
+
+    <!-- project folders -->
+    <property name="lib" value="${basedir}/libs" />
+    <property name="res" value="${basedir}/res" />
+    <property name="osm" value="${basedir}/data/osm" />
+    <property name="binary" value="${basedir}/data/binary" />
+    <property name="region" value="${basedir}/data/region" />
+
+    <!-- tools -->
+    <property name="osmosis" value="${basedir}/tools/osmosis/bin/osmosis.bat" />
+
+    <!--classpath for all execution targets -->
+    <path id="execute-classpath">
+        <fileset dir="${lib}">
+            <include name="*.jar" />
+        </fileset>
+    </path>
+
+    <!--   ### CONFIG ###  -->
+
+    <!-- database to use for preprocessing -->
+    <property name="db.host" value="localhost" />
+    <property name="db.port" value="5432" />
+    <property name="db.name" value="osm" />
+    <property name="db.user" value="postgres" />
+    <property name="db.pass" value="admin" />
+
+    <!-- the target osm file (download) -->
+    <property name="osm.download.file" value="germany.osm.bz2"/>
+    <property name="osm.download.src" value="http://download.geofabrik.de/osm/europe/${osm.download.file}" />
+    <property name="osm.download.dst" value="${osm}/${osm.download.file}" />
+
+    <!-- polygon extraction -->
+    <property name="extract.region.file" value="${region}/dach.osm" />
+    <property name="extract.polygon.file" value="${res}/dach.poly" />
+
+    <!-- rg extraction from the extracted region osm file -->
+    <property name="osm2rg.ways.whitelist" value="motorway,motorway_link,trunk,trunk_link,primary,primary_link,secondary,tertiary,residential,road,unknown,living_street" />
+
+    <!-- highway hierarchies preprocessing -->
+    <property name="hh.preprocessing.h" value="70" />
+    <property name="hh.preprocessing.c" value="2.0" />
+    <property name="hh.preprocessing.hopLimit" value="10" />
+    <property name="hh.preprocessing.vertexThreshold" value="10000" />
+    <property name="hh.preprocessing.downgradeEdges" value="true" />
+    <property name="hh.preprocessing.weightFunction" value="TIME" />
+    <property name="hh.preprocessing.numThreads" value="2" />
+    <property name="hh.preprocessing.output.file" value="${binary}/${osm.region}.hh" />
+
+    <!--   ### TARGETS ###  -->
+
+    <!-- download osm data and extract it-->
+    <target name="fetch-osm-xml">
+        <mkdir dir="${osm}"/>
+        <get src="${osm.download.src}" dest="${osm.download.dst}" verbose="true" usetimestamp="true" />
+    </target>
+
+    <!-- extract a region by bounding polygon from the downloaded osm file -->
+    <target name="extract-osm-region">
+        <mkdir dir="${region}"/>
+        <exec executable="${osmosis}">
+            <arg value="--rx" />
+            <arg value="file=${osm.download.dst}" />
+            <arg value="enableDateParsing" />
+            <arg value="--bp" />
+            <arg value="file=${extract.polygon.file}" />
+            <arg value="completeWays=yes" />
+            <arg value="--wx" />
+            <arg value="${extract.region.file}" />
+        </exec>
+    </target>
+    
+    <!-- routing graph extraction using osm2rg -->
+    <target name="extract-rg">
+        <java classname="org.mapsforge.preprocessing.graph.osm2rg.RgExtractor" failonerror="true" fork="true">
+            <jvmarg line="-Xms${vm.arg.Xms} -Xmx${vm.arg.Xmx}"/>
+            <classpath refid="execute-classpath" />
+            <arg value="${db.host}" />
+            <arg value="${db.port}" />
+            <arg value="${db.name}" />
+            <arg value="${db.user}" />
+            <arg value="${db.pass}" />
+            <arg value="${osm2rg.ways.whitelist}" />
+            <arg value="${extract.region.file}" />
+        </java>
+    </target>
+
+    <!-- highway hierarchies preprocessing -->
+    <target name="compute-hh">
+        <mkdir dir="${binary}"/>
+        <java classname="org.mapsforge.preprocessing.routing.highwayHierarchies.HHComputation" failonerror="true" fork="true">
+            <jvmarg line="-Xms${vm.arg.Xms} -Xmx${vm.arg.Xmx}"/>
+            <classpath refid="execute-classpath" />
+            <arg value="${hh.preprocessing.h}" />
+            <arg value="${hh.preprocessing.c}" />
+            <arg value="${hh.preprocessing.hopLimit}" />
+            <arg value="${hh.preprocessing.vertexThreshold}" />
+            <arg value="${hh.preprocessing.downgradeEdges}" />
+            <arg value="${hh.preprocessing.weightFunction}" />
+            <arg value="${hh.preprocessing.numThreads}" />
+            <arg value="${db.host}" />
+            <arg value="${db.port}" />
+            <arg value="${db.name}" />
+            <arg value="${db.user}" />
+            <arg value="${db.pass}" />
+            <arg value="${db.host}" />
+            <arg value="${db.port}" />
+            <arg value="${db.name}" />
+            <arg value="${db.user}" />
+            <arg value="${db.pass}" />
+            <arg value="${hh.preprocessing.output.file}" />
+        </java>
+    </target>
+
+    <!-- common tasks -->
+
+    <target name="all" depends="fetch-osm-xml,extract-osm-region,extract-rg,compute-hh"/>
+
+    <target name="clean">
+
+    </target>
+</project>
+
