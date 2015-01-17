@@ -4,19 +4,24 @@
  */
 package de.avci.joride.jbeans.matching;
 
-import de.avci.joride.jbeans.customerprofile.JCustomerEntityService;
-import de.fhg.fokus.openride.customerprofile.CustomerEntity;
-import de.fhg.fokus.openride.matching.MatchEntity;
-import de.fhg.fokus.openride.matching.RouteMatchingBeanLocal;
-import de.fhg.fokus.openride.rides.driver.DriverUndertakesRideControllerLocal;
-import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideControllerLocal;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import de.avci.joride.jbeans.customerprofile.JCustomerEntityService;
+import de.fhg.fokus.openride.customerprofile.CustomerEntity;
+import de.fhg.fokus.openride.matching.MatchEntity;
+import de.fhg.fokus.openride.matching.MatchingStatistics;
+import de.fhg.fokus.openride.matching.RouteMatchingBeanLocal;
+import de.fhg.fokus.openride.rides.driver.DriverUndertakesRideControllerLocal;
+import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideControllerLocal;
+
+
 
 /**
  * Service for delivering JMatchingEntities.
@@ -42,6 +47,8 @@ public class JMatchingEntityService {
             throw new RuntimeException(ne);
         }
     }
+    
+    
 
     /**
      * Lookup DriverUndertakesRideControllerLocal Bean that controls my offers.
@@ -92,14 +99,16 @@ public class JMatchingEntityService {
      *
      *
      * @return list of matching offers for given request
+     * 
+     * 
+     * @deprecated  uses RouteMatchingBean.searchForDrivers, which is costly, and should only be called when creatingRides
+   		*
      */
-    public List<JMatchingEntity> getMatchesForRide(int rideId) {
+    public List<JMatchingEntity> getJMatchesForRide(int riderrouteId) {
 
-        List<MatchEntity> mel = this.lookupRouteMatchingBeanLocal().searchForDrivers(rideId);
-
+        List<MatchEntity> mel = this.lookupRouteMatchingBeanLocal().searchForDrivers(riderrouteId);
 
         Iterator<MatchEntity> it = mel.iterator();
-
 
         List<JMatchingEntity> res = new LinkedList<JMatchingEntity>();
 
@@ -109,7 +118,48 @@ public class JMatchingEntityService {
 
         return res;
 
+    } // getJMatchesForRide
+
+    /**
+     * Returns a list of Matches for a rideRequest
+     *
+     * @param rideId Id of the ride request for which we have to find matching
+     * offers
+     *
+     *
+     * @return list of matching offers for given request
+     * 
+     * 
+     * @deprecated  uses RouteMatchingBean.searchForDrivers, which is costly, and should only be called when creatingRides
+     * 
+     */
+    public List<MatchEntity> getMatchesForRide(int riderrouteId) {
+
+        List<MatchEntity> mel = this.lookupRouteMatchingBeanLocal().searchForDrivers(riderrouteId);
+        return mel;
+
     } // getMatchesForRide
+
+    /**
+     * Return a MatchingStatistics Object for Request given by riderrouteId
+     *
+     *
+     * @param riderrouteId
+     * @return
+     */
+    public MatchingStatistics getMatchingStatisticsForRide(int riderrouteId) {
+        return this.lookupRouteMatchingBeanLocal().getStatisticsForRide(riderrouteId);
+    }
+
+    /**
+     * Return a MatchingStatistics Object for Offer given by rideId
+     *
+     * @param rideId
+     * @return
+     */
+    public MatchingStatistics getMatchingStatisticsForOffer(int rideId) {
+        return this.lookupRouteMatchingBeanLocal().getStatisticsForDrive(rideId);
+    }
 
     /**
      * Get All Matches for a given Offer Friendly Frontend for
@@ -118,14 +168,20 @@ public class JMatchingEntityService {
      *
      * @param rideId Id of the ride for which to detect matches
      * @return lists of matches
+     * 
+     * 
+     * 
+     * @deprecated  uses RouteMatchingBean.searchForDrivers, which is costly, and should only be called when creatingRides
+     * 
+     * 
      */
-    public List<JMatchingEntity> getMatchesForOffer(int rideId) {
+    public List<JMatchingEntity> getJMatchesForOffer(int rideId) {
 
 
-        DriverUndertakesRideControllerLocal durcl = this.lookupDriverUndertakesRideControllerBeanLocal();
+        RouteMatchingBeanLocal rmbl = this.lookupRouteMatchingBeanLocal();
 
         List<JMatchingEntity> res = new LinkedList<JMatchingEntity>();
-        List<MatchEntity> mel = durcl.getMatches(rideId, true);
+        List<MatchEntity> mel = rmbl.searchForRiders(rideId);
 
         Iterator<MatchEntity> it = mel.iterator();
 
@@ -136,6 +192,26 @@ public class JMatchingEntityService {
 
         return res;
 
+    }
+
+    /**
+     * Get All Matches for a given Offer Friendly Frontend for
+     * DriverUndertakesRideController.getMatches(rideId, true);
+     *
+     *
+     * @param rideId Id of the ride for which to detect matches
+     * @return lists of matches
+     * 
+     * 
+     * @deprecated  uses RouteMatchingBean.searchForDrivers, which is costly, and should only be called when creatingRides
+     * 
+     */
+    public List<MatchEntity> getMatchesForOffer(int rideId) {
+
+
+        RouteMatchingBeanLocal rmbl = this.lookupRouteMatchingBeanLocal();
+        List<MatchEntity> mel = rmbl.searchForRiders(rideId);
+        return mel;
     }
 
     /**
@@ -150,12 +226,13 @@ public class JMatchingEntityService {
     public boolean acceptRiderSafely(JMatchingEntity jme) {
 
 
-        log.log(Level.FINE,"" + this.getClass() + " acceptRiderSafely beeing called");
+        log.log(Level.FINE, "" + this.getClass() + " acceptRiderSafely beeing called");
 
 
-        // see who calls us!
+        // see who calls us!      
         CustomerEntity caller = this.getCustomerEntity();
 
+        
         if (caller == null) {
             throw new Error("Cannot proceed to accept rider, Caller is null");
         }
@@ -168,8 +245,8 @@ public class JMatchingEntityService {
         // determine the driver of the match entity's trip
 
         Integer driverId = jme.getMatchEntity().getDriverUndertakesRideEntity().getCustId().getCustId();
-
-
+        // see who calls us!
+     
         if (!(caller.getCustId().equals(driverId))) {
             throw new Error("Cannot proceed to accept rider, driver Id " + driverId + " does not match caller id " + caller.getCustId());
         }
@@ -205,7 +282,7 @@ public class JMatchingEntityService {
         jme.setMatchEntitiy(me);
 
         // add drive to ride if both parties have agreed
-        this.addRiderToRideSavely(me);
+        this.addRiderToRideSafely(me);
 
         return true;
     }
@@ -222,7 +299,7 @@ public class JMatchingEntityService {
     public boolean acceptDriverSafely(JMatchingEntity jme) {
 
 
-        log.log(Level.FINE,"" + this.getClass() + " acceptDriverSafely beeing called");
+        log.log(Level.FINE, "" + this.getClass() + " acceptDriverSafely beeing called");
 
         // see who calls us!
         CustomerEntity caller = this.getCustomerEntity();
@@ -271,16 +348,16 @@ public class JMatchingEntityService {
         // bad case may happen, if so return false
         if (me == null) {
 
-            log.log(Level.SEVERE,"" + this.getClass() + " acceptDriver failed ");
+            log.log(Level.SEVERE, "" + this.getClass() + " acceptDriver failed ");
             return false;
         }
 
-        log.log(Level.FINE,"" + this.getClass() + " acceptDriver succeded ");
+        log.log(Level.FINE, "" + this.getClass() + " acceptDriver succeded ");
 
         // update the Match Entity
         jme.setMatchEntitiy(me);
         // add drive to ride if both parties have agreed
-        this.addRiderToRideSavely(me);
+        this.addRiderToRideSafely(me);
 
         return true;
     }
@@ -297,7 +374,7 @@ public class JMatchingEntityService {
     public boolean rejectDriverSafely(JMatchingEntity jme) {
 
 
-        log.log(Level.FINE,"" + this.getClass() + " rejectDriverSafely beeing called");
+        log.log(Level.FINE, "" + this.getClass() + " rejectDriverSafely beeing called");
 
         // see who calls us!
         CustomerEntity caller = this.getCustomerEntity();
@@ -346,11 +423,11 @@ public class JMatchingEntityService {
         // bad case may happen, if so return false
         if (me == null) {
 
-            log.log(Level.SEVERE,"" + this.getClass() + " rejectDriver failed ");
+            log.log(Level.SEVERE, "" + this.getClass() + " rejectDriver failed ");
             return false;
         }
 
-        log.log(Level.FINE,"" + this.getClass() + " rejectDriver succeded ");
+        log.log(Level.FINE, "" + this.getClass() + " rejectDriver succeded ");
 
         // update the Match Entity
         jme.setMatchEntitiy(me);
@@ -365,7 +442,7 @@ public class JMatchingEntityService {
      *
      * @param me MatchEntity linking drive to ride
      */
-    protected void addRiderToRideSavely(MatchEntity me) {
+    protected void addRiderToRideSafely(MatchEntity me) {
 
 
         if (MatchEntity.ACCEPTED.equals(me.getRiderState())
@@ -392,7 +469,7 @@ public class JMatchingEntityService {
      */
     public boolean rejectRiderSafely(JMatchingEntity jme) {
 
-        log.log(Level.FINE,"" + this.getClass() + " rejectRiderSafely beeing called");
+        log.log(Level.FINE, "" + this.getClass() + " rejectRiderSafely beeing called");
 
 
         // see who calls us!
@@ -466,13 +543,13 @@ public class JMatchingEntityService {
 
         CustomerEntity caller = this.getCustomerEntity();
 
-        log.log(Level.FINE,"" + this.getClass() + " getMatchSavely rideId " + rideId + " riderrouteId : " + riderrouteId);
+        log.log(Level.FINE, "" + this.getClass() + " getMatchSavely rideId " + rideId + " riderrouteId : " + riderrouteId);
 
         MatchEntity me = this.lookupRiderUndertakesRideControllerBeanLocal().getMatch(rideId, riderrouteId);
 
         // there  a r e  no matches... can finish here
         if (me == null) {
-            log.log(Level.FINE,"" + this.getClass() + " returning null prematuralely ");
+            log.log(Level.FINE, "" + this.getClass() + " returning null prematuralely ");
             return null;
         }
 
@@ -487,6 +564,7 @@ public class JMatchingEntityService {
                 callerMatch = true;
             }
         } catch (java.lang.NullPointerException exc) {
+            log.severe("Error while determining rider for MatchEntity " + exc);
         }
 
 
@@ -497,10 +575,8 @@ public class JMatchingEntityService {
                 callerMatch = true;
             }
         } catch (java.lang.NullPointerException exc) {
+            log.severe("Error while determining driver for MatchEntity " + exc);
         }
-
-
-
 
         if (!(callerMatch)) {
             throw new Error("Caller is neither driver nor rider for this ride, will not return matchEntity");
@@ -510,4 +586,83 @@ public class JMatchingEntityService {
         return me;
 
     } // getMatchSafely
+
+    void setDriverMessageSafely(MatchEntity meArg, String message) {
+
+        Integer rideId = meArg.getDriverUndertakesRideEntity().getRideId();
+        Integer riderRouteId = meArg.getRiderUndertakesRideEntity().getRiderrouteId();
+        // retrive a matchEntity safely
+        MatchEntity me = this.getMatchSafely(rideId, riderRouteId);
+        // see, if caller is driver
+        CustomerEntity caller = this.getCustomerEntity();
+        Integer matchingDriverId=me.getDriverUndertakesRideEntity().getCustId().getCustId();
+       
+        if (!matchingDriverId.equals(caller.getCustId())) {
+            throw new Error("Only Driver may change Driver's Message!");
+        }
+
+        // now, set the message savely...
+        this.lookupDriverUndertakesRideControllerBeanLocal().setDriverMessage(rideId, riderRouteId, message);
+    }
+
+    void setRiderMessageSafely(MatchEntity meArg,String message) {
+
+
+        Integer rideId = meArg.getDriverUndertakesRideEntity().getRideId();
+        Integer riderRouteId = meArg.getRiderUndertakesRideEntity().getRiderrouteId();
+        // retrive a matchEntity safely
+        MatchEntity me = this.getMatchSafely(rideId, riderRouteId);
+        Integer matchingRiderId=me.getRiderUndertakesRideEntity().getCustId().getCustId();
+       
+        // see, if caller is rider
+        CustomerEntity caller = this.getCustomerEntity();
+        if (! (matchingRiderId.equals(caller.getCustId()))) {
+            throw new Error("Only Rider may change Rider's Message!");
+        }
+        // now, set the message safely
+        this.lookupDriverUndertakesRideControllerBeanLocal().setRiderMessage(rideId, riderRouteId, message);
+       
+    }
+    
+    
+    
+    
+      void countermandSafely(MatchEntity meArg) {
+
+
+        Integer rideId = meArg.getDriverUndertakesRideEntity().getRideId();
+        Integer riderRouteId = meArg.getRiderUndertakesRideEntity().getRiderrouteId();
+        // retrive a matchEntity safely
+        MatchEntity me = this.getMatchSafely(rideId, riderRouteId);
+        Integer matchingRiderId=me.getRiderUndertakesRideEntity().getCustId().getCustId();
+      
+        Integer matchingDriverId=me.getDriverUndertakesRideEntity().getCustId().getCustId();
+        
+        RiderUndertakesRideControllerLocal rurcl=this.lookupRiderUndertakesRideControllerBeanLocal();
+      
+         // see, if caller is rider, and if so, countermand as rider
+        CustomerEntity caller = this.getCustomerEntity();
+        if (matchingRiderId.equals(caller.getCustId())) {
+            rurcl.countermandRider(
+                    me.getRiderUndertakesRideEntity().getRideId().getRideId(),
+                    me.getRiderUndertakesRideEntity().getRiderrouteId()
+                    );
+            return;
+        }
+        
+        
+          // see, if caller is rider, and if so, countermand as rider
+        if (matchingDriverId.equals(caller.getCustId())) {
+            rurcl.countermandDriver(
+                    me.getRiderUndertakesRideEntity().getRideId().getRideId(),
+                    me.getRiderUndertakesRideEntity().getRiderrouteId()
+                    );
+            return;
+        }
+        
+      }
+
+  
+      
+ 
 } //class

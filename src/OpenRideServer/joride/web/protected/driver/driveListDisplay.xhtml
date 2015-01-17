@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+
+<h:head>
+	<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</h:head>
+
+
+
+<body>
+
+
+	<ui:composition template="/templates/navbar1Layout.xhtml">
+
+		<ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+		<ui:define name="content">
+
+
+			<!-- page to display lists of ride  -->
+			<!-- filteredRideLists.displayMode property governs what will be displayed -->
+
+                #{filteredDriveLists.updateDisplayMode()} 
+
+
+       
+                <p:panel
+				header="#{filteredDriveLists.headerForDisplayMode}">
+
+				<!-- primefaces dynamic accordion COOL!  -->
+				<p:accordionPanel activeIndex="-1"
+					value="#{filteredDriveLists.listForDisplayMode}" var="drive">
+
+					<p:tab
+						title=" #{drive.updatedShortcut} #{drive.startDateFormatted} #{drive.endptAddressShort}">
+
+						<h2>#{msgs.rideOffer} #{drive.rideId}</h2>
+
+						<!-- show message if ride is updated -->
+						<ui:fragment rendered="#{drive.driveUpdated}">
+							<div class="formLabel">
+								<h:graphicImage library="images" name="updated.gif" width="20"
+									height="20" />
+								#{msgs.updatedRide}
+							</div>
+						</ui:fragment>
+
+						<!-- show link only if there are matches -->
+
+
+						<h:form>
+
+							<ui:fragment rendered="#{drive.hasMatches}">
+
+								<div class="formInput">
+								
+									<p:commandButton id="showMatchesButton"
+										action="driver.driveMatchingsList" icon="ui-icon-link"
+										ajax="false">
+										<f:param name="#{crud.paramNameCrudId}"
+											value="#{drive.rideId}" />
+										<f:param name="#{webflow.getParamBack()}" value="driver" />
+									</p:commandButton>
+									<p:tooltip for="showMatchesButton"
+										value="#{msgs.rideMatchesShowRequests}" />
+									&nbsp;
+									<h:commandLink action="driver.driveMatchingsList"
+										value="#{msgs.rideMatchesShowRequests}">
+										<f:param name="#{crud.paramNameCrudId}"
+											value="#{drive.rideId}" />
+										<f:param name="#{webflow.getParamBack()}" value="driver" />
+									</h:commandLink>
+									
+								</div>
+
+							</ui:fragment>
+
+
+
+							<div class="formInput">
+								<p:commandButton id="driveDisplayButton"
+									action="driver.driveDisplay" icon="ui-icon-circle-zoomin"
+									ajax="false">
+									<f:param name="#{crud.paramNameCrudId}" value="#{drive.rideId}" />
+									<f:param name="#{webflow.getParamBack()}" value="driver" />
+								</p:commandButton>
+								<p:tooltip for="driveDisplayButton"
+									value="#{msgs.rideDisplayOffer}" />
+								&nbsp;
+								<h:commandLink action="driver.driveDisplay"
+									value="#{msgs.rideDisplayOffer}">
+									<f:param name="#{crud.paramNameCrudId}" value="#{drive.rideId}" />
+									<f:param name="#{webflow.getParamBack()}" value="driver" />
+								</h:commandLink>
+							</div>
+
+							<div class="formLabel"> #{msgs.rideStarttime}: </div>
+							<div class="formInput">
+									#{drive.startDateFormatted} </div>
+
+							<div class="formLabel">#{msgs.rideStart}:</div>
+							<div class="formInput">#{drive.startptAddress}</div>
+
+							<div class="formLabel">#{msgs.rideDestination}:</div>
+							<div class="formInput">#{drive.endptAddress}</div>
+
+							<div class="formLabel"> #{msgs.rideComment}: </div>
+							<div class="formInput"> #{drive.rideComment} </div>
+
+							<div class="formLabel">
+									#{msgs.rideNoMatchingRequests}: </div>
+							<div  class="formInput"> #{drive.noMatches} </div>
+
+
+
+						</h:form>
+					</p:tab>
+				</p:accordionPanel>
+			</p:panel>
+
+
+			<!-- webflow stanza -->
+			<h:form>
+				<table>
+					<tr>
+						<td><p:commandButton id="backlink"
+								icon="ui-icon-triangle-1-w" action="driver" ajax="false" /> <p:tooltip
+								for="backlink" value="#{msgs.back}" /></td>
+						<td><h:commandLink value="#{msgs.back}" action="driver" /></td>
+					</tr>
+				</table>
+			</h:form>
+
+
+
+		</ui:define>
+
+
+	</ui:composition>
+
+	<ui:debug />
+
+
+</body>
+</html>

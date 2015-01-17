@@ -4,8 +4,9 @@
  */
 package de.avci.joride.jbeans.customerprofile;
 
-import de.avci.joride.utils.EmailCheck;
 import java.io.Serializable;
+
+import de.fhg.fokus.openride.customerprofile.CustomerUtils;
 
 
 
@@ -28,7 +29,7 @@ public class CustomerDataNormalizer  implements Serializable {
     
        if(emailAddress==null) {throw new Error("Email Address is null");}
        
-       if(!(new EmailCheck().isEmailAdress(emailAddress))){
+       if(!(CustomerUtils.isValidEmailAdress(emailAddress))){
            throw new Error("Email address is not well-formed :"+emailAddress);
        }
       

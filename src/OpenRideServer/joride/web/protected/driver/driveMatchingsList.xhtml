@@ -7,137 +7,180 @@
 <!-- ***************************************************** -->
 
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:c="http://java.sun.com/jsp/jstl/core"
-      xmlns:p="http://primefaces.org/ui"
-      >
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:p="http://primefaces.org/ui">
 
 
-    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    </h:head>
-
-
-
-
-    <body>
+<h:head>
+	<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</h:head>
 
 
 
-        <ui:composition template="/templates/simpleLayout.xhtml">
 
-            <!-- highlight "preferences" tab -->
-            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
+<body>
 
-            <ui:define name="windowTitle">
+
+
+	<ui:composition template="/templates/simpleLayout.xhtml">
+
+		<!-- highlight "preferences" tab -->
+		<ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
+
+		<ui:define name="windowTitle">
                 #{msgs.title}
             </ui:define>
 
 
-            <ui:define name="content">
+		<ui:define name="content">
 
 
 
-                <!-- we have to use session scoped drive here to                          -->
-                <!-- circumvent problems with commandlinks insid ui:repeat or h:datatable -->
-
+			<!-- we have to use session scoped drive here to                          -->
+			<!-- circumvent problems with commandlinks insid ui:repeat or h:datatable -->
                 #{rscdriverride.update()}
 
 
+                <h1>#{msgs.matchMatchingRequestsForOffer}
+				#{rscdriverride.rideId}</h1>
 
-                <ui:repeat   value="#{rscdriverride.matches}" var="matching" >
 
-                    <p>
-                        <table>
-                            <tr>
-                                <td> <span class="formLabel"> #{msgs.matchExpectedPickupTime} </span> </td> 
-                                <td> <span class="formLabel"> &nbsp;:&nbsp;</span> </td>
-                                <td> <span class="formInput"> #{matching.matchEntity.matchExpectedStartTime}</span> </td> 
-                            </tr>
+			<p>
+				<ui:repeat value="#{rscdriverride.JMatches}" var="matching">
 
-                            <tr>
-                                <td> <span class="formLabel"> #{msgs.matchRiderName} </span> </td> 
-                                <td> <span class="formLabel"> &nbsp;:&nbsp;</span> </td>
-                                <td> 
-                                    <span class="formInput">      
-                                        <h:form>
-                                            <h:commandLink action="#{publicProfile.displayProfileForCustId()}"  >
+					<p>
+						<hr />
+
+						<div>
+							<h:form>
+								<span class="formLabel"> #{msgs.matchRiderName} : </span>
+								<span class="formInput"> <h:commandLink
+										action="#{publicProfile.displayProfileForCustId()}">
                                                 #{matching.ride.custId.custNickname} 
-                                                <f:param name="#{crud.paramNameCrudId}" value="#{matching.ride.custId.custId}" />
-                                            </h:commandLink>
-                                        </h:form>
-                                    </span> 
-                                </td> 
+                                                <f:param
+											name="#{crud.paramNameCrudId}"
+											value="#{matching.ride.custId.custId}" />
+									</h:commandLink>
+								</span>
+							</h:form>
+						</div>
+
+
+						<div class="formLabel"> #{msgs.matchExpectedPickupTime}:</div>
+						<div class="formInput"> #{matching.matchExpectedStartTimeFormatted}</div>
+
+						<div class="formLabel">#{msgs.matchFrom}:</div>
+						<div class="formInput">#{matching.ride.getStartptAddress()}
+						</div>
+
+						<div class="formLabel">#{msgs.matchTo}:</div>
+						<div class="formInput">#{matching.ride.getEndptAddress()}</div>
 
 
 
 
-                            </tr>
+						<div class="formLabel">#{msgs.matchRiderState}:</div>
+						<div class="formInput">#{matching.riderStateMessage}</div>
 
-                            <tr>
-                                <td> <span class="formLabel"> #{msgs.matchRidersGender}            </span> </td> 
-                                <td> <span class="formLabel"> &nbsp;:&nbsp;                         </span> </td>
-                                <td> <span class="formInput"> #{matching.riderGenderLabel}  </span> </td> 
-                            </tr>
-
-                            <tr>
-                                <td> <span class="formLabel"> #{msgs.matchRideId}         </span> </td> 
-                                <td> <span class="formLabel"> &nbsp;:&nbsp;               </span> </td>
-                                <td> <span class="formInput"> #{matching.ride.riderrouteId}  </span> </td> 
-                            </tr>
+						<div class="formLabel">#{msgs.matchDriverState}:</div>
+						<div class="formInput">#{matching.driverStateMessage}</div>
 
 
+						<!--  accept or request matchings link will only be shown if these options are still valid -->
+						<h:form rendered="#{matching.enableDriverAcceptOrRejectLink()}">
+
+							<!--  Match, accept or reject -->
+							<div class="formLabel">
+								<p:commandButton id="matchDisplay" action="driver.matchDisplay"
+									icon="ui-icon-triangle-1-e" ajax="false">
+									<f:param name="#{match.paramRideID}"
+										value="#{matching.drive.rideId}" />
+									<f:param name="#{match.paramRiderrouteId}"
+										value="#{matching.ride.riderrouteId}" />
+
+									<f:param name="#{crud.paramNameCrudId}"
+										value="#{rscdriverride.rideId}" />
+									<f:param name="#{webflow.getParamBack()}" value="driver" />
+								</p:commandButton>
+								<p:tooltip for="matchDisplay"
+									value="#{msgs.matchMatchingRideAcceptOrReject}" />
+								&nbsp;
+								<h:commandLink action="driver.matchDisplay"
+									value="#{msgs.matchMatchingRideAcceptOrReject}">
+									<f:param name="#{match.paramRideID}"
+										value="#{matching.drive.rideId}" />
+									<f:param name="#{match.paramRiderrouteId}"
+										value="#{matching.ride.riderrouteId}" />
+
+									<f:param name="#{crud.paramNameCrudId}"
+										value="#{rscdriverride.rideId}" />
+									<f:param name="#{webflow.getParamBack()}" value="driver" />
+								</h:commandLink>
+
+							</div>
+						</h:form>
+
+						<h:form>
+							<!--  Match, showDetails -->
+							<div class="formLabel">
+								<p:commandButton id="matchDetails" action="driver.matchDisplay"
+									icon="ui-icon-circle-zoomin" ajax="false">
+									<f:param name="#{match.paramRideID}"
+										value="#{matching.drive.rideId}" />
+									<f:param name="#{match.paramRiderrouteId}"
+										value="#{matching.ride.riderrouteId}" />
+
+									<f:param name="#{crud.paramNameCrudId}"
+										value="#{rscdriverride.rideId}" />
+									<f:param name="#{webflow.getParamBack()}" value="driver" />
+								</p:commandButton>
+								<p:tooltip for="matchDetails"
+									value="#{msgs.matchMatchingRideShowDetails}" />
+								<!--  Match, show details -->
+								&nbsp;
+								<h:commandLink action="driver.matchDisplay"
+									value="#{msgs.matchMatchingRideShowDetails}">
+									<f:param name="#{match.paramRideID}"
+										value="#{matching.drive.rideId}" />
+									<f:param name="#{match.paramRiderrouteId}"
+										value="#{matching.ride.riderrouteId}" />
+
+									<f:param name="#{crud.paramNameCrudId}"
+										value="#{rscdriverride.rideId}" />
+									<f:param name="#{webflow.getParamBack()}" value="driver" />
+								</h:commandLink>
+							</div>
+						</h:form>
+					</p>
+
+				</ui:repeat>
+
+			</p>
 
 
-
-                            <tr>
-                                <td colspan="3">
-                                    <span class="formLabel">
-                                        <h:form>
-                                            <h:commandLink action="driver.matchDisplay" value="#{msgs.matchMatchingRide}">
-                                                <f:param name="#{match.paramRideID}"        value="#{matching.drive.rideId}"    />
-                                                <f:param name="#{match.paramRiderrouteId}"  value="#{matching.ride.riderrouteId}" />
-
-                                                <f:param  name="#{crud.paramNameCrudId}" value="#{rscdriverride.rideId}"/>
-                                                <f:param name="#{webflow.getParamBack()}" value="driver"          />
-                                            </h:commandLink>
-                                        </h:form>
-                                    </span>
-                                </td>
-                            </tr>
-
-
-                        </table>
-                    </p>
-
-                </ui:repeat>
-
-
-
-                <p> <!-- webflow stanza -->
-
+			<h:form>
                     #{webflow.smartUpdate()}
-
-                    <h:form>
-                        <h:commandLink value="#{msgs.back}" action="#{webflow.getBack()}"/>
-                    </h:form>
-                </p>
-
-
-
-
-            </ui:define>
-
-
-
-
-        </ui:composition>
-
-
-
-
-
-    </body>
+                    <table>
+					<tr>
+						<td><p:commandButton id="backlink"
+								icon="ui-icon-triangle-1-w" action="#{webflow.getBack()}"
+								ajax="false">
+								<f:param name="#{crud.paramNameCrudId}"
+									value="#{rscdriverride.rideId}" />
+							</p:commandButton> <p:tooltip for="backlink" value="#{msgs.back}" /></td>
+						<td><h:commandLink value="#{msgs.back}"
+								action="#{webflow.getBack()}">
+								<f:param name="#{crud.paramNameCrudId}"
+									value="#{rscdriverride.rideId}" />
+							</h:commandLink></td>
+					</tr>
+				</table>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</body>
 </html>

@@ -17,11 +17,23 @@ import javax.inject.Named;
 @RequestScoped
 public class Messagekeys {
     
+	/** key for error messages
+	 */
     protected static final String errormessagekey="errormessagekey";
     
+   /** key for normal messages
+    *  
+    * @return
+    */
+    protected static final String normalMessagekey="messagekey";
+   
     public String getErrormessagekey(){
         return errormessagekey;
     }
     
+    
+    public String getNormalmessagekey(){
+        return normalMessagekey;
+    }
     
 }

@@ -4,16 +4,20 @@
  */
 package de.avci.joride.jbeans.customerprofile;
 
-import de.avci.joride.backing.messages.RegistrationMessage;
-import de.avci.joride.utils.EmailCheck;
-import de.avci.joride.utils.Messagekeys;
-import de.avci.joride.utils.PropertiesLoader;
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.Properties;
+
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.inject.Named;
+
+import de.avci.joride.backing.messages.RegistrationMessage;
+import de.avci.joride.utils.HTTPUtil;
+import de.avci.joride.utils.Messagekeys;
+import de.avci.joride.utils.PropertiesLoader;
+import de.fhg.fokus.openride.customerprofile.CustomerUtils;
 
 /**
  * Models a Request for getting registrated as a user in joride.
@@ -29,10 +33,22 @@ public class JRegistrationRequest implements Serializable {
      * Normalizing data is outsourced to dedicated class
      */
     private CustomerDataNormalizer normalizer = new CustomerDataNormalizer();
+    
+    /** Wether or not termsAndConditions are accepted.
+     *  Must be true for registration to take place
+     */
+    protected boolean acceptTerms=false;
+    
+    
     /**
      * Email Adress for the account to be created
      */
     protected String emailAddress;
+    
+    /** preferredLanguage, so preferred Langs could be set right away
+     */
+    private String preferredLanguage;
+    
 
     public String getEmailAddress() {
         return emailAddress;
@@ -126,9 +142,17 @@ public class JRegistrationRequest implements Serializable {
      */
     public boolean checkIntegrity() {
 
-
-        Properties msgs = new PropertiesLoader().getMessagesProps();
-
+    	Locale locale=new HTTPUtil().detectBestLocale();
+        Properties msgs = PropertiesLoader.getMessageProperties(locale);
+        
+        this.setErrorStatus(null);
+        
+        if (!this.isAcceptTerms()) {
+            this.setErrorStatus(msgs.getProperty("registrationAcceptTermsError"));
+            return false;
+        }
+        
+       
         if (this.getGivenName() == null || this.getGivenName().trim().equals("")) {
             this.setErrorStatus(msgs.getProperty("registrationGivenNameMissingError"));
             return false;
@@ -144,7 +168,7 @@ public class JRegistrationRequest implements Serializable {
 
         // check if email is well-formed
 
-        if (!(new EmailCheck().isEmailAdress(this.getEmailAddress()))) {
+        if (!(CustomerUtils.isValidEmailAdress(this.getEmailAddress()))) {
             this.setErrorStatus(msgs.getProperty("registrationEmailInvalid"));
             return false;
         }
@@ -166,15 +190,24 @@ public class JRegistrationRequest implements Serializable {
             this.setErrorStatus(msgs.getProperty("registrationNicknameMissingError"));
             return false;
         }
+        //
+        // check if nickname is valid
+        if (!(CustomerUtils.isValidNickname(this.getNickName()))) {
+            this.setErrorStatus(msgs.getProperty("registrationNicknameInvalidError"));
+            return false;
+        }
+        
+        
 
 
-        // check, if email already exists, or not
+        // check, if nickname already exists, or not
         String normalizedNickname = normalizer.normalizeNickname(this.getNickName());
 
         if (new JCustomerEntityService().nicknameExists(normalizedNickname)) {
             this.setErrorStatus(msgs.getProperty("registrationNicknameExist"));
             return false;
         }
+       
 
         return true;
 
@@ -194,18 +227,17 @@ public class JRegistrationRequest implements Serializable {
             this.setNickName(normalizer.normalizeNickname(this.getNickName()));
             this.setEmailAddress(normalizer.normalizeEmailAddress(this.getEmailAddress()));
             //
-            String passwd=new JCustomerEntityService().createRandomPasswort();
+           String passwd=new JCustomerEntityService().createRandomPasswort();
             boolean result = new JCustomerEntityService().addCustomerEntry(this,passwd);
 
-            (new RegistrationMessage()).sendRegistrationMail(this, passwd);
+            (new RegistrationMessage()).sendRegistrationMail(this, passwd, new HTTPUtil().detectBestLocale());
             
-            
-            
-            
+          
             if (result) {
                 return REQUEST_CREATE;
             } else {
-                Properties msgs = new PropertiesLoader().getMessagesProps();
+            	Locale locale=new HTTPUtil().detectBestLocale();
+                Properties msgs = PropertiesLoader.getMessageProperties(locale);
                 this.setErrorStatus(msgs.getProperty("registrationErrorWhilePersisting"));
             }
         }
@@ -213,4 +245,26 @@ public class JRegistrationRequest implements Serializable {
         this.addErrorMessage();
         return null;
     }
+
+	public String getPreferredLanguage() {
+		return preferredLanguage;
+	}
+
+	public void setPreferredLanguage(String preferredLanguage) {
+		this.preferredLanguage = preferredLanguage;
+	}
+
+	public boolean isAcceptTerms() {
+		return acceptTerms;
+	}
+
+	public void setAcceptTerms(boolean acceptTerms) {
+		this.acceptTerms = acceptTerms;
+	}
+
+    
+    
+    
+
 } // class
+                                                                       

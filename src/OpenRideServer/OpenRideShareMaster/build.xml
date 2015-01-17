@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="OpenRideServer" default="all" basedir=".">
+    <description>Builds the project OpenRideServer</description>
+
+    <!-- local.properties will always be sourced -->
+    <property file="local.properties"  />
+
+    <!-- directory where we assemble the stuff before it goes to the ear -->
+    <property name="build.dir" value="build" />
+
+    
+    <!-- dist.dir is the directory where the ear gets created -->
+    <property name="dist.dir" value="dist" />
+
+
+
+   <!-- ************************************************************************ -->
+   <!-- **** joride target is only to be build if build.joride param is set **** -->
+   <!-- ************************************************************************ -->
+   <target name="joride" description="build the joride subproject"  if="build.joride" >
+
+    <echo> *** building joride subproject  *** </echo>
+
+    <ant  dir="../joride"                      antfile="build.xml"           />
+    <copy file="../joride/dist/joride.war"     todir="${build.dir}"                   />
+   </target> <!-- joride -->
+
+
+
+
+   <!-- ************************************************************************************** -->
+   <!-- **** joride-public target is only to be build if build.joride-public param is set **** -->
+   <!-- ************************************************************************************** -->
+   <target name="joride-public" description="build the joride-public subproject"  if="build.joride-public" >
+
+    <echo> *** building joride-public subproject  *** </echo>
+ 
+    <ant  dir="../joride-public"                             antfile="build.xml"           />
+    <copy file="../joride-public/dist/joride-public.war"     todir="${build.dir}"          />
+   </target> <!-- joride-public  -->
+
+
+
+
+   <!-- ************************************************************************************** -->
+   <!-- **** joride-rest target is only to be build if build.joride-rest param is set     **** -->
+   <!-- ************************************************************************************** -->
+   <target name="joride-rest" description="build the joride-rest subproject"  if="build.joride-rest" >
+
+    <echo> *** building joride-rest subproject  *** </echo>
+
+    <ant  dir="../joride-rest"                           antfile="build.xml"           />
+    <copy file="../joride-rest/dist/joride-rest.war"     todir="${build.dir}"          />
+   </target> <!-- joride-rest  -->
+
+
+ 
+    <!-- ******************************************** -->
+    <!-- ***  target "dist": create the ear file  *** -->	
+    <!-- ******************************************** -->
+    
+  <target name="dist" description=" target dist: create the ear file "  >
+
+    <!-- assemble stuff in build.dir -->
+    <mkdir dir="${build.dir}" /> 
+
+
+    <!--build OpenRideServer      subproject  ************************************************ -->
+    <ant  dir="../OpenRideServer-ejb"  antfile="build.xml"                                />
+    <copy file="../OpenRideServer-ejb/dist/OpenRideServer-ejb.jar" todir="${build.dir}"            /> 
+
+
+
+
+
+    <!--build joride subproject                  ************************************************* -->
+    <antcall target="joride" inheritAll="true" inheritRefs="true" />
+
+    <!--build joride-public subproject           ************************************************* -->
+    <antcall target="joride-public" inheritAll="true" inheritRefs="true" />
+
+
+    <!--build joride-rest subproject            ************************************************* -->
+    <antcall target="joride-rest" inheritAll="true" inheritRefs="true" />
+
+
+
+
+
+
+
+    <!-- Add libraries *********************************************************************** -->
+    <copy  todir="${build.dir}/lib"  >       
+      <fileset dir="../OpenRideServer-ejb/libs">
+        <include name="**/*.jar"  />
+        <include name="**/*.docx" />
+      </fileset>
+    </copy>
+
+ 
+
+
+    <!-- create destination directory -->  
+    <mkdir dir="${dist.dir}" />
+
+
+      <jar destfile="${dist.dir}/${ant.project.name}.ear" >
+       <fileset  dir="${build.dir}" />
+
+      </jar>
+
+    </target> <!-- end of target "dist" -->
+
+   
+ 
+    <!-- ********************************************************* -->
+    <!-- *** target clean: cleanup dist and build directories  *** -->	
+    <!-- ********************************************************* -->
+   
+   <target name="clean" description="cleanup build artefacts" >
+	<delete dir="${dist.dir}"  />
+	<delete dir="${build.dir}" />
+
+
+       <!--clean  subprojects  ***************************************************** -->
+       <ant  dir="../OpenRideServer-ejb"   antfile="build.xml"   target="clean" />
+       <ant  dir="../joride"               antfile="build.xml"   target="clean" />
+       <ant  dir="../joride-public"        antfile="build.xml"   target="clean" />
+
+   </target> <!-- end of target clean -->
+  
+
+   <!-- ******************************************* -->
+   <!-- ***  target "all":  do clean, then dist *** -->
+   <!-- ******************************************* -->
+
+   <target name="all"  depends="clean,dist"  description="first clean, then dist..." />
+    
+</project>

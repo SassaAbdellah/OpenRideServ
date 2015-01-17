@@ -20,137 +20,259 @@
         <ui:composition template="/templates/navbar1Layout.xhtml">
 
 
-
-            <!-- highlight "preferences" tab -->
-            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexRider}" />
-
-
-
             <ui:define name="windowTitle">
                 #{msgs.title}
             </ui:define>
 
             <ui:define name="content">
 
-
-           
-
-                <p:panel header="#{msgs.rideActiveRequests}">
-
-                    <!-- primefaces dynamic accordion COOL!  -->
-                    <p:accordionPanel  activeIndex="-1" value="#{ride.activeOpenRidesForRider}" var="ride">
-
-
+                
+                <h1> 
+                    #{msgs.nav1_rider_active}
+                </h1>
+                
+                
+                #{filteredRideLists.updateFutureRides()}
 
 
-                        <p:tab title=" #{ride.updatedShortcut} #{ride.startDateFormatted} #{ride.endptAddressShort} ">
-                            
-                            <div class="formLabel"> #{msgs.rideRequest} #{ride.riderrouteId} </div>
+                <!-- message to be displayed if there are no rides -->
 
-                            <!-- show message if ride is updated -->
-                            <ui:fragment rendered="#{ride.rideUpdated}">
-                                <h:graphicImage library="images" name="updated.gif" width="20" height="20" />
-                                #{msgs.updatedRide}
-                            </ui:fragment>
+                <h:panelGroup  rendered="#{!filteredRideLists.hasRides()}">
+                    <div class="formLabel">
+                        #{msgs.rideListNoRequestCurrently}
+                    </div>
+                </h:panelGroup>
 
 
+                <!--  local links to different kinds of rides   -->
 
-                            <h:form>
-                                <p>
-                                    <table> <!-- nested table #1 -->                         
-                                        <tr>
-                                            <td colspan="3">
-                                                <span class="formLabel">
-                                                    <h:commandLink action="rider.rideDisplay" value="#{msgs.rideDisplayRequest}">
-                                                        <f:param  name="#{crud.paramNameCrudId}" value="#{ride.riderrouteId}"/>
-                                                        <f:param name="#{webflow.getParamBack()}" value="rider"          />
-                                                    </h:commandLink>
-                                                </span>
-                                            </td>
-                                        </tr>
+                <table>
+                    <h:form  rendered="#{filteredRideLists.hasRides()}">
+                        <tr>  
+                            <td>
+                                <p:commandButton action="rider.rideListDisplay" id="allRides" icon="ui-icon-triangle-1-e" ajax="false" >
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayAll}" />
+                                </p:commandButton>
+                                <p:tooltip for="allRides" value="#{msgs.rideListAllRequests}"  />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay" >
+                                    #{msgs.rideListAllRequests} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayAll}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredRideLists.numberOfAllRides}]
+                            </td>
+                        </tr>
+                    </h:form>
 
-                                        <!-- *** show matchings list only if there are matchings *** -->
-                                        <ui:fragment rendered="#{ride.hasMatches}">
-                                            <tr>
-                                                <td colspan="3">
-                                                    <span class="formLabel">
-                                                        <h:commandLink action="rider.rideMatchingsList" value="#{msgs.rideMatchesShowOffers}">
-                                                            <f:param  name="#{crud.paramNameCrudId}"   value="#{ride.riderrouteId}"/>
-                                                            <f:param  name="#{webflow.getParamBack()}" value="rider"               />
-                                                        </h:commandLink>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        </ui:fragment> 
+                    <h:form rendered="#{filteredRideLists.hasUpdatedRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="updated" action="rider.rideListDisplay"  icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayUpdated}" />
+                                </p:commandButton>
+                                <p:tooltip for="updated" value="#{msgs.rideListUpdatedRequests}" />
+                            </td>
+
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay"  >
+                                    #{msgs.rideListUpdatedRequests} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayUpdated}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel">
+                                [#{filteredRideLists.numberOfUpdatedRides}] 
+                            </td>
+                        </tr>
+                    </h:form>
 
 
-                                        <tr> 
-                                            <td>  <span class="formLabel">  #{msgs.rideStarttimeEarliest}  </span> </td>
-                                            <td> <span class="formLabel"> &nbsp;:&nbsp;  </span> </td>
-                                            <td>  <span class="formInput"> #{ride.starttimeEarliest} </span> </td>
-                                        </tr>
+                    <h:form  rendered="#{filteredRideLists.hasNewRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="newRides" action="rider.rideListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayNew}" />
+                                </p:commandButton>
+                                <p:tooltip for="newRides" value="#{msgs.rideListNewRequests}" /> 
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay">
+                                    #{msgs.rideListNewRequests} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayNew}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel">
+                                [#{filteredRideLists.numberOfNewRides}]
+                            </td>
+                        </tr>
+                    </h:form>
 
-                                        <tr> 
-                                            <td> <span class="formLabel">  #{msgs.rideStarttimeLatest}  </span> </td>
-                                            <td> <span class="formLabel"> &nbsp;:&nbsp;  </span> </td>
-                                            <td> <span class="formInput"> #{ride.starttimeLatest} </span> </td>
-                                        </tr>
-                                        <tr>
-                                            <td> <span class="formLabel">  #{msgs.rideComment}         </span> </td>
-                                            <td>  <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
-                                            <td>  <span class="formInput">  #{ride.comment}  </span> </td>
-                                        </tr>
+                    <h:form  rendered="#{filteredRideLists.hasRiderRequestedRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton  id="riderRequested" action="rider.rideListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayRiderRequested}" />
+                                </p:commandButton>
+                                <p:tooltip for="riderRequested" value="#{msgs.rideListRiderAcceptedRequests}"/>
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay" >
+                                    #{msgs.rideListRiderAcceptedRequests} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayRiderRequested}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredRideLists.numberOfRiderRequestedRides}]
+                            </td>
+                        </tr>
+                    </h:form>
 
-                                        <tr>
-                                            <td> <span class="formLabel">  #{msgs.rideStart}  </span> </td>
-                                            <td> <span class="formLabel"> &nbsp;:&nbsp;  </span> </td>
-                                            <td> <span class="formInput"> #{ride.startptAddress} </span> </td> 
-                                        </tr>
+                    <h:form   rendered="#{filteredRideLists.hasDriverAcceptedRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="driverAccepted" action="rider.rideListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayDriverAccepted}" />
+                                </p:commandButton>
+                                <p:tooltip for="driverAccepted" value="#{msgs.rideListDriverAcceptedOffers}"/>
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay" > 
+                                    #{msgs.rideListDriverAcceptedOffers} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayDriverAccepted}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredRideLists.numberOfDriverAcceptedRides}]
+                            </td>
+                        </tr>
+                    </h:form>
 
-                                        <tr>
-                                            <td> <span class="formLabel">  #{msgs.rideDestination} </span> </td>
-                                            <td> <span class="formLabel"> &nbsp;:&nbsp;  </span> </td>
-                                            <td> <span class="formInput">  #{ride.endptAddress} </span> </td>
-                                        </tr>
+                    <h:form  rendered="#{filteredRideLists.hasBothAcceptedRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="bothAccepted" action="rider.rideListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayBothAccepted}" />
+                                </p:commandButton>
+                                <p:tooltip for="bothAccepted" value="#{msgs.rideListBothAcceptedOffers}"/>
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay">
+                                    #{msgs.rideListBothAcceptedOffers} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayBothAccepted}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredRideLists.numberOfBothAcceptedRides}]
+                            </td>
+                        </tr>
+                    </h:form>
 
-                                        <tr>
-                                            <td> <span class="formLabel">  #{msgs.rideNoMatchingOffers} </span> </td>
-                                            <td> <span class="formLabel"> &nbsp;:&nbsp;                 </span> </td>
-                                            <td> <span class="formInput">  #{ride.noMatches}            </span> </td>
-                                        </tr>
+                    <h:form  rendered="#{filteredRideLists.hasRiderCountermandedRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="riderCountermanded" action="rider.rideListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayRiderCountermanded}" />
+                                </p:commandButton>
+                                <p:tooltip for="riderCountermanded" value="#{msgs.rideListRiderCountermandedRequests}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay" >
+                                    #{msgs.rideListRiderCountermandedRequests} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayRiderCountermanded}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredRideLists.numberOfRiderCountermandedRides}]
+                            </td>
+                        </tr>
+                    </h:form>
 
-                                        <!-- *** show matchings list only if there are matchings *** -->
-                                        <ui:fragment rendered="#{ride.hasMatches}">
-                                            <tr>
-                                                <td colspan="3">
-                                                    <span class="formLabel">
-                                                        <h:commandLink action="rider.rideMatchingsList" value="#{msgs.rideMatchesShowOffers}">
-                                                            <f:param  name="#{crud.paramNameCrudId}"   value="#{ride.riderrouteId}"/>
-                                                            <f:param  name="#{webflow.getParamBack()}" value="rider"               />
-                                                        </h:commandLink>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        </ui:fragment> 
+                    <h:form   rendered="#{filteredRideLists.hasDriverCountermandedRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="driverCountermanded" action="rider.rideListDisplay" icon="ui-icon-triangle-1-e" ajax="false">                             
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayDriverCountermanded}" />
+                                </p:commandButton>
+                                <p:tooltip for="driverCountermanded" value="#{msgs.rideListDriverCountermandedOffers}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay" >
+                                    #{msgs.rideListDriverCountermandedOffers} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayDriverCountermanded}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredRideLists.numberOfDriverCountermandedRides}]
+                            </td>
+                        </tr>
+                    </h:form>
 
-                                    </table> <!-- nested table #1 -->  
-                                </p>
-                            </h:form>
-                        </p:tab>
-                    </p:accordionPanel>
-                </p:panel>
+                    <h:form  rendered="#{filteredRideLists.hasBothCountermandedRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton action="rider.rideListDisplay" icon="ui-icon-triangle-1-e" ajax="false">     
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayBothCountermanded}" />
+                                </p:commandButton>
+                                <p:tooltip for="bothCountermanded" value="#{msgs.rideListBothCountermandedOffers}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay" >
+                                    #{msgs.rideListBothCountermandedOffers} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayBothCountermanded}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredRideLists.numberOfBothCountermandedRides}] 
+                            </td>
+                        </tr>
+                    </h:form>
 
+                    <h:form rendered="#{filteredRideLists.hasUnavaillableRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="unavaillable" action="rider.rideListDisplay" icon="ui-icon-triangle-1-e" ajax="false">    
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayUnavaillable}" />
+                                </p:commandButton>
+                                <p:tooltip for="unavaillable" value=" #{msgs.rideListUnavaillableRides}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay" >
+                                    #{msgs.rideListUnavaillableRides} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayUnavaillable}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel">
+                                [#{filteredRideLists.numberOfUnavaillableRides}]
+                            </td>
+                        </tr>
+                    </h:form>
+
+                    <h:form rendered="#{filteredRideLists.hasUnclearRides()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="unclear" action="rider.rideListDisplay" icon="ui-icon-triangle-1-e" ajax="false">    
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayUnclear}" />
+                                </p:commandButton>
+                                <p:tooltip for="unclear" value="#{msgs.rideListUnclearRides}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="rider.rideListDisplay"  >
+                                    #{msgs.rideListUnclearRides} 
+                                    <f:param name="#{filteredRideLists.paramNameDisplayMode}" value="#{filteredRideLists.valueDisplayUnclear}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel">
+                                [#{filteredRideLists.numberOfUnclearRides}]
+                            </td>
+                        </tr>
+                    </h:form>
+                </table>
 
             </ui:define>
 
-
-
-
         </ui:composition>
-
-
-
-
 
     </body>
 </html>

@@ -17,12 +17,7 @@
 
     <body>
 
-
         <ui:composition template="/templates/navbar1Layout.xhtml">
-
-            <!-- highlight "preferences" tab -->
-            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
-
 
             <ui:define name="windowTitle">
                 #{msgs.title}
@@ -31,90 +26,246 @@
 
             <ui:define name="content">
 
+                <h1> #{msgs.nav1_driver_active} </h1>
 
-                <!-- List of future offers for this driver -->
+                #{filteredDriveLists.updateFutureDrives()}
 
-                <p:panel header="#{msgs.rideActiveOffers}">
 
-                    <!-- primefaces dynamic accordion COOL!  -->
-                    <p:accordionPanel  activeIndex="-1" value="#{driverride.futureDrives}" var="drive">                  
+                <!-- message to be displayed if there are no rides -->
 
-                        <p:tab title=" #{drive.updatedShortcut} #{drive.startDateFormatted} #{drive.endptAddressShort}">
+                <h:panelGroup  rendered="#{!filteredDriveLists.hasDrives()}">
+                    <div class="formLabel">
+                        #{msgs.driveListNoOffersCurrently}
+                    </div>
+                </h:panelGroup>
 
-                            <div class="formLabel"> #{msgs.rideOffer} #{drive.rideId} </div>
-                            
-                            <!-- show message if ride is updated -->
-                            <ui:fragment rendered="#{drive.driveUpdated}">
-                                <div class="formLabel">
-                                    <h:graphicImage library="images" name="updated.gif" width="20" height="20" />
-                                    #{msgs.updatedRide}
-                                </div>
-                            </ui:fragment>
 
-                            <!-- show link only if there are matches -->
-                            <ui:fragment rendered="#{drive.hasMatches}">
-                                <div class="formLabel">
-                                    <h:form>
-                                        <h:commandLink action="driver.driveMatchingsList" value="#{msgs.rideMatchesShowRequests}">
-                                            <f:param   name="#{crud.paramNameCrudId}"   value="#{drive.rideId}"/>
-                                            <f:param   name="#{webflow.getParamBack()}" value="driver"              />
-                                        </h:commandLink>
-                                    </h:form>
-                                </div>
-                            </ui:fragment>
+                <!--  local links to different kinds of rides   -->
 
-                            <h:form>
-                                <table> <!-- nested three column table -->
+                <table>
+                    <h:form  rendered="#{filteredDriveLists.hasDrives()}">
+                        <tr>  
+                            <td>
+                                <p:commandButton action="driver.driveListDisplay" id="allRides" icon="ui-icon-triangle-1-e" ajax="false" >
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayAll}" />
+                                </p:commandButton>
+                                <p:tooltip for="allRides" value="#{msgs.driveListAllOffers}"  />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay" >
+                                    #{msgs.driveListAllOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayAll}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredDriveLists.numberOfAllDrives}]
+                            </td>
+                        </tr>
+                    </h:form>
 
-                                    <tr>
-                                        <td colspan="3">
-                                            <span class="formLabel">
-                                                <h:commandLink action="driver.driveDisplay" value="#{msgs.formDisplay}">
-                                                    <f:param  name="#{crud.paramNameCrudId}" value="#{drive.rideId}"/>
-                                                    <f:param name="#{webflow.getParamBack()}" value="driver"          />
-                                                </h:commandLink>
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>                                            
-                                        <td>
-                                            <span class="formLabel">
-                                                #{msgs.rideStarttime}
-                                            </span>
-                                        </td>
-                                        <td class="formLabel"> &nbsp;:&nbsp; </td>
-                                        <td>
-                                            <span class="formInput">
-                                                #{drive.startDateFormatted} 
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="formLabel">  #{msgs.rideStart}  </td>
-                                        <td class="formLabel"> &nbsp;:&nbsp; </td>
-                                        <td class="formInput"> #{drive.startptAddress} </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="formLabel">   #{msgs.rideDestination}  </td>
-                                        <td class="formLabel"> &nbsp;:&nbsp; </td>
-                                        <td class="formInput"> #{drive.endptAddress} </td>
-                                    </tr>
-                                    <tr>
-                                        <td> <span class="formLabel">  #{msgs.rideComment} </span> </td>
-                                        <td> <span class="formLabel"> &nbsp;:&nbsp;                 </span> </td>
-                                        <td>  <span class="formInput">  #{drive.rideComment}            </span> </td>
-                                    </tr>
-                                    <tr>
-                                        <td> <span class="formLabel">  #{msgs.rideNoMatchingRequests} </span> </td>
-                                        <td> <span class="formLabel"> &nbsp;:&nbsp;                 </span> </td>
-                                        <td> <span class="formInput">  #{drive.noMatches}            </span> </td>
-                                    </tr>
+                    <h:form rendered="#{filteredDriveLists.hasUpdatedDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="updated" action="driver.driveListDisplay"  icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayUpdated}" />
+                                </p:commandButton>
+                                <p:tooltip for="updated" value="#{msgs.driveListUpdatedOffers}" />
+                            </td>
 
-                                </table>
-                            </h:form>  
-                        </p:tab>
-                    </p:accordionPanel>
-                </p:panel>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay"  >
+                                    #{msgs.driveListUpdatedOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayUpdated}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel">
+                                [#{filteredDriveLists.numberOfUpdatedDrives}] 
+                            </td>
+                        </tr>
+                    </h:form>
+
+
+                    <h:form  rendered="#{filteredDriveLists.hasNewDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="newRides" action="driver.driveListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayNew}" />
+                                </p:commandButton>
+                                <p:tooltip for="newRides" value="#{msgs.driveListNewOffers}" /> 
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay">
+                                    #{msgs.driveListNewOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayNew}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel">
+                                [#{filteredDriveLists.numberOfNewDrives}]
+                            </td>
+                        </tr>
+                    </h:form>
+
+                    <h:form  rendered="#{filteredDriveLists.hasRiderRequestedDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton  id="riderRequested" action="driver.driveListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayRiderRequested}" />
+                                </p:commandButton>
+                                <p:tooltip for="riderRequested" value="#{msgs.driveListRiderAcceptedOffers}"/>
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay" >
+                                    #{msgs.driveListRiderAcceptedOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayRiderRequested}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredDriveLists.numberOfRiderRequestedDrives}]
+                            </td>
+                        </tr>
+                    </h:form>
+
+                    <h:form   rendered="#{filteredDriveLists.hasDriverAcceptedDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="driverAccepted" action="driver.driveListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayDriverAccepted}" />
+                                </p:commandButton>
+                                <p:tooltip for="driverAccepted" value="#{msgs.driveListDriverAcceptedOffers}"/>
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay" > 
+                                    #{msgs.driveListDriverAcceptedOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayDriverAccepted}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredDriveLists.numberOfDriverAcceptedDrives}]
+                            </td>
+                        </tr>
+                    </h:form>
+
+                    <h:form  rendered="#{filteredDriveLists.hasBothAcceptedDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="bothAccepted" action="driver.driveListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayBothAccepted}" />
+                                </p:commandButton>
+                                <p:tooltip for="bothAccepted" value="#{msgs.driveListBothAcceptedOffers}"/>
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay">
+                                    #{msgs.driveListBothAcceptedOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayBothAccepted}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredDriveLists.numberOfBothAcceptedDrives}]
+                            </td>
+                        </tr>
+                    </h:form>
+
+                    <h:form  rendered="#{filteredDriveLists.hasRiderCountermandedDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="riderCountermanded" action="driver.driveListDisplay" icon="ui-icon-triangle-1-e" ajax="false">
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayRiderCountermanded}" />
+                                </p:commandButton>
+                                <p:tooltip for="riderCountermanded" value="#{msgs.driveListRiderCountermandedOffers}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay" >
+                                    #{msgs.driveListRiderCountermandedOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayRiderCountermanded}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredDriveLists.numberOfRiderCountermandedDrives}]
+                            </td>
+                        </tr>
+                    </h:form>
+
+                    <h:form   rendered="#{filteredDriveLists.hasDriverCountermandedDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="driverCountermanded" action="driver.driveListDisplay" icon="ui-icon-triangle-1-e" ajax="false">                             
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayDriverCountermanded}" />
+                                </p:commandButton>
+                                <p:tooltip for="driverCountermanded" value="#{msgs.driveListDriverCountermandedOffers}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay" >
+                                    #{msgs.driveListDriverCountermandedOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayDriverCountermanded}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredDriveLists.numberOfDriverCountermandedDrives}]
+                            </td>
+                        </tr>
+                    </h:form>
+
+                    <h:form  rendered="#{filteredDriveLists.hasBothCountermandedDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton action="driver.driveListDisplay" icon="ui-icon-triangle-1-e" ajax="false">     
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayBothCountermanded}" />
+                                </p:commandButton>
+                                <p:tooltip for="bothCountermanded" value="#{msgs.driveListBothCountermandedOffers}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay" >
+                                    #{msgs.driveListBothCountermandedOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayBothCountermanded}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel"> 
+                                [#{filteredDriveLists.numberOfBothCountermandedDrives}] 
+                            </td>
+                        </tr>
+                    </h:form>
+
+                    <h:form rendered="#{filteredDriveLists.hasUnavaillableDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="unavaillable" action="driver.driveListDisplay" icon="ui-icon-triangle-1-e" ajax="false">    
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayUnavaillable}" />
+                                </p:commandButton>
+                                <p:tooltip for="unavaillable" value=" #{msgs.driveListUnavaillableOffers}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay" >
+                                    #{msgs.driveListUnavaillableOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayUnavaillable}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel">
+                                [#{filteredDriveLists.numberOfUnavaillableDrives}]
+                            </td>
+                        </tr>
+                    </h:form>
+
+                    <h:form rendered="#{filteredDriveLists.hasUnclearDrives()}" >
+                        <tr>  
+                            <td>
+                                <p:commandButton id="unclear" action="driver.driveListDisplay" icon="ui-icon-triangle-1-e" ajax="false">    
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayUnclear}" />
+                                </p:commandButton>
+                                <p:tooltip for="unclear" value="#{msgs.driveListUnclearOffers}" />
+                            </td>
+                            <td class="formLabel">
+                                <h:commandLink action="driver.driveListDisplay"  >
+                                    #{msgs.driveListUnclearOffers} 
+                                    <f:param name="#{filteredDriveLists.paramNameDisplayMode}" value="#{filteredDriveLists.valueDisplayUnclear}" />
+                                </h:commandLink>
+                            </td>
+                            <td class="formLabel">
+                                [#{filteredDriveLists.numberOfUnclearDrives}]
+                            </td>
+                        </tr>
+                    </h:form>
+                </table>
+           
 
             </ui:define>
 

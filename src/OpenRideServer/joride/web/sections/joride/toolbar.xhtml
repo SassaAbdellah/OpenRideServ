@@ -1,176 +1,60 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui"
-      >
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
 
-    <head><title>IGNORED</title></head>
-    <body>
-
-
-        <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
-            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        </h:head>
+<head>
+<title>IGNORED</title>
+</head>
+<body>
 
 
-
-
-        <!--  systemwide slide menu  -->
-
-        <ui:composition>
-
-            <h:form> <!-- slidemenu with popup button -->
-
-                <p:toolbar>  
-                    <p:toolbarGroup align="left">  
-                        <p:commandButton 
-                            id="dynaButton" 
-                            value="#{msgs.nav1_navigation}" 
-                            type="button" 
-                            icon="ui-icon-transferthick-e-w"
-                            />  
-                    </p:toolbarGroup>
+	<h:head>
+		<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	</h:head>
 
 
 
-                    <!-- logout button to the very right -->
-                    <p:toolbarGroup align="right">  
 
-                        <p:splitButton value="#{HTTPUser.currentUser}" icon="ui-icon-gear" >
+	<!--  systemwide slide menu  -->
 
+	<ui:composition>
 
-                            <p:menuitem 
-                                action="rider"
-                                value="#{msgs.nav1_rider_active}"  
-                                ajax="false"
-                                icon="ui-icon-suitcase"
-                                />    
+		<h:form>
+			<!-- slidemenu with popup button -->
 
-
-                            <p:menuitem 
-                                action="rider.rideCreate"        
-                                value="#{msgs.rideNewRequest}" 
-                                ajax="false"
-                                icon="ui-icon-newwin"
-                                /> 
-
-                            <p:spacer />    
-
-                            <p:menuitem 
-                                action="driver"              
-                                value="#{msgs.nav1_driver_active}" 
-                                ajax="false"
-                                icon="ui-icon-person"
-                                />  
-
-                            <p:menuitem 
-                                action="driver.driveCreate"    
-                                value="#{msgs.rideNewDrive}"
-                                ajax="false"
-                                icon="ui-icon-newwin"
-                                />  
-
-                            <p:spacer/>
-                            <p:menuitem 
-                                action="updates"  
-                                value="#{msgs.updates}"
-                                ajax="false"
-                                icon="ui-icon-lightbulb" 
-                                /> 
+			<p:toolbar>
+				<p:toolbarGroup align="left">
+					<p:commandButton id="dynaButton" value="#{msgs.nav1_navigation}"
+						type="button" icon="ui-icon-transferthick-e-w" />
+				</p:toolbarGroup>
+			
+			</p:toolbar>
 
 
-                            <p:spacer />    
 
 
-                            <p:menuitem 
-                                url="#{HTTPUser.getLogoutURL()}"  
-                                value="#{msgs.nav1_logout}"       
-                                icon="ui-icon-power"
-                                /> 
+			<!-- slide menu comes with a primefaces 4.0 fashioned programmatic menu -->
+			<p:slideMenu model="#{mainMenu}" overlay="true" trigger="dynaButton"
+				my="left top" at="left bottom">
+			</p:slideMenu>
+		</h:form>
+
+		<!--  end of slide menu -->
 
 
-                        </p:splitButton>
 
 
-                    </p:toolbarGroup>
-
-                </p:toolbar>
-
-                <p:slideMenu overlay="true" trigger="dynaButton" my="left top" at="left bottom" style="width:180px">  
-
-                    <!-- Go Home!      -->
-                    <p:menuitem outcome="home"  value="#{msgs.nav1_home_label}"  icon="ui-icon-home"  />   
-
-                    <!-- Rider Submenu -->
-                    <p:submenu label="#{msgs.nav1_rider_label}" icon="ui-icon-suitcase">
-                        <p:menuitem outcome="rider"                    value="#{msgs.nav1_rider_active}"     />    
-                        <p:menuitem  outcome="rider.rideCreate"         value="#{msgs.rideNewRequest}"  >  
-                            <f:param name="#{webflow.paramBack}"    value="rider" /> 
-                            <f:param name="#{webflow.paramFinish}"  value="rider" /> 
-                            <f:param name="#{webflow.paramCancel}"  value="rider" /> 
-                        </p:menuitem>
-                        <p:menuitem outcome="search.requests"   value="#{msgs.rideSearchRequests}" />    
-                    </p:submenu>
-
-                    <!-- Driver Submenu -->
-                    <p:submenu  label="#{msgs.nav1_driver_label}" icon="ui-icon-person">
-                        <p:menuitem outcome="driver"                 value="#{msgs.nav1_driver_active}"  />  
-                        <p:menuitem outcome="driver.driveCreate"     value="#{msgs.rideNewDrive}">  
-                            <f:param name="#{webflow.paramBack}"     value="driver" /> 
-                            <f:param name="#{webflow.paramFinish}"   value="driver" /> 
-                            <f:param name="#{webflow.paramCancel}"   value="driver" /> 
-                        </p:menuitem>
-                        <p:menuitem outcome="search.drives"  value="#{msgs.rideSearchDrives}"  />  
-                    </p:submenu>
-
-                    <p:submenu  label="#{msgs.searchSubMenu}" icon="ui-icon-search">
-                        <p:menuitem outcome="search.requests"               value="#{msgs.rideSearchRequests}"  />    
-                        <p:menuitem outcome="search.drives"                 value="#{msgs.rideSearchDrives}"  /> 
-                        <p:menuitem outcome="searchPublicProfileByNickName" value="#{msgs.publicProfileSearchProfile}"  />
-                    </p:submenu>
-
-                    <!-- preferences submenu  -->
-                    <p:submenu  label="#{msgs.nav1_preferences_label}" icon="ui-icon-wrench">
-                        <p:menuitem outcome="password_change"                            value="#{msgs.changePassword}"                     /> 
-                        <p:menuitem outcome="preferences.personalData"                   value="#{msgs.nav1_pref_personalData_label}"       /> 
-                        <p:menuitem outcome="preferences.riderPreferences"               value="#{msgs.nav1_pref_riderPreferences_label}"   /> 
-                        <p:menuitem outcome="preferences.driverPreferences"              value="#{msgs.nav1_pref_driverPreferences_label}"  /> 
-                        <p:menuitem outcome="preferences.favoritePlaces"                 value="#{msgs.nav1_pref_favoritePlaces_label}"     />
-
-                    </p:submenu>
-
-
-                    <p:spacer/>
-                    <p:menuitem outcome="updates"  value="#{msgs.updates}" icon="ui-icon-lightbulb" /> 
-
-
-                    <p:spacer/>
-                    <p:menuitem outcome="preferences"  value="#{msgs.custRemoveAccountLabel}" icon="ui-icon-trash" /> 
-
-                    <p:spacer/>
-                    <p:menuitem outcome="contact" value="#{msgs.contact}" icon="ui-icon-mail-closed"/>
-
-                    <p:spacer/>
-                    <p:menuitem url="#{HTTPUser.getLogoutURL()}"  value="#{msgs.nav1_logout}" icon="ui-icon-power" /> 
-
-                </p:slideMenu>
-
-            </h:form> <!--  end of slidemenu stanza -->
+	</ui:composition>
 
 
 
 
 
 
-        </ui:composition>
-
-
-
-
-
-
-    </body>
+</body>
 </html>

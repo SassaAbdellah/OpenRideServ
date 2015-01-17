@@ -1,6 +1,10 @@
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
+ * 
+ * 
+ * 
+ * @deprecated  since we do not use tabindexes any more it can probably go away
  */
 package de.avci.joride.utils;
 

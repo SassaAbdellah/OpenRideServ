@@ -1,0 +1,14 @@
+#properties for the graphhopperRouter
+#
+# 
+#
+# Base directory of the graphhopper
+#
+#
+ghroute.basedir=/opt/openride/graphhopper/graphhopper-folder/
+#
+# 
+#
+ghroute.pbf=isle_of_man.osm.pbf
+#
+#

@@ -92,23 +92,27 @@
                 <button onclick="getLocation()"> #{msgs.geolocationServiceLabel} </button>
 
 
-
-
-                <div class="webflow">
-
-                    <h:form>
-
-                        <h:commandLink value="#{msgs.back}" action="#{webflow.getBack()}"/>
-                        |
-                        <h:commandLink value="#{msgs.cancel}" action="#{webflow.getCancel()}"/>
-
+                
+                <p>
+                   <h:form>
+                        <table>
+                            <tr>
+                                <td>
+                                    <p:commandButton id="backlink" icon="ui-icon-triangle-1-w" action="#{webflow.getBack()}" ajax="false" />
+                                    <p:tooltip for="backlink" value="#{msgs.back}"  />
+                                </td>
+                                <td>
+                                    <h:commandLink value="#{msgs.back}" action="#{webflow.getBack()}"/>
+                                </td>
+                                <td>
+                                    &nbsp; &nbsp;
+                                    <h:commandLink value="#{msgs.cancel}" action="#{webflow.getCancel()}"/>
+                                </td>
+                            </tr>
+                        </table>
                     </h:form>
-
-                </div>
-
-
-
-
+                </p>
+                
             </ui:define>
 
         </ui:composition>

@@ -29,14 +29,15 @@
 
             <ui:define name="content">
 
-                <form method="POST" action="../j_security_check" >  <!-- we use non JSF form to evade JSF Navigation Cases  -->
+				<!-- login is done via SmartLoginServlet -->
+                <form method="post" action="#{HTTPUser.smartLoginURL}" >  <!-- we use non JSF form to evade JSF Navigation Cases  -->
 
                     <!-- label and input for username  *********************************************** -->
-                    <div class="formLabel"> #{msgs.loginUsername} :                                 </div>
+                    <div class="formLabel"> #{msgs.loginUsernameOrEmailaddress}                                  </div>
                     <div class="formInput"> <input   name="j_username"/>                            </div>
 
                     <!-- label and input for password  *********************************************** -->
-                    <div class="formLabel"> #{msgs.loginPassword} :                                 </div>
+                    <div class="formLabel"> #{msgs.loginPassword}                                  </div>
                     <div class="formInput">  <input  type="password" name="j_password" />           </div>
 
                     <!-- we use non JSF html button for submit to eva JSF Navigation Cases *********** -->

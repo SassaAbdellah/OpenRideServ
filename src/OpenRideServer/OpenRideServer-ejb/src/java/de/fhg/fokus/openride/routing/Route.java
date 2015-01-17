@@ -32,12 +32,7 @@ import java.util.List;
  */
 public interface Route 
 {
-    /**
-     * Edges ordered from source to target.
-     * @return
-     */
-    public List<Edge> getEdges();
-
+   
 
     /**
      * Routpoints ordered from source to target.

@@ -41,16 +41,6 @@ public class EmailCheck {
     
     
     
-    /** Checks, if given String is an email adress.
-     *  Returns true, if the argument is a single email adress,
-     * else false.
-     * 
-     * @param args
-     * @return 
-     */
-    public boolean isEmailAdress(String arg){
-        return getEmailAddresses(arg).length==1;
-    }
-       
+ 
  
 } // class

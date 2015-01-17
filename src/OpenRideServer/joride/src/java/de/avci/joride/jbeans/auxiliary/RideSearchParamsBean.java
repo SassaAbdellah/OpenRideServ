@@ -5,8 +5,11 @@
 package de.avci.joride.jbeans.auxiliary;
 
 import de.avci.joride.constants.JoRideConstants;
+import de.avci.joride.jbeans.riderundertakesride.JRiderUndertakesRideEntity;
 import de.avci.joride.utils.BeanRetriever;
 import de.avci.joride.utils.HTTPUtil;
+import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideEntity;
+
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -16,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ActionEvent;
 import javax.inject.Named;
 
 /**
@@ -81,7 +85,7 @@ public class RideSearchParamsBean implements Serializable {
      * TimeFormat used for retrieving dates in http requests
      *
      */
-    protected String DATE_FORMAT = JoRideConstants.JORIDE_DATE_FORMAT_STR;
+    protected String DATE_FORMAT = JoRideConstants.getDateFormatString();
 
     /**
      * Make Format Strings available in JSF Fashion
@@ -89,7 +93,10 @@ public class RideSearchParamsBean implements Serializable {
     public String getDateformat() {
         return DATE_FORMAT;
     }
+    
+    
     protected DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+    
     /**
      * Date starting the period for which rides/drive should be displayed
      *
@@ -104,6 +111,15 @@ public class RideSearchParamsBean implements Serializable {
     public Date getStartDate() {
         return this.startDate;
     }
+    
+   /**
+    *
+    * @return nicely formatted version of the startDate property.
+    */
+   public String getStartDateFormatted() {
+       return dateFormat.format(this.getStartDate());
+   }
+    
     /**
      * Date ending the period for which rides/drive should be displayed
      *
@@ -127,13 +143,7 @@ public class RideSearchParamsBean implements Serializable {
         return dateFormat.format(this.getEndDate());
     }
 
-    /**
-     *
-     * @return nicely formatted version of the startDate property.
-     */
-    public String getStartDateFormatted() {
-        return dateFormat.format(this.getStartDate());
-    }
+ 
     /**
      * http parameter to transmit the startDate
      */
@@ -264,5 +274,43 @@ public class RideSearchParamsBean implements Serializable {
          return (RideSearchParamsBean) new BeanRetriever().retrieveBean(beanName, this.getClass());
          
     } // 
+    
+    
+    
+    
+   /** Convenience method for returning a date far back in the past (01.01.1970 00:00)
+    *  in formated way suitable to be passed as a http parameter
+    * 
+    * @return
+    */
+   public String getEpochDateFormatted() {
+       return dateFormat.format(new Date(0));
+   }
+   
+   
+   /** Convenience method for returning current date
+    *  in formated way suitable to be passed as a http parameter
+    * 
+    * @return
+    */
+   public String getNowDateFormatted() {
+       return dateFormat.format(new Date(System.currentTimeMillis()));
+   }
+   
+   
+   public void configureUnratedRidesForDriver(ActionEvent evt){
+	   this.setStartDate(new Date(0));
+	   this.setEndDate(new Date(System.currentTimeMillis()));
+	   this.setSearchType(new JRiderUndertakesRideEntity().getParamValueRidereportUnratedRidesForDriver());
+   }
+   
+   public void configureUnratedRidesForRider(ActionEvent evt){
+	   this.setStartDate(new Date(0));
+	   this.setEndDate(new Date(System.currentTimeMillis()));
+	   this.setSearchType(new JRiderUndertakesRideEntity().getParamValueRidereportUnratedRidesForRider());
+   }
+   
+    
+   
 } // class
 

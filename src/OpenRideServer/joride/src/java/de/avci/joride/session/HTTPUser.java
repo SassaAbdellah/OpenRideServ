@@ -1,16 +1,24 @@
 package de.avci.joride.session;
 
-import de.avci.joride.utils.HTTPUtil;
-import de.avci.joride.utils.PropertiesLoader;
 import java.io.IOException;
-
 import java.io.Serializable;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.enterprise.context.SessionScoped;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ActionEvent;
+import javax.faces.model.SelectItem;
 import javax.inject.Named;
 import javax.servlet.http.HttpSession;
+
+import de.avci.joride.constants.JoRideConstants;
+import de.avci.joride.jbeans.customerprofile.JCustomerEntityService;
+import de.avci.joride.utils.HTTPUtil;
+import de.avci.joride.utils.PropertiesLoader;
 
 /**
  * A simplistic bean allowing access to HTTPAuthData
@@ -61,7 +69,8 @@ public class HTTPUser implements Serializable {
     
     public String getLoginLabel() {
         if (getUserPrincipal() == null) {
-            return (new PropertiesLoader()).getMessagesProps().getProperty("login");
+        	java.util.Locale myLocale=new HTTPUtil().detectBestLocale();
+            return (PropertiesLoader.getMessageProperties(myLocale).getProperty("login"));
         }
         return null;
     }
@@ -76,9 +85,8 @@ public class HTTPUser implements Serializable {
      * @return 
      */
     public String getURLBase(){
-    
-           PropertiesLoader pl=new PropertiesLoader();
-           return pl.getNavigationProps().getProperty("urlBase");
+         
+           return PropertiesLoader.getNavigationProperties().getProperty("urlBase");
     }
     
     
@@ -91,10 +99,8 @@ public class HTTPUser implements Serializable {
      */
     
     public String getLoginURL() {
-     
-            PropertiesLoader pl=new PropertiesLoader();
-         
-            String urlLogin=pl.getNavigationProps().getProperty("urlLogin");
+             
+            String urlLogin=PropertiesLoader.getNavigationProperties().getProperty("urlLogin");
             return getURLBase()+urlLogin;
             
     }
@@ -103,7 +109,8 @@ public class HTTPUser implements Serializable {
    
      public String getLogoutLabel() {
         if (getUserPrincipal() != null) {
-            return (new PropertiesLoader()).getMessagesProps().getProperty("logout");
+        	java.util.Locale myLocale=new HTTPUtil().detectBestLocale();
+            return PropertiesLoader.getMessageProperties(myLocale).getProperty("logout");
         }
         return null;
     }
@@ -111,26 +118,27 @@ public class HTTPUser implements Serializable {
     
     public String getLogoutURL() {
         
-            PropertiesLoader pl=new PropertiesLoader();
-            String urlLogout=pl.getNavigationProps().getProperty("urlLogout");
-            
+            String urlLogout=PropertiesLoader.getNavigationProperties().getProperty("urlLogout");        
             return urlLogout;
     } 
      
      
-    
-    
-      public String getLoggedOutURL() {
-        
-            PropertiesLoader pl=new PropertiesLoader();
+  
+    public String getLoggedOutURL() {
             
-            System.err.println("TODO: navigation props: "+pl.getNavigationProps());
-            
-            String urlLoggedOut=pl.getNavigationProps().getProperty("urlLoggedOut");
+            String urlLoggedOut=PropertiesLoader.getNavigationProperties().getProperty("urlLoggedOut");
             return urlLoggedOut;
     } 
-     
-      
+
+    /** URL where the smartLoginServlet lives
+     * 
+     * @return
+     */
+    public String getSmartLoginURL() {
+        
+        String smartLoginUrl1=PropertiesLoader.getNavigationProperties().getProperty("urlSmartLogin");
+        return getURLBase()+smartLoginUrl1;
+} 
       
     
       /** Invalidate Session, then forward to "loggedOutURL"
@@ -162,12 +170,82 @@ public class HTTPUser implements Serializable {
 
         PropertiesLoader pl = new PropertiesLoader();
 
-        System.err.println("TODO: navigation props: " + pl.getNavigationProps());
+        System.err.println("TODO: navigation props: " + PropertiesLoader.getNavigationProperties());
 
-        String urlLoggedOut = pl.getNavigationProps().getProperty("urlOpenLayers");
+        String urlLoggedOut = PropertiesLoader.getNavigationProperties().getProperty("urlOpenLayers");
         return urlLoggedOut;
     }
     
      
+    /** Flag signifying wether or not maps should be shown.
+     *  I.e: Maps are cool and should always be shown, unless there
+     *  is not enough bandwidth.
+     *  
+     *  Since such conditions can be expected to last for
+     *  
+     * 
+     */
+    private boolean showMap=false;
+
+	public boolean isShowMap() {
+		return showMap;
+	}
+
+	public void setShowMap(boolean showMap) {
+		this.showMap = showMap;
+	}
+    
+	
+	public void toggleMapVisibility(ActionEvent evt){
+		this.setShowMap(!this.isShowMap());
+		
+		System.err.println("TODO: toggled showMapsProperty, current property is "+this.isShowMap());
+	}
+    
+    /** return inversion of isShowMap
+     */
+    public boolean isHideMap(){
+    	return !this.isShowMap();
+    }
+    
+    /** Return the timezone for this session
+     * 
+     */
+    public TimeZone getTimeZone(){
+    	return JoRideConstants.getTimeZone();
+    }
+    
+    
+    /** Return the list of supported locales
+     */
+    public Locale[] getSupportedLocales(){
+    		
+    	return new JCustomerEntityService().getSupportedLocales();
+    }
+    
+    
+    /**
+     * 
+     * @return list of supported languages as Select Items
+     */
+    public List <SelectItem> getSupportedLanguages(){
+    	
+    	
+    	Locale[] supportedLocales=new JCustomerEntityService().getSupportedLocales();
+    	
+    	ArrayList <SelectItem> res = new ArrayList<SelectItem> ();
+    	
+    	for (Locale l: supportedLocales){
+    		SelectItem s=new SelectItem(l, l.getDisplayLanguage(l));
+    		res.add(s);    
+    	}
+    	
+    	return res;
+    } 
+    
+    
+    
+    
+    
     
 } // class

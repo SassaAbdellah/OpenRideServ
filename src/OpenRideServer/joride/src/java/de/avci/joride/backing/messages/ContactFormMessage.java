@@ -4,10 +4,12 @@
  */
 package de.avci.joride.backing.messages;
 
-import de.avci.joride.utils.PropertiesLoader;
 import java.io.Serializable;
+
 import javax.enterprise.context.RequestScoped;
+import de.avci.joride.utils.PropertiesLoader;
 import javax.inject.Named;
+
 
 /** Class providing functionality for sending messages 
  *  from the contact form.
@@ -17,14 +19,20 @@ import javax.inject.Named;
  * @author jochen
  */
 
-@Named
+@Named("contactFormMessage")
 @RequestScoped
 
 public class ContactFormMessage extends MailMessage implements Serializable{
     
         
     
-    /** Send a message from the contact form.
+    /** Default serial.
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	
+	/** Send a message from the contact form.
      *  
      *  
      * 
@@ -37,13 +45,21 @@ public class ContactFormMessage extends MailMessage implements Serializable{
      */
     public String sendContactFormMail() {
 
-        PropertiesLoader pl = new PropertiesLoader();
+     
 
-        this.setSender(pl.getOperationalProps().getProperty(PROPERTY_NAME_WEBMASTER_EMAIL_RECIPIENT));
-        this.setRecipient(pl.getOperationalProps().getProperty(PROPERTY_NAME_WEBMASTER_EMAIL_RECIPIENT));
+        this.setSender(PropertiesLoader.getOperationalProperties().getProperty(PROPERTY_NAME_WEBMASTER_EMAIL_RECIPIENT));
+        this.setRecipient(PropertiesLoader.getOperationalProperties().getProperty(PROPERTY_NAME_WEBMASTER_EMAIL_RECIPIENT));
 
         
         return this.send();
+    }
+    
+    
+    /** Dumb default constructor
+     * 
+     */
+    public ContactFormMessage(){
+    	super();
     }
     
 }

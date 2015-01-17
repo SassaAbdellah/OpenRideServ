@@ -1,0 +1,21 @@
+#
+# Your App Id. 
+# 
+# You may look up it's value  at the dashbook at
+# https://developers.facebook.com/
+#
+#
+app.id=__insert_your_app_id_here__
+#
+# Your App's secret. Do not publish this
+#
+# You may look up it's value  at the dashbook at
+# https://developers.facebook.com/
+#
+#
+app.secret=_insert_your_app_secret_here__
+#
+#
+# base url where You have installed Your app
+#
+app.baseURL=http://localhost:8080/facebooklogin/

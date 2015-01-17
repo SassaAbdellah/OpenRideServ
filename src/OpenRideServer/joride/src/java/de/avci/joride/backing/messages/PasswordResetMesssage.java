@@ -6,8 +6,11 @@ package de.avci.joride.backing.messages;
 
 import de.avci.joride.jbeans.customerprofile.JPasswordResetRequest;
 import de.avci.joride.jbeans.customerprofile.JRegistrationRequest;
+import de.avci.joride.utils.HTTPUtil;
 import de.avci.joride.utils.PropertiesLoader;
 import java.io.Serializable;
+import java.util.Locale;
+
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Named;
 
@@ -32,30 +35,31 @@ public class PasswordResetMesssage extends MailMessage implements Serializable{
      */
     public String sendPasswordResetMail(JPasswordResetRequest jprr, String nickname, String password) {
 
-        PropertiesLoader pl = new PropertiesLoader();
+   
 
-        this.setSender(pl.getOperationalProps().getProperty(PROPERTY_NAME_WEBMASTER_EMAIL_RECIPIENT));
+        this.setSender(PropertiesLoader.getOperationalProperties().getProperty(PROPERTY_NAME_WEBMASTER_EMAIL_RECIPIENT));
         this.setRecipient(jprr.getEmail());
-
-        this.setSubject(pl.getMessagesProps().getProperty("passwordResetMailSubject"));
+        
+        Locale locale=new HTTPUtil().detectBestLocale();
+        this.setSubject(PropertiesLoader.getMessageProperties(locale).getProperty("passwordResetMailSubject"));
 
         String message="\n"+
-        pl.getMessagesProps().getProperty("paswordResetMailText")+"\n"+
+        PropertiesLoader.getMessageProperties(locale).getProperty("paswordResetMailText")+"\n"+
         "\n"+
-        pl.getMessagesProps().getProperty("custNickname")+":"+
+        PropertiesLoader.getMessageProperties(locale).getProperty("custNickname")+":"+
         "\n"+
         "\n"+        
         nickname+
         "\n"+            
         "\n"+       
                 
-        pl.getMessagesProps().getProperty("custPassword")+":"+
+        PropertiesLoader.getMessageProperties(locale).getProperty("custPassword")+":"+
         "\n"+
         "\n"+        
         password+
         "\n"+            
         "\n"+
-        pl.getMessagesProps().getProperty("registrationMailPasswordHint")+"\n";        
+        PropertiesLoader.getMessageProperties(locale).getProperty("registrationMailPasswordHint")+"\n";        
         this.setMessage(message);
         
         

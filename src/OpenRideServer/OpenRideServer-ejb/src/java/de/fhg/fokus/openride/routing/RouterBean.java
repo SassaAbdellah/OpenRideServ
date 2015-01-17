@@ -28,17 +28,9 @@
 
 package de.fhg.fokus.openride.routing;
 
-import de.fhg.fokus.openride.routing.osm.HHRouter;
-import de.fhg.fokus.openride.routing.osm.OsmRouter;
-import java.sql.Connection;
-import java.sql.SQLException;
+import de.fhg.fokus.openride.routing.graphhopper.routing.GraphhopperRouter;
 import java.sql.Timestamp;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.ejb.Stateless;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 /**
  *
@@ -50,77 +42,22 @@ public class RouterBean implements RouterBeanLocal, Router {
     private Router router;
 
     public RouterBean(){
-        router = new HHRouter();
+       
+        // Use GrapHopperRouter to enable GraphHopperRouting 
+        this.router=new GraphhopperRouter();
     }
-
+                                                       
+    @Override
     public Route findRoute(Coordinate source, Coordinate target,
-            Timestamp startTime, boolean fastestPath, double threshold,
-            boolean includeWaypoints){
+            Timestamp startTime, boolean fastestPath, double threshold){
 
-        return router.findRoute(source, target, startTime, fastestPath, threshold, includeWaypoints);
-
-        /*
-        Route route = null;
-        Connection conn = null;
-        try {
-            conn = lookupConnection();
-            Router router = new OsmRouter(conn);
-            route = router.findRoute(source, target, startTime, fastestPath, threshold, includeWaypoints);
-            conn.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(RouterBean.class.getName()).log(Level.SEVERE, null, ex);
-        } catch(NamingException ex) {
-            Logger.getLogger(RouterBean.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if(conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(RouterBean.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return route;
-        */
-
+        return router.findRoute(source, target, startTime, fastestPath, threshold); 
     }
 
+    @Override
     public RoutePoint[] getEquiDistantRoutePoints(Coordinate[] coordinates,
             Timestamp startTime, boolean fastestPath, double threshold,
             double maxDistanceOfPoints){
         return router.getEquiDistantRoutePoints(coordinates, startTime, fastestPath, threshold, maxDistanceOfPoints);
-
-        /*
-        RoutePoint[] rp = null;
-        Connection conn = null;
-        try {
-            conn = lookupConnection();
-            Router router = new OsmRouter(conn);
-            rp = router.getEquiDistantRoutePoints(coordinates, startTime, fastestPath, threshold, maxDistanceOfPoints);
-            conn.close();
-        } catch (SQLException ex) {
-            Logger.getLogger(RouterBean.class.getName()).log(Level.SEVERE, null, ex);
-        } catch(NamingException ex) {
-            Logger.getLogger(RouterBean.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if(conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException ex) {
-                    Logger.getLogger(RouterBean.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-        return rp;
-         * */
-
     }
-
-    private Connection lookupConnection() throws NamingException, SQLException {
-         InitialContext ic = new InitialContext();
-         DataSource ds = (DataSource) ic.lookup("jdbc/routing_osm");
-         return ds.getConnection();
-    }
-
-
 }

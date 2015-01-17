@@ -29,13 +29,19 @@ package de.fhg.fokus.openride.rides.driver;
 
 import de.fhg.fokus.openride.customerprofile.CustomerEntity;
 import de.fhg.fokus.openride.helperclasses.converter.PointConverter;
+import de.fhg.fokus.openride.matching.MatchEntity;
+import de.fhg.fokus.openride.matching.MatchingStatistics;
+import de.fhg.fokus.openride.matching.RideNegotiationConstants;
 import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -116,6 +122,13 @@ public class DriverUndertakesRideEntity implements Serializable {
     private Integer rideOfferedseatsNo;
     @OneToMany(mappedBy = "rideId")
     private Collection<RiderUndertakesRideEntity> riderUndertakesRideEntityCollection;
+    @OneToMany(mappedBy = "rideId", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    private List<WaypointEntity> waypoints;
+    // fetch type eager, because of lesson learned. Better pay for EAGER loading then for
+    // repeatedly calling server for matchings from frontend!
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ride_id")
+    private List<MatchEntity> matchings;
     @JoinColumn(name = "cust_id", referencedColumnName = "cust_id")
     @ManyToOne
     private CustomerEntity custId;
@@ -126,6 +139,10 @@ public class DriverUndertakesRideEntity implements Serializable {
     private String startptAddressStreet;
     @Column(name = "endpt_addr")
     private String endptAddressStreet;
+    @Column(name = "last_matching_state")
+    private Integer lastMatchingState;
+    @Column(name = "is_countermanded")
+    private Boolean countermanded;
 
     public DriverUndertakesRideEntity() {
     }
@@ -300,8 +317,122 @@ public class DriverUndertakesRideEntity implements Serializable {
         return true;
     }
 
+    /**
+     * @return Waypoints for this entity. Maybe not sorted by routeIndex.
+     *         If You want sorted waypoints, call get sortedWaypoints instead!
+     */
+    public List<WaypointEntity> getWaypoints() {
+        return this.waypoints;
+    }
+    
+    
+    
+    
+
+    public void setWaypoints(List<WaypointEntity> arg) {
+
+        this.waypoints = arg;
+    }
+
+    /**
+     * Returns the Number of OpenMatches for this RideRequest
+     *
+     * @return Returns the Number of OpenMatches for this RideRequest
+     */
+    public int getNoMatches() {
+        return this.getMatchings().size();
+    }
+
+  
+   
+
+    public Integer getLastMatchingState() {
+        return this.lastMatchingState;
+    }
+
+    public void setLastMatchingState(Integer arg) {
+        this.lastMatchingState = arg;
+    }
+
+    /**
+     *
+     * @return MatchingStatitstics Object for this drive
+     */
+    public MatchingStatistics getMatchingStatistics() {
+    	
+        MatchingStatistics res = new MatchingStatistics();
+        res.statisticsFromList(this.getMatchings());
+        return res;
+    }
+
+    public Boolean getCountermanded() {
+        return this.countermanded;
+    }
+
+    public void setCountermanded(Boolean arg) {
+        this.countermanded = arg;
+    }
+
     @Override
     public String toString() {
-        return "de.fhg.fokus.openride.rides.driver.DriverUndertakesRideEntity[rideId=" + rideId + "]";
+        return this.getClass().getCanonicalName()
+                + "\n[rideId=" + getRideId() + "]"
+                + "\n[waypoints=" + getWaypoints() + "]";
     }
+
+
+
+    /**
+     *
+     * Determines wether route for a driverundertakesrideentity can be edited or
+     * not. I.e: wether or not waypoints can be added or removed.
+     *
+     * Waypoints can be added or removed as long as there are no confirmed
+     * requests or as long as driver does not have accepted a request;
+     */
+    public boolean getCanEditRoute() {
+
+        MatchingStatistics ms = this.getMatchingStatistics();
+
+        // if ms==null, then probably something is not initialized
+        if (ms == null) {
+            return false;
+        }
+
+        if (ms.getAcceptedBoth() >0 ) {
+            return false;
+        }
+        
+        if (ms.getAcceptedDriver()>0 ) {
+            return false;
+        }
+
+        return true;
+    }
+    
+    
+     /**
+     * True, if driver can countermand this ride
+     *
+     * @return true, if ride does not have matches of state confirmed both
+     */
+    public boolean getCanCountermandDriver() {
+        MatchingStatistics ms = this.getMatchingStatistics();
+       
+        if (ms.getAcceptedBoth()>0){
+            return false;
+        }
+        return true;
+    }
+
+	public List<MatchEntity> getMatchings() {
+		return matchings;
+	}
+
+	public void setMatchings(List<MatchEntity> matchings) {
+		this.matchings = matchings;
+	}
+    
+    
+    
 }

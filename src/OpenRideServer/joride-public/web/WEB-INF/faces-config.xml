@@ -1,200 +1,221 @@
 <?xml version="1.0"?>
-<faces-config xmlns="http://java.sun.com/xml/ns/javaee" 
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
       http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
-              version="2.0">
+	version="2.0">
 
 
 
 
-    <application>
-        
-        <!-- lists of supported locales -->
-        <locale-config>
-            <default-locale>en</default-locale>
-            <supported-locale>de</supported-locale>
-        </locale-config>
-        
-     
-        <!-- Messages Properties  ******************************* -->
-       
-        <resource-bundle>
-            <base-name>de.avci.joride.messages</base-name>
-            <var>msgs</var>
-        </resource-bundle>
-      
-        <!-- Navigation Properties ******************************* -->
-        <resource-bundle>
-            <base-name>de.avci.joride.navigation</base-name>
-            <var>nav</var>
-        </resource-bundle>
-        
-        <!-- Date/Time Properties ******************************* -->
-        <resource-bundle>
-            <base-name>de.avci.joride.datetime</base-name>
-            <var>datetime</var>
-        </resource-bundle>
-        
-        
-        
-        <!-- update Properties ******************************* -->
-        <resource-bundle>
-            <base-name>de.avci.joride.update</base-name>
-            <var>update</var>
-        </resource-bundle>
-        
-    </application>
+	<application>
+
+		<!-- lists of supported locales -->
+		<locale-config>
+			<default-locale>en</default-locale>
+			<supported-locale>de</supported-locale>
+			<supported-locale>en</supported-locale>
+		</locale-config>
+
+
+		<!-- Messages Properties ******************************* -->
+
+		<resource-bundle>
+			<base-name>de.avci.joride.messages</base-name>
+			<var>msgs</var>
+		</resource-bundle>
+
+		<!-- Navigation Properties ******************************* -->
+		<resource-bundle>
+			<base-name>de.avci.joride.navigation</base-name>
+			<var>nav</var>
+		</resource-bundle>
+
+		<!-- Date/Time Properties ******************************* -->
+		<resource-bundle>
+			<base-name>de.avci.joride.datetime</base-name>
+			<var>datetime</var>
+		</resource-bundle>
+
+
+
+		<!-- update Properties ******************************* -->
+		<resource-bundle>
+			<base-name>de.avci.joride.update</base-name>
+			<var>update</var>
+		</resource-bundle>
+
+	</application>
 
 
 
 
-        
-        
-    <!-- navigation cases  -->
-        
-        
-
-    <!-- Navigation Case                                  -->
-    <!-- enable new login (for example after loginFailed) -->
-
-    <!-- todo: change login and logout targets! -->
-
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome>login</from-outcome>
-            <to-view-id>/faces/public/login.xhtml</to-view-id>
-        </navigation-case>
-    </navigation-rule>
-
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome>logout</from-outcome>
-            <to-view-id>/faces/public/logout.xhtml</to-view-id>
-        </navigation-case>
-    </navigation-rule>
 
 
-    <!-- Basic Navigation Case  -->
-    <!-- go home                -->
-
-
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome>home</from-outcome>
-            <to-view-id>/faces/index.xhtml </to-view-id>
-        </navigation-case>
-    </navigation-rule>
+	<!-- navigation cases -->
 
 
 
-    <!-- *** Registration and account maintenance *** -->
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome> myAccount </from-outcome>
-            <to-view-id>/faces/account/index.xhtml </to-view-id>
-        </navigation-case>
-    </navigation-rule>
-    
-    <!-- *** Create a new account *** -->
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome> registration </from-outcome>
-            <to-view-id>/faces/account/registration.xhtml </to-view-id>
-        </navigation-case>
-    </navigation-rule>
-    
-    <!-- *** Create a new account *** -->
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome> resetPassword</from-outcome>
-            <to-view-id>/faces/account/resetPassword.xhtml </to-view-id>
-        </navigation-case>
-    </navigation-rule>
-   
-    
-   
-  
-    
-    <!-- contact page -->
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome>contact</from-outcome>
-            <to-view-id>/faces/public/contact/contact.xhtml</to-view-id>
-        </navigation-case>
-    </navigation-rule>
+	<!-- Navigation Case -->
+	<!-- enable new login (for example after loginFailed) -->
+
+	<!-- todo: change login and logout targets! -->
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>login</from-outcome>
+			<to-view-id>/faces/public/login.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>logout</from-outcome>
+			<to-view-id>/faces/public/logout.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
 
 
-    <!-- email contact form  -->
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome>contactForm</from-outcome>
-            <to-view-id>/faces/public/contact/contactForm.xhtml</to-view-id>
-        </navigation-case>
-    </navigation-rule>
+	<!-- Basic Navigation Case -->
+	<!-- go home -->
 
 
-    <!-- confirm sucessfull sending of mail from contact form or elsewhere -->
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome>SENT_OK</from-outcome>
-            <to-view-id>/faces/public/message/message-confirm.xhtml</to-view-id>
-        </navigation-case>
-    </navigation-rule>
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>home</from-outcome>
+			<to-view-id>/faces/index.xhtml </to-view-id>
+		</navigation-case>
+	</navigation-rule>
 
 
- 
-  
-   
-     
- 
-     
-    <!-- confirm sucessfull sending of mail from contact form or elsewhere -->
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome>registration_create</from-outcome>
-            <to-view-id>/faces/account/registration-confirm.xhtml</to-view-id>
-        </navigation-case>
-    </navigation-rule>
- 
- 
-    <!-- confirm sucessfull reset of password -->
-    <navigation-rule>
-        <navigation-case>
-            <from-outcome>password_request_ok</from-outcome>
-            <to-view-id>/faces/account/resetPasswordConfirm.xhtml</to-view-id>
-        </navigation-case>
-    </navigation-rule>
- 
-	
-    <!-- ***********************************************************  -->	
-    <!-- *****  Application Section ********************************  -->
-    <!-- ***********************************************************  -->		
-    <!-- *****  Beans Section **************************************  -->
 
-    <!-- ****** HTTPUser Bean ****** -->
-    <managed-bean> 
-        <managed-bean-name>HTTPUser</managed-bean-name>
-        <managed-bean-class>de.avci.joride.session.HTTPUser</managed-bean-class>
-        <managed-bean-scope>session</managed-bean-scope>
-    </managed-bean> 
-    
- <!-- ****** PasswordResetRequest Bean ****** -->
-    <managed-bean> 
-        <managed-bean-name>passwordResetRequest</managed-bean-name>
-        <managed-bean-class>de.avci.joride.jbeans.customerprofile.JPasswordResetRequest        </managed-bean-class>
-        <managed-bean-scope>session</managed-bean-scope>
-    </managed-bean> 
-    
+	<!-- *** Registration and account maintenance *** -->
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>myAccount</from-outcome>
+			<to-view-id>/faces/account/index.xhtml </to-view-id>
+		</navigation-case>
+	</navigation-rule>
 
-<!-- ******  Bean for registering new Customers ****** -->
-    <managed-bean> 
-        <managed-bean-name>registrationRequest</managed-bean-name>
-        <managed-bean-class>de.avci.joride.jbeans.customerprofile.JRegistrationRequest        </managed-bean-class>
-        <managed-bean-scope>session</managed-bean-scope>
-    </managed-bean> 
-    
+	<!-- *** Create a new account *** -->
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>registration</from-outcome>
+			<to-view-id>/faces/account/registration.xhtml </to-view-id>
+		</navigation-case>
+	</navigation-rule>
 
+	<!-- *** Create a new account *** -->
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>resetPassword</from-outcome>
+			<to-view-id>/faces/account/resetPassword.xhtml </to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+
+
+
+
+	<!-- contact page -->
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>contact</from-outcome>
+			<to-view-id>/faces/public/contact/contact.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+
+	<!-- email contact form -->
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>contactForm</from-outcome>
+			<to-view-id>/faces/public/contact/contactForm.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+
+	<!-- confirm sucessfull sending of mail from contact form or elsewhere -->
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>SENT_OK</from-outcome>
+			<to-view-id>/faces/public/message/message-confirm.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+
+
+
+
+
+
+
+	<!-- confirm sucessfull sending of mail from contact form or elsewhere -->
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>registration_create</from-outcome>
+			<to-view-id>/faces/account/registration-confirm.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+
+	<!-- confirm sucessfull reset of password -->
+	<navigation-rule>
+		<navigation-case>
+			<from-outcome>password_request_ok</from-outcome>
+			<to-view-id>/faces/account/resetPasswordConfirm.xhtml</to-view-id>
+		</navigation-case>
+	</navigation-rule>
+
+
+	<!-- ********************************************************************* -->
+	<!-- ***** Application Section ****************************************** -->
+	<!-- ********************************************************************* -->
+	<!-- ***** Beans Section ************************************************ -->
+	<!-- ********************************************************************* -->
+
+	<!-- ********************************************************************* -->
+	<!-- ***** Note that annotations are not understood in joride-public ***** -->
+	<!-- ***** As classes are not compiled but imported via joride.jar ***** -->
+	<!-- ***** Hence, we must import all beans by faces-config ***** -->
+	<!-- ********************************************************************** -->
+
+	<!-- ****** HTTPUser Bean ************************************************ -->
+	<managed-bean>
+		<managed-bean-name>HTTPUser</managed-bean-name>
+		<managed-bean-class>de.avci.joride.session.HTTPUser</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<!-- ****** PasswordResetRequest Bean ****** -->
+	<managed-bean>
+		<managed-bean-name>passwordResetRequest</managed-bean-name>
+		<managed-bean-class>de.avci.joride.jbeans.customerprofile.JPasswordResetRequest</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+
+	<!-- ****** Bean for registering new Customers ****** -->
+	<managed-bean>
+		<managed-bean-name>registrationRequest</managed-bean-name>
+		<managed-bean-class>de.avci.joride.jbeans.customerprofile.JRegistrationRequest</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+
+	<!-- ****** Bean for registering new Customers ****** -->
+	<managed-bean>
+		<managed-bean-name>registrationRequest</managed-bean-name>
+		<managed-bean-class>de.avci.joride.jbeans.customerprofile.JRegistrationRequest</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+
+	<!-- ****** Bean for sending us messages ****** -->
+	<managed-bean>
+		<managed-bean-name>contactFormMessage</managed-bean-name>
+		<managed-bean-class>de.avci.joride.backing.messages.ContactFormMessage</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
 
 
 

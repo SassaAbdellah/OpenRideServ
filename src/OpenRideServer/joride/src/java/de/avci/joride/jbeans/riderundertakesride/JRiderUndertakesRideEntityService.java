@@ -9,6 +9,7 @@ import de.avci.joride.jbeans.customerprofile.JCustomerEntityService;
 import de.fhg.fokus.openride.customerprofile.CustomerEntity;
 import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideControllerLocal;
 import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideEntity;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -133,7 +134,7 @@ public class JRiderUndertakesRideEntityService {
 
         // get all rides related to this customer
         List<RiderUndertakesRideEntity> res1 =
-                rurcl.getRidesForCustomer(
+                rurcl.getRidesForCustomer(                                                                                                                                            
                 ce,
                 tb.getStartDate(),
                 tb.getEndDate());
@@ -263,9 +264,18 @@ public class JRiderUndertakesRideEntityService {
         return res;
 
     } // getRealizedRidesForRiderInInterval
-
-    public List<JRiderUndertakesRideEntity> getUnratedRidesForRiderInInterval() {
-
+    
+    
+    
+    /**
+     * Get a list of all  rides for the actual Rider in that 
+     * have starttime latest after NOW
+     *
+     *
+     *
+     * @return
+     */
+    public List<JRiderUndertakesRideEntity> getFutureRidesForRider() {
 
         CustomerEntity ce = this.getCustomerEntity();
         RiderUndertakesRideControllerLocal rurcl = this.lookupRiderUndertakesRideControllerBeanLocal();
@@ -278,21 +288,89 @@ public class JRiderUndertakesRideEntityService {
             throw new Error("Cannot determine Rides, customerNickname is null");
         }
 
+        // get all rides related to this customer
+        List<RiderUndertakesRideEntity> res1 =
+                rurcl.getRidesForRiderAfterDate(ce, new Date());
+                
 
-        // retrieve startDateAndEndDate
+        // cast them to JRiderUntertakesRideEntity
+        List<JRiderUndertakesRideEntity> res = new LinkedList<JRiderUndertakesRideEntity>();
+
+        for (RiderUndertakesRideEntity rure : res1) {
+
+            JRiderUndertakesRideEntity jrure = new JRiderUndertakesRideEntity();
+            jrure.updateFromRiderUndertakesRideEntity(rure);
+
+            res.add(jrure);
+        }
+
+        return res;
+
+    } // getRidesForRiderAfter
+    
+    /** Create a filtered ride list of all future rides for this rider
+     * 
+     * @param jrfl typically empty object to be initiallized by this method
+     */
+    public void updateJFilteredRideList(JRideFilteredLists jrfl){
+        jrfl.setAllRides(this.getFutureRidesForRider());
+    }
+   
+    
+    /** List unrated rides for Rider with pickup time earlier then now (System.currentTimeMillis())
+     */
+    public List<JRiderUndertakesRideEntity> getUnratedRidesForRider() {
+  
+    	return this.getUnratedRidesForRiderInInterval(new Date(0), new Date(System.currentTimeMillis()));
+    }
+    
+    
+    /** List rides that are not rated by rider in interval given by 
+     *  rideSearchParamBean.
+     * 
+     * @return
+     */
+ 
+    public List<JRiderUndertakesRideEntity> getUnratedRidesForRiderInInterval() {
+
+    	// retrieve startDateAndEndDate
 
         String param = new RideSearchParamsBean().getBeanNameRidesearchparam();
         RideSearchParamsBean tb = new RideSearchParamsBean().retrieveCurrentTimeInterval(param);
 
         log.log(Level.FINE,"Updated Time Interval " + tb.getStartDateFormatted() + " -> " + tb.getEndDateFormatted());
+    
+        return getUnratedRidesForRiderInInterval(tb.getStartDate(), tb.getEndDate());
+    
+    }
 
+
+    /** List rides that are not rated by rider in interval given by 
+     *  startDate...endDate
+     * 
+     * @return
+     */
+   
+    private List<JRiderUndertakesRideEntity> getUnratedRidesForRiderInInterval(Date startDate, Date endDate) {
+    	
+        CustomerEntity ce = this.getCustomerEntity();
+        RiderUndertakesRideControllerLocal rurcl = this.lookupRiderUndertakesRideControllerBeanLocal();
+
+        if (ce == null) {
+            throw new Error("Cannot determine Rides, customerEntity is null");
+        }
+
+        if (ce.getCustNickname() == null) {
+            throw new Error("Cannot determine Rides, customerNickname is null");
+        }
 
         // get all rides related to this customer
         List<RiderUndertakesRideEntity> res1 =
                 rurcl.getUnratedRidesForRider(
                 ce,
-                tb.getStartDate(),
-                tb.getEndDate());
+                startDate,
+                endDate
+                );
 
         // cast them to JRiderUntertakesRideEntity
         List<JRiderUndertakesRideEntity> res = new LinkedList<JRiderUndertakesRideEntity>();
@@ -308,6 +386,70 @@ public class JRiderUndertakesRideEntityService {
         return res;
 
     }
+    
+    
+    
+    /** List unrated rides for Driver with pickup time earlier then now (System.currentTimeMillis())
+     */
+    public List<JRiderUndertakesRideEntity> getUnratedRidesForDriver() {
+  
+    	return this.getUnratedRidesForDriverInInterval(new Date(0), new Date(System.currentTimeMillis()));
+    }
+    
+    /** List rides that are not rated by driver in interval given by 
+     *  rideSearchParamBean.
+     * 
+     * @return
+     */
+    public List<JRiderUndertakesRideEntity> getUnratedRidesForDriverInInterval() {
+
+    	  String param = new RideSearchParamsBean().getBeanNameRidesearchparam();
+          RideSearchParamsBean tb = new RideSearchParamsBean().retrieveCurrentTimeInterval(param);
+
+          log.log(Level.FINE,"Updated Time Interval " + tb.getStartDateFormatted() + " -> " + tb.getEndDateFormatted());
+
+          return getUnratedRidesForDriverInInterval(tb.getStartDate(), tb.getEndDate());
+    }
+    
+    
+    /** List rides that are not rated by driver in interval given by 
+     *  startDate...endDate
+     * 
+     * @return
+     */
+    private List<JRiderUndertakesRideEntity> getUnratedRidesForDriverInInterval(Date startDate, Date endDate) {
+    	
+        CustomerEntity ce = this.getCustomerEntity();
+        RiderUndertakesRideControllerLocal rurcl = this.lookupRiderUndertakesRideControllerBeanLocal();
+
+        if (ce == null) {
+            throw new Error("Cannot determine Rides, customerEntity is null");
+        }
+
+        if (ce.getCustNickname() == null) {
+            throw new Error("Cannot determine Rides, customerNickname is null");
+        }
+
+        // get all rides related to thisdriver
+        List<RiderUndertakesRideEntity> res1 = rurcl.getUnratedRidesForDriver( ce,  startDate, endDate);
+
+        // cast them to JRiderUntertakesRideEntity
+        List<JRiderUndertakesRideEntity> res = new LinkedList<JRiderUndertakesRideEntity>();
+
+        for (RiderUndertakesRideEntity rure : res1) {
+
+            JRiderUndertakesRideEntity jrure = new JRiderUndertakesRideEntity();
+            jrure.updateFromRiderUndertakesRideEntity(rure);
+
+            res.add(jrure);
+        }
+
+        return res;
+
+    }
+
+    
+    
 
     /**
      * Savely get the Ride with given riderRouteId.
@@ -642,7 +784,7 @@ public class JRiderUndertakesRideEntityService {
             throw new Error("Attempt to invalidate request that is not owned by User");
         }
 
-        if (rurcl.isDeletable(riderrouteId)) {
+        if (rurcl.isRemovable(riderrouteId)) {
             log.info("Offer " + riderrouteId + " is deleteable, removing it");
             rurcl.removeRide(riderrouteId);
         } else {
