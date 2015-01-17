@@ -34,11 +34,12 @@
                 </p>
 
                 <p>
-                    <h:link outcome="login"> #{msgs.loginAgain} </h:link>
+                    <h:outputLink value="#{HTTPUser.getLoginURL()}">
+                        #{msgs.loginAgain}
+                    </h:outputLink>
                 </p>
 
             </ui:define>
-
 
 
 

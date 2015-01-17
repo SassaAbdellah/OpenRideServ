@@ -1,13 +1,11 @@
 package de.avci.joride.backing.messages;
 
-import de.avci.joride.utils.EmailCheck;
-import de.avci.joride.utils.Messagekeys;
-import de.avci.joride.utils.PropertiesLoader;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.mail.Message;
@@ -20,6 +18,12 @@ import javax.mail.internet.MimeMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+
+import de.avci.joride.utils.EmailCheck;
+import de.avci.joride.utils.HTTPUtil;
+import de.avci.joride.utils.Messagekeys;
+import de.avci.joride.utils.PropertiesLoader;
+import de.fhg.fokus.openride.customerprofile.CustomerUtils;
 
 /**
  * Generic class for sending mail messages.
@@ -158,12 +162,13 @@ public class MailMessage implements Serializable {
 
         //
         EmailCheck echeck = new EmailCheck();
-        Properties messages = new PropertiesLoader().getMessagesProps();
+        
+        Properties messages = PropertiesLoader.getMessageProperties(new HTTPUtil().detectBestLocale());
 
         //
         // Checking sender
         //
-        if (!(echeck.isEmailAdress(this.getSender()))) {
+        if (!(CustomerUtils.isValidEmailAdress(this.getSender()))) {
             errorstatus = messages.getProperty("mailEmailAdressInvalid") + " : \n" + sender;
             addErrorMessage();
             return null;
@@ -252,8 +257,7 @@ public class MailMessage implements Serializable {
      */
     private String loadMailServiceJNDI() {
 
-        PropertiesLoader pl = new PropertiesLoader();
-        return pl.getOperationalProps().getProperty(PROPERTY_NAME_MAIL_SERVICE_JNDI);
+    	 return PropertiesLoader.getOperationalProperties().getProperty(PROPERTY_NAME_MAIL_SERVICE_JNDI);
     }
     
     

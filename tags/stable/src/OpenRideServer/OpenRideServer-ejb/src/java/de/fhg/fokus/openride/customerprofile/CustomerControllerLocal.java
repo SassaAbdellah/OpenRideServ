@@ -25,6 +25,8 @@ package de.fhg.fokus.openride.customerprofile;
 
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
+
 import javax.ejb.Local;
 
 /**
@@ -34,9 +36,9 @@ import javax.ejb.Local;
 @Local
 public interface CustomerControllerLocal {
 
-    int addCustomer(String custNickname, String custPasswd, String custFirstname, String custLastname, Date custDateofbirth, char custGender, String custMobilephoneno, String custEmail, boolean custIssmoker, boolean custPostident, String custAddrStreet, String custAddrZipcode, String custAddrCity);
+    int addCustomer(String custNickname, String custPasswd, String custFirstname, String custLastname, Date custDateofbirth, char custGender, String custMobilephoneno, String custEmail, boolean custIssmoker, boolean custPostident, String custAddrStreet, String custAddrZipcode, String custAddrCity, String preferredLanguage);
 
-    public int addCustomer(String custNickname, String custPasswd, String custFirstname, String custLastname, char custGender, String custEmail, String custMobilephoneno);
+    public int addCustomer(String custNickname, String custPasswd, String custFirstname, String custLastname, char custGender, String custEmail, String custMobilephoneno, String preferredLanguage);
 
     void removeCustomer(int custId);
 
@@ -52,9 +54,9 @@ public interface CustomerControllerLocal {
 
     CustomerEntity getCustomerByEmail(String email);
 
-    void setPersonalData(int custId, Date custDateofbirth, String custEmail, String custMobilePhoneNo, String custFixedPhoneNo, String custAddrStreet, String custAddrZipcode, String custAddrCity, char custIssmoker, Date custLicenseDate);
+    void setPersonalData(int custId, Date custDateofbirth, String custEmail, boolean showEmailToPartners,  String custMobilePhoneNo, boolean showMobileToPartners, String custFixedPhoneNo, String custAddrStreet, String custAddrZipcode, String custAddrCity, char custIssmoker, Date custLicenseDate, String preferredLanguage);
 
-    public void setBasePersonalData(int custId, java.lang.String custFirstName, java.lang.String custLastName, char custGender);
+    public void setBasePersonalData(int custId, java.lang.String custFirstName, java.lang.String custLastName, char custGender, String preferredLanguage);
 
     public void setRiderPrefs(int custId, int custRiderprefAge, char custRiderprefGender, char custRiderprefIssmoker);
 
@@ -67,6 +69,50 @@ public interface CustomerControllerLocal {
     public boolean isNicknameAvailable(String custNickname);
 
     public CustomerEntity getCustomerByCredentials(String custNickname, String custPasswd);
-
+    
     public LinkedList<CustomerEntity> getAllCustomers();
+    
+    /** Set the timestamp of last write access of the customer 
+     *  with the given customerId to actual datetime.
+     *  Together with setLastCustomerCheck() 
+     *  this allows for determinating updates *fast*,
+     *  without having to do large (sub) queries.
+     * 
+     * @param customerId Id of the customer to query
+     * @param transactionRequired if true, setting the property will be enclosed in a transaction
+     */
+    public void setLastMatchingChange(int customerId, boolean transactionRequired);
+    
+      /** Set the timestamp of last write access of the customer 
+     *  with the given customerId to actual datetime.
+     *  Together with setLastMatchingChange
+     *  this allows for determinating updates *fast*,
+     *  without having to do large (sub) queries.
+     * 
+     * @param customerId Id of the customer to do the query
+     * @param transactionRequired  if true, setting the property will be enclosed in a transaction
+     */
+    public void setLastCustomerCheck(int customerId, boolean transactionRequired);
+    
+    /** Set customer's lastMatchingCheck property to current date/time,
+     *  so that the customer is not notified from  *old* messages any more.
+     *  
+     * @param customerId  id of the customer for which notifications are to be resetted
+     */
+    public void resetLastCustomerCheck(int customerId);
+    
+    /** return true, if there are updates since last customer check
+     * 
+     *
+     * @param customerId  id of the customer to be checked
+     * @return 
+     */
+    public boolean isMatchUpdated(int customerId);
+    
+    
+    /** 
+     * @return  Return the list of supported locales
+     */
+    public Locale[] getSupportedLocales();
+    
 }

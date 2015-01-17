@@ -11,6 +11,7 @@ import de.fhg.fokus.openride.customerprofile.CustomerEntity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.enterprise.context.SessionScoped;
@@ -71,7 +72,7 @@ public class JPublicCustomerProfile implements Serializable {
      * before deciding on whether or not to acceppt a ride offer.
      *
      */
-    Date custLicensedate;
+    private Date custLicensedate;
 
     public Date getCustLicensedate() {
         return custLicensedate;
@@ -81,11 +82,89 @@ public class JPublicCustomerProfile implements Serializable {
      * allowed during rides.
      *
      */
-    Boolean custIssmoker;
+    private Boolean custIssmoker;
 
     public Boolean getCustIssmoker() {
         return custIssmoker;
     }
+    
+    /** preferred language of this customer */
+    
+    private String preferredLanguage;
+    
+    public String getPreferredLanguage(){
+    	return this.preferredLanguage;
+    }
+    
+    /** Human readable version of preferred language to display
+     * 
+     */
+    public String getPreferredLanguageDisplayString(){
+    	
+    	try{
+    		Locale locale=new Locale(this.getPreferredLanguage());
+    		if(locale==null) return("");
+    		return locale.getDisplayName();
+    	} catch (Exception exc){
+    		return("");
+    	}
+    }
+    
+
+    /** Wether or not the user wants his phonenumber to be shown to others
+     */
+    private boolean showMobilePhoneno;
+    
+    public boolean getShowMobilePhoneno(){
+    	return this.showMobilePhoneno;
+    }
+    
+    public void setShowMobilePhoneno(boolean arg){
+    	this.showMobilePhoneno=arg;
+    }
+    
+    
+    /** Wether or not the user wants his email to be shown to others
+     */
+    private boolean showEmail;
+    
+    
+    public boolean getShowEmail(){
+    	return this.showEmail;
+    }
+    
+    public void setShowEmail(boolean arg){
+    	this.showEmail=arg;
+    }
+    
+    
+    
+    /** User's mobile phonenumber
+     */
+    private String mobilePhoneno;
+    
+    public String getMobilePhoneno(){
+    	return this.mobilePhoneno;
+    }
+    
+    public void setMobilePhoneno(String arg){
+    	this.mobilePhoneno=arg;
+    }
+    
+    
+    /** user's email
+     */
+    private String email;
+    
+    
+    public String getEmail(){
+    	return this.email;
+    }
+    
+    public void setEmail(String arg){
+    	this.email=arg;
+    }
+    
 
     /**
      * Fill with Data from givenCustomerId.
@@ -105,13 +184,19 @@ public class JPublicCustomerProfile implements Serializable {
         }
 
 
+        
         this.custId = ce.getCustId();
         this.custGender = ce.getCustGender();
         this.custLicensedate = ce.getCustLicensedate();
         this.custNickname = ce.getCustNickname();
-
         this.custIssmoker = ce.getCustIssmoker();
-
+        this.preferredLanguage=ce.getPreferredLanguage();
+        // set email only if user wants to display it
+        this.showEmail=ce.getShowEmailToPartners();
+        if(this.showEmail){ this.setEmail(ce.getCustEmail());}
+        // set public profile only if user wants us to
+        this.showMobilePhoneno=ce.getShowMobilePhoneToPartners();
+        if(this.showMobilePhoneno){this.setMobilePhoneno(ce.getCustMobilephoneno());}
     }
 
     /**

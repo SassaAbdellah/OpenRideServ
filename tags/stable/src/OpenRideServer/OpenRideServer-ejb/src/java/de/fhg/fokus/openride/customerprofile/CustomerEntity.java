@@ -1,31 +1,31 @@
 /*
-    OpenRide -- Car Sharing 2.0
-    Copyright (C) 2010  Fraunhofer Institute for Open Communication Systems (FOKUS)
+ OpenRide -- Car Sharing 2.0
+ Copyright (C) 2010  Fraunhofer Institute for Open Communication Systems (FOKUS)
 
-    Fraunhofer FOKUS
-    Kaiserin-Augusta-Allee 31
-    10589 Berlin
-    Tel: +49 30 3463-7000
-    info@fokus.fraunhofer.de
+ Fraunhofer FOKUS
+ Kaiserin-Augusta-Allee 31
+ 10589 Berlin
+ Tel: +49 30 3463-7000
+ info@fokus.fraunhofer.de
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License Version 3 as
-    published by the Free Software Foundation.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License Version 3 as
+ published by the Free Software Foundation.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Affero General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package de.fhg.fokus.openride.customerprofile;
 
 import de.fhg.fokus.openride.rides.driver.DriverUndertakesRideEntity;
 import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideEntity;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import javax.persistence.Basic;
@@ -58,7 +58,7 @@ import javax.persistence.TemporalType;
     @NamedQuery(name = "CustomerEntity.findByCustDriverprefGender", query = "SELECT c FROM CustomerEntity c WHERE c.custDriverprefGender = :custDriverprefGender"),
     @NamedQuery(name = "CustomerEntity.findByCustDateofbirth", query = "SELECT c FROM CustomerEntity c WHERE c.custDateofbirth = :custDateofbirth"),
     @NamedQuery(name = "CustomerEntity.findByCustDriverprefMusictaste", query = "SELECT c FROM CustomerEntity c WHERE c.custDriverprefMusictaste = :custDriverprefMusictaste"),
-  //  @NamedQuery(name = "CustomerEntity.findByCustMobilephoneno", query = "SELECT c FROM CustomerEntity c WHERE c.custMobilephoneno = :custMobilephoneno"),
+    //  @NamedQuery(name = "CustomerEntity.findByCustMobilephoneno", query = "SELECT c FROM CustomerEntity c WHERE c.custMobilephoneno = :custMobilephoneno"),
     @NamedQuery(name = "CustomerEntity.findByCustRiderprefAge", query = "SELECT c FROM CustomerEntity c WHERE c.custRiderprefAge = :custRiderprefAge"),
     @NamedQuery(name = "CustomerEntity.findByCustEmail", query = "SELECT c FROM CustomerEntity c WHERE c.custEmail = :custEmail"),
     @NamedQuery(name = "CustomerEntity.findByCustRiderprefGender", query = "SELECT c FROM CustomerEntity c WHERE c.custRiderprefGender = :custRiderprefGender"),
@@ -86,18 +86,14 @@ public class CustomerEntity implements Serializable {
     public static final char PREF_SMOKER_NOT_DESIRED = 'n';
     public static final char PREF_SMOKER_DONT_CARE = '-';
     public static final char PREF_SMOKER_DEFAULT = PREF_SMOKER_DONT_CARE;
-
     public static final char PREF_GENDER_GIRLS_ONLY = 'f';
     public static final char PREF_GENDER_DONT_CARE = '-';
     public static final char PREF_GENDER_DEFAULT = PREF_GENDER_DONT_CARE;
-
     public static final char GENDER_MALE = 'm';
     public static final char GENDER_FEMALE = 'f';
-
-
     private static final long serialVersionUID = 1L;
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Basic(optional = false)
     @Column(name = "cust_id")
     private Integer custId;
@@ -109,7 +105,6 @@ public class CustomerEntity implements Serializable {
     private String custNickname;
     @Column(name = "cust_firstname")
     private String custFirstname;
-
     @Column(name = "cust_dateofbirth")
     @Temporal(TemporalType.DATE)
     private Date custDateofbirth;
@@ -153,31 +148,46 @@ public class CustomerEntity implements Serializable {
     private int custSessionId;
     @Column(name = "cust_group")
     private String custGroup;
-
+    @Column(name = "last_customer_check")
+    private Timestamp custLastCheck;
+    @Column(name = "last_matching_change")
+    private Timestamp custLastMatchingChange;
     /* PREFERENCES */
-
     @Column(name = "cust_riderpref_smoker")
     private Character custRiderprefIssmoker;
     @Column(name = "cust_driverpref_smoker")
     private Character custDriverprefIssmoker;
-
     @Column(name = "cust_riderpref_gender")
     private Character custRiderprefGender;
     @Column(name = "cust_driverpref_gender")
     private Character custDriverprefGender;
-
     @Column(name = "cust_riderpref_musictaste")
     private String custRiderprefMusictaste;
     @Column(name = "cust_driverpref_musictaste")
     private String custDriverprefMusictaste;
-
     @Column(name = "cust_riderpref_age")
     private Integer custRiderprefAge;
     @Column(name = "cust_driverpref_age")
     private Integer custDriverprefAge;
+    @Column(name = "preferred_language")
+    private String preferredLanguage; // IETF Language tag f
+    // wether user wants his email to be exposed ('t'/'f')
+    @Column(name="show_email")        
+    private Boolean showEmailToPartners; 
+    // wether user wants his cellphone number to be exposed ('t'/'f')
+    @Column(name="show_mobile")
+    private Boolean showMobilePhoneToPartners; 
+    
+    
+    public String getPreferredLanguage() {
+		return preferredLanguage;
+	}
 
+	public void setPreferredLanguage(String preferredLanguage) {
+		this.preferredLanguage = preferredLanguage;
+	}
 
-    @OneToMany(mappedBy = "custId")
+	@OneToMany(mappedBy = "custId")
     private Collection<CarDetailsEntity> carDetailsEntityCollection;
     @OneToMany(mappedBy = "custId")
     private Collection<DriverUndertakesRideEntity> driverUndertakesRideEntityCollection;
@@ -211,7 +221,6 @@ public class CustomerEntity implements Serializable {
         this.custAddrStreet = custAddrStreet;
     }
 
-
     public int getCustSessionId() {
         return custSessionId;
     }
@@ -227,6 +236,7 @@ public class CustomerEntity implements Serializable {
     public void setIsLoggedIn(Boolean isLoggedIn) {
         this.isLoggedIn = isLoggedIn;
     }
+
     public Character getCustDriverprefIssmoker() {
         return custDriverprefIssmoker;
     }
@@ -491,6 +501,38 @@ public class CustomerEntity implements Serializable {
         this.custGroup = cust_group;
     }
 
+    public Timestamp getCustLastMatchingChange() {
+        return this.custLastMatchingChange;
+    }
+
+    public void setCustLastMatchingChange(Timestamp arg) {
+        this.custLastMatchingChange = arg;
+    }
+
+    /**
+     * Set the last matching state to current date.
+     */
+    public void updateCustLastMatchingChange() {
+        this.setCustLastMatchingChange(new Timestamp(System.currentTimeMillis()));
+    }
+
+    public Timestamp getCustLastCheck() {
+        return this.custLastCheck;
+    }
+
+    public void setCustLastCheck(Timestamp arg) {
+        this.custLastCheck = arg;
+    }
+
+    /**
+     * Set the last matching state to current date.
+     */
+    public void updateCustLastCheck() {
+        this.setCustLastCheck(new Timestamp(System.currentTimeMillis()));
+    }
+    
+    
+
     @Override
     public int hashCode() {
         int hash = 0;
@@ -511,9 +553,47 @@ public class CustomerEntity implements Serializable {
         return true;
     }
 
+    /**
+     * @return true, if lastMatchingChange is later then lastCheck
+     */
+    public boolean isMatchUpdated() {
+
+       
+        Timestamp lastMatchingChange=this.getCustLastMatchingChange();
+        if (lastMatchingChange==null){ return false;}
+        //
+        //
+        Timestamp lastCustCheck=this.getCustLastCheck();
+        // in view of previous code: there are matchingChanges,
+        // but user has never checked
+        if(lastCustCheck==null){ return true;}
+        // both values !=null, so we can savely compare
+        String lastCustCheckStr=lastCustCheck.toGMTString();
+        String lastMatchStr=lastMatchingChange.toGMTString();
+        
+        boolean res=lastCustCheck.getTime()<=lastMatchingChange.getTime();
+        return res;
+      
+    }
+
     @Override
     public String toString() {
         return "de.fhg.fokus.openride.customerprofile.CustomerEntity[custId=" + custId + "]";
     }
 
+	public Boolean getShowEmailToPartners() {
+		return showEmailToPartners;
+	}
+
+	public void setShowEmailToPartners(Boolean showEmailToPartners) {
+		this.showEmailToPartners = showEmailToPartners;
+	}
+
+	public Boolean getShowMobilePhoneToPartners() {
+		return showMobilePhoneToPartners;
+	}
+
+	public void setShowMobilePhoneToPartners(Boolean showMobilePhoneToPartners) {
+		this.showMobilePhoneToPartners = showMobilePhoneToPartners;
+	}
 }

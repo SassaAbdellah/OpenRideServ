@@ -5,9 +5,11 @@
 package de.avci.joride.jbeans.customerprofile;
 
 import de.avci.joride.backing.messages.PasswordResetMesssage;
+import de.avci.joride.utils.HTTPUtil;
 import de.avci.joride.utils.Messagekeys;
 import de.avci.joride.utils.PropertiesLoader;
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.Properties;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.application.FacesMessage;
@@ -88,8 +90,8 @@ public class JPasswordResetRequest implements Serializable {
         // 
         if (!(jces.emailExists(this.getEmail()))) {
 
-            PropertiesLoader pl = new PropertiesLoader();
-            this.setErrorStatus(pl.getMessagesProps().getProperty("resetPasswortNoSuchAccountError"));
+        	Locale locale=new HTTPUtil().detectBestLocale();
+            this.setErrorStatus(PropertiesLoader.getMessageProperties(locale).getProperty("resetPasswortNoSuchAccountError"));
             this.addErrorMessage();
 
             return null;

@@ -1,5 +1,5 @@
 /*
- OpenRide -- Car Sharing 2.0
+ OpenRide -- Car Sharing< 2.0
  Copyright (C) 2010  Fraunhofer Institute for Open Communication Systems (FOKUS)
 
  Fraunhofer FOKUS
@@ -22,6 +22,7 @@
  */
 package de.fhg.fokus.openride.rides.rider;
 
+import de.avci.openrideshare.messages.MessageControllerLocal;
 import de.fhg.fokus.openride.customerprofile.CustomerControllerLocal;
 import de.fhg.fokus.openride.customerprofile.CustomerEntity;
 import de.fhg.fokus.openride.helperclasses.ControllerBean;
@@ -46,6 +47,8 @@ import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -67,6 +70,9 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
     private DriverUndertakesRideControllerLocal driverUndertakesRideControllerBean;
     @EJB
     private CustomerControllerLocal customerControllerBean;
+    @EJB
+    private  MessageControllerLocal messageController;
+    
     @PersistenceContext
     private EntityManager em;
     /**
@@ -138,6 +144,7 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
      */
     public int addRiderToRide(int riderRouteId, int rideId) {
         startUserTransaction();
+
         RiderUndertakesRideEntity ride = getRideByRiderRouteId(riderRouteId);
         em.lock(ride, LockModeType.PESSIMISTIC_WRITE);
 
@@ -173,6 +180,7 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
             ride.setTimestampbooked(new Date());
             ride.setRideId(drive);
             em.merge(drive);
+            em.merge(ride);
             MatchEntity match = getMatch(rideId, riderRouteId);
             match.setRiderChange(new Date());
             em.merge(match);
@@ -256,14 +264,34 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
      * This method is called, when a new search or ride is persisted. It updates
      * the Matches table.
      */
-    public void callAlgorithm(int riderrouteId, boolean setRiderAccess) {
+    private void callMatchingAlgorithm(int riderrouteId, boolean setRiderAccess) {
+
+        startUserTransaction();
         // there are still free places
         List<MatchEntity> matches = routeMatchingBean.searchForDrivers(riderrouteId);
         matches = filter(matches);
+        if (matches == null) {
+            // catch the case where there is no result
+            // TODO: better, prevent null results beeing returned
+            matches = new ArrayList<MatchEntity>();
+        }
+
         for (MatchEntity m : matches) {
             // persist match, so it can be found later on!
             em.persist(m);
+            // norify rider and drivers of potential matches
+            CustomerEntity driver=m.getDriverUndertakesRideEntity().getCustId();
+            driver.updateCustLastMatchingChange();
+            em.persist(driver);
+            CustomerEntity rider=m.getRiderUndertakesRideEntity().getCustId();
+            rider.updateCustLastMatchingChange();
+            em.persist(rider);
+            // send notifications...
+            messageController.createMessagesOnNewMatch(m);
         }
+ 
+        em.flush();
+        commitUserTransaction();      
     }
 
     public void setReceivedRating(int riderRouteId, int rating, String ratingComment) {
@@ -294,58 +322,16 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
         }
     }
 
+    /**
+     * TODO: remove this
+     *
+     * @deprecated currently, this is void.
+     *
+     * @param rideId
+     */
     public void addPaymentReference(int rideId) {
         startUserTransaction();
         commitUserTransaction();
-    }
-
-    /**
-     * This method creates a new riderequest of a customer.
-     *
-     * @param custId
-     * @param starttime
-     * @param noPassengers
-     * @param startpt
-     * @param endpt
-     * @param price
-     * @return -1, if the Entity could not be persisted; the rideId to indentify
-     * the Ride later on.
-     */
-    public int addRideRequest(int cust_id, Date starttime_earliest, Date starttimeLatest, int noPassengers, Point startpt, Point endpt, double price, String comment) {
-        startUserTransaction();
-
-        CustomerEntity customer = customerControllerBean.getCustomer(cust_id);
-
-        //TODO: could get Problems if different users simultanously add a RideRequest;Transaction? perhaps locks to much?
-        RiderUndertakesRideEntity r = null;
-        logger.info("---------------------------addRideRequest, customer is :" + customer + "----------------------");
-//        List<AccountHistoryEntity> a = (List<AccountHistoryEntity>)em.createNamedQuery("AccountHistoryEntity.findByCustId").setParameter("custId", customer.getCustId()).getResultList();
-        if (customer != null) {
-            /*
-             * new change: primary key
-             */
-            //r = new RiderUndertakesRideEntity(index, starttime,noPassengers,startpt,endpt,price,a.get(0).getAccountHistoryEntityPK().getAccountTimestamp());
-
-            // FIXME: (pab) This index is only valid if a rideId with the same value exists!
-            //r = new RiderUndertakesRideEntity(index, starttimeLatest, startpt, endpt, price, noPassengers, starttime_earliest, customer);
-            r = new RiderUndertakesRideEntity(customer, starttime_earliest, starttimeLatest, noPassengers, startpt, endpt, price);
-            r.setCustId(customer);
-            r.setComment(comment);
-            logger.info("---------------------------addRideRequest 1: " + r.getCustId().getCustId());
-
-            em.persist(r);
-            logger.log(Level.INFO, "riderundertakesride added ");
-        } else {
-
-            logger.log(Level.WARNING, "No Customer with id: " + cust_id);
-        }
-        commitUserTransaction();
-        if (r == null) {
-            return -1;
-        } else {
-            callAlgorithm(r.getRiderrouteId(), false);
-            return r.getRiderrouteId();
-        }
     }
 
     /**
@@ -636,102 +622,6 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
      *
      * @param rider
      * @return ArrayList of IDs of the rides undertaken by a specific customer
-     * as a rider that have not yet been rated by both parties.
-     */
-    public List<RiderUndertakesRideEntity> getRidesWithoutRatingByRider(CustomerEntity rider) {
-        try {
-            List<RiderUndertakesRideEntity> entities = em.createNamedQuery("RiderUndertakesRideEntity.findRidesWithoutRatingByRider").setParameter("custId", rider).getResultList();
-            return entities;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     *
-     * @param rider
-     * @return ArrayList of IDs of the rides undertaken by a specific customer
-     * as a rider that have not yet been rated by this rider.
-     */
-    public List<RiderUndertakesRideEntity> getRidesWithoutGivenRatingByRider(CustomerEntity rider) {
-        try {
-            List<RiderUndertakesRideEntity> entities = em.createNamedQuery("RiderUndertakesRideEntity.findRidesWithoutGivenRatingByRider").setParameter("custId", rider).getResultList();
-            return entities;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     *
-     * @param rider
-     * @return ArrayList of IDs of the rides undertaken by a specific customer
-     * as a rider that have not yet been rated by the driver.
-     */
-    public List<RiderUndertakesRideEntity> getRidesWithoutReceivedRatingByRider(CustomerEntity rider) {
-        try {
-            List<RiderUndertakesRideEntity> entities = em.createNamedQuery("RiderUndertakesRideEntity.findRidesWithoutReceivedRatingByRider").setParameter("custId", rider).getResultList();
-            return entities;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     *
-     * @param driver
-     * @return ArrayList of IDs of the rides undertaken by a specific customer
-     * as a driver that have not yet been rated by all parties.
-     */
-    public List<RiderUndertakesRideEntity> getRidesWithoutRatingByDriver(CustomerEntity driver) {
-        try {
-            List<RiderUndertakesRideEntity> entities = em.createNamedQuery("RiderUndertakesRideEntity.findRidesWithoutRatingByDriver").setParameter("custId", driver).getResultList();
-            return entities;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     *
-     * @param driver
-     * @return ArrayList of IDs of the rides undertaken by a specific customer
-     * as a driver that have not yet been rated by this customer.
-     */
-    public List<RiderUndertakesRideEntity> getRidesWithoutGivenRatingByDriver(CustomerEntity driver) {
-        try {
-            List<RiderUndertakesRideEntity> entities = em.createNamedQuery("RiderUndertakesRideEntity.findRidesWithoutGivenRatingByDriver").setParameter("custId", driver).getResultList();
-            return entities;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     *
-     * @param driver
-     * @return ArrayList of IDs of the rides undertaken by a specific customer
-     * as a driver that have not yet been rated by (all of) the rider(s).
-     */
-    public List<RiderUndertakesRideEntity> getRidesWithoutReceivedRatingByDriver(CustomerEntity driver) {
-        try {
-            List<RiderUndertakesRideEntity> entities = em.createNamedQuery("RiderUndertakesRideEntity.findRidesWithoutReceivedRatingByDriver").setParameter("custId", driver).getResultList();
-            return entities;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     *
-     * @param rider
-     * @return ArrayList of IDs of the rides undertaken by a specific customer
      * as a rider that have been rated by the driver.
      */
     public List<RiderUndertakesRideEntity> getRatedRidesByRider(CustomerEntity rider) {
@@ -880,9 +770,7 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
     }
 
     @Override
-    public boolean isDeletable(int riderrouteId) {
-
-
+    public boolean isRemovable(int riderrouteId) {
 
         startUserTransaction();
         List<MatchEntity> states = (List<MatchEntity>) em.createNamedQuery("MatchEntity.findByRiderrouteId").setParameter("riderrouteId", riderrouteId).getResultList();
@@ -899,43 +787,89 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
         return deletable;
     }
 
+    @Override
     public boolean removeRide(int riderrouteId) {
-        System.out.println("remove ride");
+
+        if (isRemovable(riderrouteId)) {
+            log.info("removing removable ride : " + riderrouteId);
+            return this.removeRideCompletely(riderrouteId);
+        } else {
+            log.info("countermanding non removable ride : " + riderrouteId);
+            return this.removeRideCountermandOnly(riderrouteId);
+        }
+    }
+
+    /**
+     * Remove ride completely from database. This should be done only if ride
+     * does not contain confirmed matches.
+     *
+     *
+     *
+     *
+     * @param riderrouteId
+     * @return
+     */
+    private boolean removeRideCompletely(int riderrouteId) {
+
+        log.info("removeRideCompletely  riderrouteId : " + riderrouteId);
 
         startUserTransaction();
         List<MatchEntity> states = (List<MatchEntity>) em.createNamedQuery("MatchEntity.findByRiderrouteId").setParameter("riderrouteId", riderrouteId).getResultList();
-        boolean deletable = true;
 
-        if (deletable) {
-            // entity can be chang  ed
 
-            //TODO (03/09/10): Matches & Ride need to be removed in one transaction....!
+        for (Iterator<MatchEntity> it = states.iterator(); it.hasNext();) {
+            em.remove(it.next());
+        }
 
-            for (Iterator<MatchEntity> it = states.iterator(); it.hasNext();) {
-                em.remove(it.next());
-//                it.remove();
-            }
+        List<RiderUndertakesRideEntity> entity = em.createNamedQuery("RiderUndertakesRideEntity.findByRiderrouteId").setParameter("riderrouteId", riderrouteId).getResultList();
+        for (RiderUndertakesRideEntity ente : entity) {
+            em.remove(ente);
+        }
 
-            List<RiderUndertakesRideEntity> entity = em.createNamedQuery("RiderUndertakesRideEntity.findByRiderrouteId").setParameter("riderrouteId", riderrouteId).getResultList();
-            System.out.println("size entity: " + entity.size());
-            for (RiderUndertakesRideEntity ente : entity) {
-                em.remove(ente);
-            }
+        // TODO: remove rider from drive, not yet implemented
+        commitUserTransaction();
 
-            System.out.println("entity removed: " + riderrouteId);
-        } else {
-            // entities have to be adapted
-            for (Iterator<MatchEntity> it = states.iterator(); it.hasNext();) {
-                MatchEntity matchEntity = it.next();
-                // mark matches as countermanded by rider
-                matchEntity.setRiderState(MatchEntity.COUNTERMANDED);
+        log.info("entity removed: " + riderrouteId);
+
+        return true;
+    }
+
+    /**
+     *
+     * @param riderrouteId
+     * @return
+     */
+    private boolean removeRideCountermandOnly(int riderrouteId) {
+
+
+        log.info("remove (countermand only) ride request riderrouteId :" + riderrouteId);
+
+        startUserTransaction();
+        List<MatchEntity> states = (List<MatchEntity>) em.createNamedQuery("MatchEntity.findByRiderrouteId").setParameter("riderrouteId", riderrouteId).getResultList();
+
+
+        // entities have to be adapted
+        for (Iterator<MatchEntity> it = states.iterator(); it.hasNext();) {
+            MatchEntity matchEntity = it.next();
+            // mark matches as countermanded by rider if not already done
+            if (matchEntity.getRiderState() != MatchEntity.RIDER_COUNTERMANDED) {
+                matchEntity.setRiderState(MatchEntity.RIDER_COUNTERMANDED);
                 matchEntity.setRiderChange(new Date());
                 em.merge(matchEntity);
             }
         }
-        commitUserTransaction();
-        return deletable;
 
+
+        List<RiderUndertakesRideEntity> rides = em.createNamedQuery("RiderUndertakesRideEntity.findByRiderrouteId").setParameter("riderrouteId", riderrouteId).getResultList();
+
+        for (RiderUndertakesRideEntity ride : rides) {
+            ride.setCountermanded(Boolean.TRUE);
+            em.merge(ride);
+        }
+
+        commitUserTransaction();
+        log.info("removed (countermand only) ride request riderrouteId :" + riderrouteId);
+        return false;
     }
 
     public int updateRide(
@@ -966,14 +900,13 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
 
     @Override
     public int addRideRequest(int cust_id, Date starttime_earliest, Date starttimeLatest, int noPassengers, Point startpt, Point endpt, double price, String comment, String startptAddress, String endptAddress) {
-        startUserTransaction();
 
         CustomerEntity customer = customerControllerBean.getCustomer(cust_id);
-
         //TODO: could get Problems if different users simultanously add a RideRequest;Transaction? perhaps locks to much?
         RiderUndertakesRideEntity r = null;
-        logger.info("---------------------------addRideRequest, customer is :" + customer + "----------------------");
+        logger.info("addRideRequest, customer is :" + customer + "");
         if (customer != null) {
+            startUserTransaction();
             // FIXME: (pab) This index is only valid if a rideId with the same value exists!
             //r = new RiderUndertakesRideEntity(index, starttimeLatest, startpt, endpt, price, noPassengers, starttime_earliest, customer);
             r = new RiderUndertakesRideEntity(customer, starttime_earliest, starttimeLatest, noPassengers, startpt, endpt, price);
@@ -984,15 +917,18 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
             logger.info("---------------------------addRideRequest 1: " + r.getCustId().getCustId());
             em.persist(r);
             logger.log(Level.INFO, "riderundertakesride added ");
+            commitUserTransaction();
+            em.flush();
+
         } else {
 
             logger.log(Level.WARNING, "No Customer with id: " + cust_id);
         }
-        commitUserTransaction();
+
         if (r == null) {
             return -1;
         } else {
-            callAlgorithm(r.getRiderrouteId(), false);
+            callMatchingAlgorithm(r.getRiderrouteId(), false);
             return r.getRiderrouteId();
         }
     }
@@ -1018,8 +954,12 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
             for (Iterator<MatchEntity> it = states.iterator(); it.hasNext();) {
                 MatchEntity matchEntity = it.next();
                 // mark matches as countermanded by rider
-                matchEntity.setRiderState(MatchEntity.COUNTERMANDED);
+                matchEntity.setRiderState(MatchEntity.RIDER_COUNTERMANDED);
                 matchEntity.setRiderChange(new Date());
+                // Notify the driver:
+                CustomerEntity driver=matchEntity.getDriverUndertakesRideEntity().getCustId();
+                driver.updateCustLastMatchingChange();
+                em.merge(driver);
                 em.merge(matchEntity);
             }
 
@@ -1027,7 +967,8 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
             riderundertakesride.setRideId(null);
             em.persist(riderundertakesride);
 
-            System.out.println(numOfRiders + " die neue Size: " + driverUndertakesRideControllerBean.getRidersForDrive(rideid).size());
+            
+            logger.log(Level.INFO,numOfRiders + " die neue Size: " + driverUndertakesRideControllerBean.getRidersForDrive(rideid).size());
         } else {
             //TODO: may return something or throw exception!
             System.out.println("no drive was set!");
@@ -1163,10 +1104,18 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
                 int prevSize = newMatches.size();
                 int unrejectedCount = 0;
                 for (MatchEntity m : newMatches) {
-                    // Generally don't remove matches with states 0, 2, 3 (rejected, countermanded, no more available),
+                    // Generally don't remove matches with states 0, 2, 3, 4 (rejected, countermanded, no more available),
                     // or matches accepted by both parties,
                     // or matches accepted by the other party only
-                    if (!(m.getDriverState() == MatchEntity.ACCEPTED || m.getRiderState() == MatchEntity.REJECTED || m.getRiderState() == MatchEntity.COUNTERMANDED || m.getRiderState() == MatchEntity.NO_MORE_AVAILABLE || m.getDriverState() == MatchEntity.REJECTED || m.getDriverState() == MatchEntity.COUNTERMANDED || m.getDriverState() == MatchEntity.NO_MORE_AVAILABLE) && !(m.getRiderState() == MatchEntity.ACCEPTED && m.getDriverState() == MatchEntity.ACCEPTED)) {
+                    if (!(m.getDriverState() == MatchEntity.ACCEPTED
+                            || m.getRiderState() == MatchEntity.REJECTED
+                            || m.getRiderState() == MatchEntity.RIDER_COUNTERMANDED
+                            || m.getRiderState() == MatchEntity.DRIVER_COUNTERMANDED
+                            || m.getRiderState() == MatchEntity.NO_MORE_AVAILABLE
+                            || m.getDriverState() == MatchEntity.REJECTED
+                            || m.getDriverState() == MatchEntity.RIDER_COUNTERMANDED
+                            || m.getDriverState() == MatchEntity.DRIVER_COUNTERMANDED
+                            || m.getDriverState() == MatchEntity.NO_MORE_AVAILABLE) && !(m.getRiderState() == MatchEntity.ACCEPTED && m.getDriverState() == MatchEntity.ACCEPTED)) {
                         if (unrejectedCount < matchCountLimit) {
                             // Keep this match in list
                             unrejectedCount++;
@@ -1281,8 +1230,12 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
     public void setMatchCountermand(Integer rideId, Integer riderrouteId) {
         List<MatchEntity> match = em.createNamedQuery("MatchEntity.findByRideIdRiderrouteId").setParameter("rideId", rideId).setParameter("riderrouteId", riderrouteId).getResultList();
         if (match.size() > 0) {
-            match.get(0).setRiderState(MatchEntity.COUNTERMANDED);
+            match.get(0).setRiderState(MatchEntity.RIDER_COUNTERMANDED);
             match.get(0).setRiderChange(new Date());
+            CustomerEntity driver=match.get(0).getDriverUndertakesRideEntity().getCustId();
+            driver.updateCustLastMatchingChange();
+            em.persist(match.get(0));
+            em.persist(driver);
         }
     }
 
@@ -1295,6 +1248,7 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
     }
 
     @Override
+    // TODO: obsolete as remove does is better
     public boolean invalidateRide(Integer riderrouteId) {
 
         startUserTransaction();
@@ -1322,8 +1276,13 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
         LinkedList<MatchEntity> matchList = routeMatchingBean.searchForDrivers(riderrouteId);
         Date now = new Date(System.currentTimeMillis());
         for (MatchEntity match : matchList) {
-            match.setRiderState(MatchEntity.COUNTERMANDED);
+            match.setRiderState(MatchEntity.RIDER_COUNTERMANDED);
             match.setRiderChange(now);
+            // notify riders
+            CustomerEntity rider=match.getRiderUndertakesRideEntity().getCustId();
+            rider.updateCustLastMatchingChange();
+            
+            em.merge(rider); 
             em.merge(match);
         }
 
@@ -1352,6 +1311,15 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
         return res;
     }
 
+    @Override
+    public List<RiderUndertakesRideEntity> getUnratedRidesForDriver(CustomerEntity ce, Date startDate, Date endDate) {
+
+        List<RiderUndertakesRideEntity> res = em.createNamedQuery("RiderUndertakesRideEntity.findByDriversUnratedRidesBetween").setParameter("custId", ce).setParameter("startDate", startDate).setParameter("endDate", endDate).getResultList();
+        return res;
+    }
+
+    
+    
     @Override
     public List<RiderUndertakesRideEntity> getRidesForDriver(CustomerEntity ce, Date startDate, Date endDate) {
 
@@ -1430,4 +1398,65 @@ public class RiderUndertakesRideControllerBean extends ControllerBean implements
         return this.getCountOfRatingsForDriver(customer)
                 + this.getCountOfRatingsForRider(customer);
     }
+
+    @Override
+    public List<RiderUndertakesRideEntity> getRidesForRiderAfterDate(CustomerEntity ce, Date startDate) {
+
+   
+    	Query query = em.createNamedQuery("RiderUndertakesRideEntity.findRidesAfterDateforCustId");
+        List<RiderUndertakesRideEntity> res = query.setParameter("custId", ce).setParameter("startDate", startDate).getResultList();
+        this.refreshEntityList(res);
+        return res;
+    }
+
+    /**
+     * Fetch Entity with given rideId and riderrouteId from db
+     *
+     * @param rideId rideId of associated riderundertakesrideEntity
+     * @param riderrouteId riderrouteId of associated driverundertakesrideEntity
+     * @return
+     */
+    private MatchEntity fetchMatchEntity(Integer rideId, Integer riderrouteId) {
+
+        MatchEntity me = (MatchEntity) em.createNamedQuery("MatchEntity.findByRiderIdAndRiderrouteId").setParameter("rideId", rideId).setParameter("riderrouteId", riderrouteId).getSingleResult();
+
+        return me;
+    }
+
+    @Override
+    public void countermandDriver(Integer rideId, Integer riderrouteId) {
+
+        startUserTransaction();
+        MatchEntity me = this.fetchMatchEntity(rideId, riderrouteId);
+        me.setDriverState(MatchEntity.DRIVER_COUNTERMANDED);
+        
+        // update rider's notification
+        CustomerEntity rider = me.getRiderUndertakesRideEntity().getCustId();
+        rider.updateCustLastMatchingChange();
+        em.merge(rider);
+        //
+        em.merge(me);
+        messageController.createMessageOnCountermand(me);
+        em.flush();
+        commitUserTransaction();
+    }
+    
+
+    @Override
+    public void countermandRider(Integer rideId, Integer riderrouteId) {
+
+        startUserTransaction();
+        MatchEntity me = this.fetchMatchEntity(rideId, riderrouteId);
+        me.setRiderState(MatchEntity.RIDER_COUNTERMANDED);
+
+        CustomerEntity customer = me.getRiderUndertakesRideEntity().getCustId();
+        customer.updateCustLastMatchingChange();
+        em.merge(customer);
+        em.merge(me);
+        messageController.createMessageOnCountermand(me);
+        em.flush();
+        commitUserTransaction();
+    }
+   
+    
 }

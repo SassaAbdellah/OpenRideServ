@@ -141,6 +141,8 @@ public class RatingBean extends ControllerBean implements RatingLocal {
      *
      * @param cust_id
      * @return List of rides that the customer has undertaken as rider.
+     * 
+     * TODO: remove transaction handling, this is readonly
      */
  
     public List<Rating> getRatingsAsRider(int cust_id) {
@@ -157,16 +159,23 @@ public class RatingBean extends ControllerBean implements RatingLocal {
         return ratings;
     }
 
+    /**
+    * TODO: remove transaction handling, this is readonly
+    */
   
     public List<OpenRatingInfo> getOpenRatingsAsDriver(int cust_id) {
         startUserTransaction();
-        CustomerEntity e = customerControllerBean.getCustomer(cust_id);
-        List<RiderUndertakesRideEntity> rides = riderUndertakesRideControllerBean.getRidesWithoutGivenRatingByDriver(e);
+        CustomerEntity ce = customerControllerBean.getCustomer(cust_id);
+        // get Unrated rides between beginning of time and now!
+        Date startDate=new Date(0);
+        Date endDate=new Date(System.currentTimeMillis());
+        
+        List<RiderUndertakesRideEntity> rides = riderUndertakesRideControllerBean.getUnratedRidesForDriver(ce, startDate, endDate);
         ArrayList<OpenRatingInfo> ratings = new ArrayList<OpenRatingInfo>();
         OpenRatingInfo rating;
         for (RiderUndertakesRideEntity entity : rides) {
             // TODO: (pab) What shall this Timestamp be?
-            rating = new OpenRatingInfo(entity.getRiderrouteId(), cust_id, e.getCustNickname(), new Date());
+            rating = new OpenRatingInfo(entity.getRiderrouteId(), cust_id, ce.getCustNickname(), new Date());
             ratings.add(rating);
         }
         commitUserTransaction();
@@ -176,13 +185,17 @@ public class RatingBean extends ControllerBean implements RatingLocal {
    
     public List<OpenRatingInfo> getOpenRatingsAsRider(int cust_id) {
         startUserTransaction();
-        CustomerEntity e = customerControllerBean.getCustomer(cust_id);
-        List<RiderUndertakesRideEntity> rides = riderUndertakesRideControllerBean.getRidesWithoutGivenRatingByRider(e);
+        CustomerEntity ce = customerControllerBean.getCustomer(cust_id);
+        
+        // get Unrated rides between beginning of time and now!
+        Date startDate=new Date(0);
+        Date endDate=new Date(System.currentTimeMillis());
+        List<RiderUndertakesRideEntity> rides = riderUndertakesRideControllerBean.getUnratedRidesForDriver(ce, startDate, endDate);
         ArrayList<OpenRatingInfo> ratings = new ArrayList<OpenRatingInfo>();
         OpenRatingInfo rating;
         for (RiderUndertakesRideEntity entity : rides) {
             // TODO: (pab) What shall this Timestamp be?
-            rating = new OpenRatingInfo(entity.getRiderrouteId(), cust_id, e.getCustNickname(), new Date());
+            rating = new OpenRatingInfo(entity.getRiderrouteId(), cust_id, ce.getCustNickname(), new Date());
             ratings.add(rating);
         }
         commitUserTransaction();

@@ -35,7 +35,7 @@ import javax.ejb.Local;
  */
 @Local
 public interface RouteMatchingBeanLocal {
-
+	
      /**
      * Computes a set of Matches for the given drive offer.
      * @param driveId Identifier for a driver's offer.
@@ -70,6 +70,24 @@ public interface RouteMatchingBeanLocal {
      * @return shared distance in meters.
      */
     public double computeAdaptedRoute(int rideId, int riderrouteId, LinkedList<DriveRoutepointEntity> decomposedRouteBuff, LinkedList<RoutePointEntity> routeBuff);
+
+    
+    /** Get matching statistics for RiderUndertakesRideEntity given by rideId
+     * 
+     * @param rideId
+     * @return 
+     */
+    public MatchingStatistics getStatisticsForRide(int rideId);
+
+ 
+    /** Get matching statistics for DriverUndertakesRideEntity given by driveId
+     * 
+     * @param rideId
+     * @return 
+     */
+    public MatchingStatistics getStatisticsForDrive(int rideId);
+
+
 
 }
 

@@ -28,6 +28,10 @@
 package de.fhg.fokus.openride.helperclasses;
 
 import de.fhg.fokus.openride.customerprofile.CustomerControllerBean;
+import de.fhg.fokus.openride.customerprofile.CustomerEntity;
+import de.fhg.fokus.openride.rides.driver.DriverUndertakesRideEntity;
+
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.Context;
@@ -150,4 +154,32 @@ public abstract class ControllerBean {
 
         }
     }
+    
+    
+    
+    
+    /** Refresh all Entities in the list from Database (call em.refresh on Elements).
+     *  For example, calling refresh on rides is badly needed to ensure that all
+     *  actual matches are contained in the rideEntity.
+     * 
+     */
+    protected void refreshEntityList(List list){
+    	
+   	 	for(Object o:list){
+   	 		refreshEntity(o);
+   	 	}
+    }
+    
+    /** Refresh all Rides  from Database (call em.refresh on ride).
+     *  This is badly needed to ensure, that all actual matches are contained in the ride.
+     * 
+     */
+    protected void refreshEntity(Object o){
+  	 		em.merge(o);
+   	 		em.refresh(o);
+    }
+
+	
+ 
+    
 }

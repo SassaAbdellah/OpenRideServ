@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<!-- ***************************************************** -->
+<!--    Display a list of Matchings for given ride         -->
+<!-- ***************************************************** -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+    <body>
+
+
+        <!-- ***** Displays matching's data for rider                    **** -->
+        <!-- ***** i.e driver's public data,                             **** -->
+        <!-- ***** control to accept upon hitch from rider's perspective **** -->
+
+        <ui:composition template="/templates/simpleLayout.xhtml">
+
+            <!-- highlight "preferences" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexRider}" />
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+            <ui:define name="content">
+                <h1> #{msgs.rideCountermand} </h1>
+
+                #{match.smartUpdate()} 
+
+                #{webflow.smartUpdate()}
+
+                <p>
+                    <h:form rendered="#{match.notCountermanded}">
+
+                        <table>
+
+                            <tr>
+                                <td class="formInput">
+                                    <p>
+                                        #{msgs.rideClickHereToCountermand}
+                                    </p>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td class="formLabel">
+                                    #{msgs.rideSetCountermandMessage}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="formInput">
+                                    <h:inputTextarea value="#{match.riderMessage}">
+                                    </h:inputTextarea>
+                                </td>
+                            </tr>
+                        </table>
+
+
+                        <p:commandButton action="rider.rideDisplay" value="#{msgs.rideCountermand}" actionListener="#{match.doCountermand(evt)}" > 
+
+                            <f:param name="#{match.paramRiderrouteId}"  value="#{match.ride.riderrouteId}"  />
+                            <f:param name="#{match.paramRideID}"        value="#{match.ride.rideId.rideId}" />
+                            <f:param name="#{crud.paramNameCrudId}"     value="#{match.ride.riderrouteId}"  />
+
+
+                        </p:commandButton>
+                    </h:form>
+                </p>
+
+                <!-- webflow stanza -->
+                    #{webflow.smartUpdate()}
+                    <h:form>
+                        <table>
+                            <tr>
+                                <td>
+                                    <p:commandButton id="backlink" icon="ui-icon-triangle-1-w" action="#{webflow.getBack()}" ajax="false" >
+                                        <f:param   name="#{crud.paramNameCrudId}"   value="#{match.ride.riderrouteId}"/>
+                                    </p:commandButton>
+                                    <p:tooltip for="backlink" value="#{msgs.back}"  />
+                                </td>
+                                <td>
+                                    <h:commandLink value="#{msgs.back}" action="#{webflow.getBack()}">
+                                        <f:param   name="#{crud.paramNameCrudId}"   value="#{match.ride.riderrouteId}"/>
+                                    </h:commandLink>
+                                </td>
+                            </tr>
+                        </table>
+                    </h:form>
+        
+            </ui:define>            
+
+
+
+
+        </ui:composition>
+
+
+
+
+
+    </body>
+</html>

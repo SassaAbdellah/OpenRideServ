@@ -2,155 +2,165 @@
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
-      xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:p="http://primefaces.org/ui"
-      >
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
 
 
-    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    </h:head>
-
-
-
-    <body>
+<h:head>
+	<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</h:head>
 
 
 
-        <ui:composition template="/templates/navbar1Layout.xhtml">
+<body>
 
 
-            <!-- highlight "preferences" tab -->
-            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexPreferences}" />
+
+	<ui:composition template="/templates/navbar1Layout.xhtml">
 
 
-            <ui:define name="windowTitle">
+		<!-- highlight "preferences" tab -->
+		<ui:param name="jrtabindex" value="#{jrtab.jorideTabindexPreferences}" />
+
+
+		<ui:define name="windowTitle">
                 #{msgs.title}
             </ui:define>
 
 
-            <ui:define name="content">
-
-
-            
+		<ui:define name="content">
 
 
 
-                <!-- the profile must be filled with data before anything -->   
-                <!-- useful can be done with it                           -->
+
+
+
+			<!-- the profile must be filled with data before anything -->
+			<!-- useful can be done with it                           -->
                 #{jprofile.updateFromDB()}
 
 
-                <p:panel header="#{msgs.nav1_pref_driverPreferences_label}"  >
-                    <h:form>
+                <p:panel
+				header="#{msgs.nav1_pref_driverPreferences_label}">
+				<h:form>
 
-                        <!-- int custDriverprefAge -->
-                        <!-- removed from driverprefs, because not relevant for matching -->
-                        <!-- char custDriverprefGender -->
-                        <!-- currently removed. FIXME: check relevance for matching algoritm -->
-                        <!-- char custDriverprefSmoker --> 
-                        <div class="formLabel"> #{msgs.custDriverprefSmoker} </div>
-                        <div class="formInput"> 
-                            <h:selectOneMenu value="#{jprofile.custDriverprefSmoker}">
-                                <f:selectItem itemValue="#{jprofile.smokerChar}" itemLabel="#{msgs.custSmokeInCar}" />
-                                <f:selectItem itemValue="#{jprofile.nonsmokerChar}" itemLabel="#{msgs.custNonSmokeInCar}" />
-                            </h:selectOneMenu>
-                        </div>
-                        <h:commandButton action="#{jprofile.updateDriverPreferencesToDB}"  value="#{msgs.formSubmit}" />
-                    </h:form>
-                </p:panel>
+					<!-- int custDriverprefAge -->
+					<!-- removed from driverprefs, because not relevant for matching -->
+					<!-- char custDriverprefGender -->
+					<!-- currently removed. FIXME: check relevance for matching algoritm -->
+					<!-- char custDriverprefSmoker -->
+					<div class="formLabel">#{msgs.custDriverprefSmoker}</div>
+						<h:selectOneRadio value="#{jprofile.custDriverprefSmoker}">
+							<div class="formLabel">
+								<f:selectItem itemValue="#{jprofile.smokerChar}"
+									itemLabel="#{msgs.custSmokeInCar}" />
+							</div>
+							<div class="formLabel">
+								<f:selectItem itemValue="#{jprofile.nonsmokerChar}"
+									itemLabel="#{msgs.custNonSmokeInCar}" />
+							</div>
+						</h:selectOneRadio>
+					<p:commandButton action="#{jprofile.updateDriverPreferencesToDB}"
+						value="#{msgs.formApply}" ajax="false" />
+				</h:form>
+			</p:panel>
 
 
-                <!-- Car Details below -->
+			<!-- Car Details below -->
 
-                <p:panel header="#{msgs.cardetails}" >
-                    <h:form>
-                        <!-- dynamic accordion displaying list of cars for this driver -->
-                        <p:accordionPanel
-                            value="#{jcardetails.carDetailsList}" 
-                            var="car" 
-                            activeIndex="-1"
-                            >
+			<p:panel header="#{msgs.cardetails}">
+				<h:form>
+					<!-- dynamic accordion displaying list of cars for this driver -->
+					<p:accordionPanel value="#{jcardetails.carDetailsList}" var="car"
+						activeIndex="-1">
 
-                            <p:tab  title=" #{car.cardetBrand}   #{car.cardetPlateno}">     
+						<p:tab title=" #{car.cardetBrand}   #{car.cardetPlateno}">
 
-                                <table> <!-- nested table for car details item -->
+							<table>
+								<!-- nested table for car details item -->
 
-                                    <tr> 
-                                        <td> <span class="formLabel"> #{msgs.cardetBrandLabel} </span> </td>
-                                        <td> <span class="formLabel">:</span></td>
-                                        <td> #{car.cardetBrand} </td>
-                                    </tr>
+								<tr>
+									<td><span class="formLabel">
+											#{msgs.cardetBrandLabel} </span></td>
+									<td><span class="formLabel">:</span></td>
+									<td>#{car.cardetBrand}</td>
+								</tr>
 
-                                    <tr> 
-                                        <td> <span class="formLabel">#{msgs.cardetColorLabel}</span> </td>
-                                        <td> <span class="formLabel">:</span></td>
-                                        <td> #{car.cardetColour} </td>
-                                    </tr>
+								<tr>
+									<td><span class="formLabel">#{msgs.cardetColorLabel}</span>
+									</td>
+									<td><span class="formLabel">:</span></td>
+									<td>#{car.cardetColour}</td>
+								</tr>
 
-                                    <tr> 
-                                        <td> <span class="formLabel"> #{msgs.cardetBuildyearLabel}</span> </td>
-                                        <td> <span class="formLabel"> : </span></td>
-                                        <td> #{car.cardetBuildyear} </td>
-                                    </tr>
+								<tr>
+									<td><span class="formLabel">
+											#{msgs.cardetBuildyearLabel}</span></td>
+									<td><span class="formLabel"> : </span></td>
+									<td>#{car.cardetBuildyear}</td>
+								</tr>
 
-                                    <tr> 
-                                        <td> <span class="formLabel"> #{msgs.cardetLicenseplateLabel} </span> </td>
-                                        <td> <span class="formLabel"> :</span></td>
-                                        <td> #{car.cardetPlateno} </td>
-                                    </tr>
+								<tr>
+									<td><span class="formLabel">
+											#{msgs.cardetLicenseplateLabel} </span></td>
+									<td><span class="formLabel"> :</span></td>
+									<td>#{car.cardetPlateno}</td>
+								</tr>
 
-                                    <tr>
-                                        <td>
-                                            <h:commandLink  action="preferences.carDetailsEdit"   >
-                                                <!-- comandlink for show details --> 
-                                                <f:param  name="#{crud.paramNameCrudAction}" value="#{crud.paramValueCrudUpdate}"/>
-                                                <f:param  name="#{crud.paramNameCrudId}" value="#{car.cardetId}"/>
+								<tr>
+									<td><h:commandLink action="preferences.carDetailsEdit">
+											<!-- comandlink for show details -->
+											<f:param name="#{crud.paramNameCrudAction}"
+												value="#{crud.paramValueCrudUpdate}" />
+											<f:param name="#{crud.paramNameCrudId}"
+												value="#{car.cardetId}" />
                                                 #{msgs.formEdit}
-                                            </h:commandLink>
-                                        </td>
-                                        <td>
-                                            &nbsp; 
-                                        </td>
-                                        <td>
-                                            <!-- comandlink for delete action --> 
-                                            <h:commandLink actionListener="#{jcardetails.doCrudAction}" >
-                                                <f:param  name="#{crud.paramNameCrudAction}" value="#{crud.paramValueCrudDelete}"/>
-                                                <f:param  name="#{crud.paramNameCrudId}" value="#{car.cardetId}"/>
+                                            </h:commandLink></td>
+									<td>&nbsp;</td>
+									<td>
+										<!-- comandlink for delete action --> <h:commandLink
+											actionListener="#{jcardetails.doCrudAction}">
+											<f:param name="#{crud.paramNameCrudAction}"
+												value="#{crud.paramValueCrudDelete}" />
+											<f:param name="#{crud.paramNameCrudId}"
+												value="#{car.cardetId}" />
                                                 #{msgs.formDelete}
                                             </h:commandLink>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </p:tab>
-                        </p:accordionPanel>
-                    </h:form>   
+									</td>
+								</tr>
+							</table>
+						</p:tab>
+					</p:accordionPanel>
+				</h:form>
 
-                    <p>
-                        <h:form>
-                            <h:commandLink value="#{msgs.cardetAddCar}" action="preferences.carDetailsCreate" />
-                        </h:form>
-                    </p>
-
-
-                </p:panel>
+				<p>
+					<h:form>
+						<h:commandLink value="#{msgs.cardetAddCar}"
+							action="preferences.carDetailsCreate" />
+					</h:form>
+				</p>
 
 
-
-            </ui:define> <!-- content section -->
+			</p:panel>
 
 
 
-
-
-
-        </ui:composition>
+		</ui:define>
+		<!-- content section -->
 
 
 
 
 
-    </body>
+
+	</ui:composition>
+
+
+
+
+
+</body>
 </html>

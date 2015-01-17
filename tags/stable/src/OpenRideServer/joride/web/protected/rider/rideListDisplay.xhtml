@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+
+<h:head>
+	<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</h:head>
+
+
+
+<body>
+
+	<ui:composition template="/templates/simpleLayout.xhtml">
+
+		<!-- highlight "preferences" tab -->
+		<ui:param name="jrtabindex" value="#{jrtab.jorideTabindexRider}" />
+
+
+
+		<ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+		<ui:define name="content">
+			<!-- page to display lists of ride  -->
+			<!-- filteredRideLists.displayMode property governs what will be displayed -->
+
+                #{filteredRideLists.updateDisplayMode()} 
+
+                <p>
+				<h:panelGroup id="ridelist">
+					<p>
+						<p:panel header="#{filteredRideLists.headerForDisplayMode}">
+							<!-- primefaces dynamic accordion COOL!  -->
+							<p:accordionPanel activeIndex="-1"
+								value="#{filteredRideLists.listForDisplayMode}" var="ride">
+								<p:tab
+									title=" #{ride.updatedShortcut} #{ride.startDateFormatted} #{ride.endptAddressShort} ">
+
+
+									<div class="formLabel">#{msgs.rideRequest}
+										#{ride.riderrouteId}</div>
+
+									<!-- show message if ride is updated -->
+									<ui:fragment rendered="#{ride.rideUpdated}">
+										<h:graphicImage library="images" name="updated.gif" width="20"
+											height="20" />
+                                            #{msgs.updatedRide}
+                                        </ui:fragment>
+
+									<h:form>
+										<p>
+
+											<div colspan="1" class="formLabel">
+												<p:commandButton id="rideDisplayButton"
+													action="rider.rideDisplay" icon="ui-icon-circle-zoomin"
+													ajax="false">
+													<f:param name="#{crud.paramNameCrudId}"
+														value="#{ride.riderrouteId}" />
+													<f:param name="#{webflow.getParamBack()}" value="rider" />
+												</p:commandButton>
+												<p:tooltip for="rideDisplayButton"
+													value="#{msgs.rideDisplayRequest}" />
+	                                            &nbsp;	
+												<h:commandLink action="rider.rideDisplay"
+													value="#{msgs.rideDisplayRequest}">
+													<f:param name="#{crud.paramNameCrudId}"
+														value="#{ride.riderrouteId}" />
+													<f:param name="#{webflow.getParamBack()}" value="rider" />
+												</h:commandLink>
+											</div>
+
+
+											<!-- *** show matchings list only if there are matchings *** -->
+											<ui:fragment rendered="#{ride.hasMatches}">
+
+												<div class="formLabel">
+													<p:commandButton id="showMatchesButton1"
+														action="rider.rideMatchingsList" icon="ui-icon-link"
+														ajax="false">
+														<f:param name="#{crud.paramNameCrudId}"
+															value="#{ride.riderrouteId}" />
+														<f:param name="#{webflow.getParamBack()}" value="rider" />
+													</p:commandButton>
+													<p:tooltip for="showMatchesButton1"
+														value="#{msgs.rideMatchesShowOffers}" />
+													&nbsp;
+													<h:commandLink action="rider.rideMatchingsList"
+														value="#{msgs.rideMatchesShowOffers}">
+														<f:param name="#{crud.paramNameCrudId}"
+															value="#{ride.riderrouteId}" />
+														<f:param name="#{webflow.getParamBack()}" value="rider" />
+													</h:commandLink>
+												</div>
+
+											</ui:fragment>
+										<div class="formLabel">#{msgs.rideStarttimeEarliest}:</div>
+										<div class="formInput">
+											#{ride.starttimeEarliestFormatted}</div>
+
+
+										<div class="formLabel">#{msgs.rideStarttimeLatest}:</div>
+										<div class="formInput">#{ride.starttimeLatestFormatted}</div>
+
+										<div class="formLabel">#{msgs.rideComment}:</div>
+										<div class="formInput">#{ride.comment}</div>
+
+										<div class="formLabel">#{msgs.rideStart}:</div>
+										<div class="formInput">#{ride.startptAddress}</div>
+
+										<div class="formLabel">#{msgs.rideDestination}:</div>
+										<div class="formInput">#{ride.endptAddress}</div>
+
+										<div class="formLabel">#{msgs.rideNoMatchingOffers}:</div>
+										<div class="formInput">#{ride.noMatches}</div>
+
+
+										<!-- *** show matchings list only if there are matchings *** -->
+										<ui:fragment rendered="#{ride.hasMatches}">
+
+											<div class="formLabel">
+												<p:commandButton id="showMatchesButton2"
+													action="rider.rideMatchingsList" icon="ui-icon-link"
+													ajax="false">
+													<f:param name="#{crud.paramNameCrudId}"
+														value="#{ride.riderrouteId}" />
+													<f:param name="#{webflow.getParamBack()}" value="rider" />
+												</p:commandButton>
+												<p:tooltip for="showMatchesButton2"
+													value="#{msgs.rideMatchesShowOffers}" />
+												&nbsp;
+												<h:commandLink action="rider.rideMatchingsList"
+													value="#{msgs.rideMatchesShowOffers}">
+													<f:param name="#{crud.paramNameCrudId}"
+														value="#{ride.riderrouteId}" />
+													<f:param name="#{webflow.getParamBack()}" value="rider" />
+												</h:commandLink>
+											</div>
+										</ui:fragment>
+					</p>
+					</h:form>
+
+
+
+
+
+					</p:tab>
+					</p:accordionPanel>
+					</p:panel>
+			</p>
+			</h:panelGroup>
+			</p>
+
+			<!-- webflow stanza -->
+			<h:form>
+				<table>
+					<tr>
+						<td><p:commandButton id="backlink"
+								icon="ui-icon-triangle-1-w" action="rider" ajax="false" /> <p:tooltip
+								for="backlink" value="#{msgs.back}" /></td>
+						<td><h:commandLink value="#{msgs.back}" action="rider" /></td>
+					</tr>
+				</table>
+			</h:form>
+
+
+
+
+
+		</ui:define>
+
+
+
+
+	</ui:composition>
+
+
+
+
+
+</body>
+</html>

@@ -217,8 +217,8 @@ final class PotentialMatch
      * @param router
      */
     private void computeDetour(Router router){
-        Route routeA = router.findRoute(onRouteLiftPoint, liftPoint, timeAtLiftPoint, true, 2000.0d, false);
-        Route routeB = router.findRoute(onRouteDropPoint, dropPoint, timeAtLiftPoint, true, 2000.0d, false);
+        Route routeA = router.findRoute(onRouteLiftPoint, liftPoint, timeAtLiftPoint, true, 2000.0d );
+        Route routeB = router.findRoute(onRouteDropPoint, dropPoint, timeAtLiftPoint, true, 2000.0d );
 
         if(routeA == null || routeB == null){
             this.detourMeters = Double.MAX_VALUE;

@@ -131,6 +131,10 @@ public class CarDetailsControllerBean extends ControllerBean implements CarDetai
         commitUserTransaction();
     }
 
+    /** TODO: dislike!
+     * 
+     * @param object 
+     */
     public void persist(Object object) {
         startUserTransaction();
         em.persist(object);

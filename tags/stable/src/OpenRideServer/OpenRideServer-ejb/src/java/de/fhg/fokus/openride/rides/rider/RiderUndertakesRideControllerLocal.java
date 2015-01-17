@@ -54,9 +54,6 @@ public interface RiderUndertakesRideControllerLocal {
 
     void addPaymentReference(int rideId);
 
-    @Deprecated
-    int addRideRequest(int cust_id, Date starttime_earliest, Date starttimeLatest, int noPassengers, Point startpt, Point endpt, double price, String comment);
-
     List<RiderUndertakesRideEntity> getRides(String nickname);
 
     List<RiderUndertakesRideEntity> getActiveRideRequests(String nickname);
@@ -72,29 +69,18 @@ public interface RiderUndertakesRideControllerLocal {
 
     List<RiderUndertakesRideEntity> getActiveRideRequestsByCustId(String custId);
 
-    List<RiderUndertakesRideEntity> getRidesWithoutRatingByRider(CustomerEntity rider);
-
-    List<RiderUndertakesRideEntity> getRidesWithoutGivenRatingByRider(CustomerEntity rider);
-
-    List<RiderUndertakesRideEntity> getRidesWithoutReceivedRatingByRider(CustomerEntity rider);
-
-    List<RiderUndertakesRideEntity> getRidesWithoutRatingByDriver(CustomerEntity driver);
-
-    List<RiderUndertakesRideEntity> getRidesWithoutGivenRatingByDriver(CustomerEntity driver);
-
-    List<RiderUndertakesRideEntity> getRidesWithoutReceivedRatingByDriver(CustomerEntity driver);
-
     List<RiderUndertakesRideEntity> getRatedRidesByRider(CustomerEntity rider);
 
     List<RiderUndertakesRideEntity> getRatedRidesByDriver(CustomerEntity driver);
 
-    /** Count Ratings for Customer
-     * 
+    /**
+     * Count Ratings for Customer
+     *
      * @param customer customer Entity to count number of ratings
      * @return Overall Number of all Ratings for this user
      */
     Integer getRatingsCountByCustomer(CustomerEntity customer);
-    
+
     int getRatingsTotalByCustomer(CustomerEntity customer);
 
     float getRatingsRatioByCustomerAndDate(CustomerEntity customer, Date fromDate);
@@ -129,13 +115,13 @@ public interface RiderUndertakesRideControllerLocal {
     public int addRideRequest(int cust_id, Date starttime_earliest, Date starttimeLatest, int noPassengers, Point startpt, Point endpt, double price, String comment, String startptAddress, String endptAddress);
 
     /**
-     * True, if RiderUndertakesRide Entity with given riderrouteId is deletable,
+     * True, if RiderUndertakesRide Entity with given riderrouteId is removable,
      * else false.
      *
      * @param riderrouteId
      * @return
      */
-    public boolean isDeletable(int riderrouteId);
+    public boolean isRemovable(int riderrouteId);
 
     void removeRiderFromRide(int riderrouteid, int rideid);
 
@@ -167,38 +153,62 @@ public interface RiderUndertakesRideControllerLocal {
 
     public List<RiderUndertakesRideEntity> getUnratedRidesForRider(CustomerEntity ce, Date startDate, Date endDate);
 
+    public List<RiderUndertakesRideEntity> getUnratedRidesForDriver(CustomerEntity ce, Date startDate, Date endDate);
+
     public List<RiderUndertakesRideEntity> getRidesForDriver(CustomerEntity ce, Date startDate, Date endDate);
-    
-    
-   /** Get the sum over all Ratings that the customer received when acting as rider.
-    * 
-    * @param custId  id of customer for whom ratings will be summed up
-    * @return  sum over all driver ratings the customer has received
-    */
+
+    public List<RiderUndertakesRideEntity> getRidesForRiderAfterDate(CustomerEntity ce, Date startDate);
+
+    /**
+     * Get the sum over all Ratings that the customer received when acting as
+     * rider.
+     *
+     * @param custId id of customer for whom ratings will be summed up
+     * @return sum over all driver ratings the customer has received
+     */
     public Integer getTotalOfRatingsForDriver(CustomerEntity customer);
-    
-    /** Count all rides where the customer has acted as a driver
-     * 
+
+    /**
+     * Count all rides where the customer has acted as a driver
+     *
      * @param customer customer for whom ratings will be counted
-     * @return  number of rated rides where the customer acted as driver
+     * @return number of rated rides where the customer acted as driver
      */
     public Integer getCountOfRatingsForDriver(CustomerEntity customer);
-    
-      /** Get the sum over all Ratings that the customer received when acting as rider.
-    * 
-    * @param customer customer for whom ratings will be summed up
-    * @return  sum over all rider ratings the customer has received
-    */
+
+    /**
+     * Get the sum over all Ratings that the customer received when acting as
+     * rider.
+     *
+     * @param customer customer for whom ratings will be summed up
+     * @return sum over all rider ratings the customer has received
+     */
     public Integer getTotalOfRatingsForRider(CustomerEntity customer);
-    
-    /** Count all rides where the customer has acted as a rider
-     * 
-     * @param customer  customer for whom ratings will be counted
-     * @return  number of rated rides where the customer acted as rider
+
+    /**
+     * Count all rides where the customer has acted as a rider
+     *
+     * @param customer customer for whom ratings will be counted
+     * @return number of rated rides where the customer acted as rider
      */
     public Integer getCountOfRatingsForRider(CustomerEntity customer);
     
     
+   /** Countermand a Match given by rideId and riderrouteId , acting as Driver.
+    * 
+    * @param rideId         rideId of the driverUndertakesRideId for which the matching exists
+    * @param riderrouteId   riderrouteId of the riderUndertakesRideId for which the matching exists
+    */
+    public void countermandDriver(Integer rideId, Integer riderrouteId) ;
+
+    
+    /** Countermand a Match given by rideId and riderrouteId , acting as Rider.
+    * 
+    * @param rideId         rideId of the driverUndertakesRideId for which the matching exists
+    * @param riderrouteId   riderrouteId of the riderUndertakesRideId for which the matching exists
+    */
+    public void countermandRider(Integer rideId, Integer riderrouteId) ;
+
     
     
     

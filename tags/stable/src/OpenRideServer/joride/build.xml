@@ -1,71 +1,349 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- You may freely edit this file. See commented blocks below for -->
-<!-- some examples of how to customize the build. -->
-<!-- (If you delete it and reopen the project it will be recreated.) -->
-<!-- By default, only the Clean and Build commands use this build script. -->
-<!-- Commands such as Run, Debug, and Test only use this build script if -->
-<!-- the Compile on Save feature is turned off for the project. -->
-<!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
-<!-- in the project's Project Properties dialog box.-->
-<project name="joride" default="default" basedir=".">
-    <description>Builds, tests, and runs the project joride.</description>
-    <import file="nbproject/build-impl.xml"/>
-    <!--
+<project name="joride" default="build">
+	<property environment="env" />
+	<property file="build.properties" />
+	<property file="${app}/tomcat.properties" />
+	<property name="appdir" value="${basedir}" />
+	<property name="build.dir" value="${appdir}/build" />
+	<property name="web-inf.dir" value="${build.dir}/WEB-INF" />
+	<property name="dist.dir" value="${appdir}/dist" />
+	<!-- warfile which ist the main deliverable of this subproject -->
+	<property name="warfile" value="${dist.dir}/${ant.project.name}.war" />
+	<!-- jarfile for use by other subprojects (say: joride-public)-->
+	<property name="jarfile" value="${dist.dir}/${ant.project.name}.jar" />
 
-    There exist several targets which are by default empty and which can be 
-    used for execution of your tasks. These targets are usually executed 
-    before and after some main targets. They are: 
+	<path id="classpath">
+		<fileset dir="${appdir}">
+			<include name="lib/*.jar" />
+			<include name="lib/build/*.jar" />
+		</fileset>
+		<!-- include classes from ejb project -->
+		<pathelement location="../OpenRideServer-ejb/dist/OpenRideServer-ejb.jar" />
 
-      -pre-init:                 called before initialization of project properties 
-      -post-init:                called after initialization of project properties 
-      -pre-compile:              called before javac compilation 
-      -post-compile:             called after javac compilation 
-      -pre-compile-single:       called before javac compilation of single file
-      -post-compile-single:      called after javac compilation of single file
-      -pre-compile-test:         called before javac compilation of JUnit tests
-      -post-compile-test:        called after javac compilation of JUnit tests
-      -pre-compile-test-single:  called before javac compilation of single JUnit test
-      -post-compile-test-single: called after javac compilation of single JUunit test
-      -pre-dist:                 called before archive building 
-      -post-dist:                called after archive building 
-      -post-clean:               called after cleaning build products 
-      -pre-run-deploy:           called before deploying
-      -post-run-deploy:          called after deploying
+		<!-- external jars from ejb project  -->
+		<fileset dir="../OpenRideServer-ejb/libs/">
+			<include name="*.jar" />
+		</fileset>
 
-    Example of pluging an obfuscator after the compilation could look like 
+		<!-- include jee libs from some glassfish -->
 
-        <target name="-post-compile">
-            <obfuscate>
-                <fileset dir="${build.classes.dir}"/>
-            </obfuscate>
-        </target>
-
-    For list of available properties check the imported 
-    nbproject/build-impl.xml file. 
+		<fileset dir="../OpenRideShareMaster/build.headless.support/jee/libs.glassfish.3.0.2/">
+			<include name="*.jar" />
+		</fileset>
 
 
-    Other way how to customize the build is by overriding existing main targets.
-    The target of interest are: 
+	</path>
 
-      init-macrodef-javac:    defines macro for javac compilation
-      init-macrodef-junit:   defines macro for junit execution
-      init-macrodef-debug:    defines macro for class debugging
-      do-dist:                archive building
-      run:                    execution of project 
-      javadoc-build:          javadoc generation 
+	<!-- TARGET prepare -->
+	<target name="prepare" description="Create build and dist directory.">
+		<delete dir="${build.dir}" />
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${web-inf.dir}" />
+		<mkdir dir="${web-inf.dir}/classes" />
+		<mkdir dir="${dist.dir}" />
+	</target>
 
-    Example of overriding the target for project execution could look like 
+	<!-- TARGET copy -->
+	<target name="copy" depends="prepare" description="Copy files to build directory.">
+		<copy todir="${build.dir}" failonerror="false" verbose="true">
+			<fileset dir="${appdir}/web" />
+		</copy>
+		<copy todir="${web-inf.dir}/classes" failonerror="false" verbose="true">
+			<fileset dir="${appdir}/src/java">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy todir="${web-inf.dir}" failonerror="false" verbose="true">
+			<fileset dir="${appdir}">
+				<include name="lib/**" />
+			</fileset>
+		</copy>
+	</target>
 
-        <target name="run" depends="<PROJNAME>-impl.jar">
-            <exec dir="bin" executable="launcher.exe">
-                <arg file="${dist.jar}"/>
-            </exec>
-        </target>
 
-    Notice that overridden target depends on jar target and not only on 
-    compile target as regular run target does. Again, for list of available 
-    properties which you can use check the target you are overriding in 
-    nbproject/build-impl.xml file. 
 
-    -->
+
+
+	<!-- TARGET apply-local-properties -->
+	<target name="apply-local-properties" depends="copy" description="rewrite properties files with local properties">
+
+		<!-- check, that user has a local.properties file in place in master project -->
+
+
+		<property file="../OpenRideShareMaster/local.properties" />
+
+		<fail message=" ../OpenRideShareMaster/local.properties file is missing! -- You will probably have to create one, see included local.properties.sample file. ">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset id="fs" dir="../OpenRideShareMaster/" includes="local.properties" />
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+
+
+
+
+		<!-- ****************************  -->
+		<!-- Rewrite operational setting   -->
+		<!-- ****************************  -->
+
+
+		<property name="opsparamfile" value="${build.dir}/WEB-INF/classes/de/avci/joride/operational.properties" />
+		<!-- replace email target -->
+
+
+		<!-- replacing mailServiceJNDI property with local settings  -->
+
+		<replaceregexp byline="true">
+			<regexp pattern="mailServiceJNDI=(.*)" />
+			<substitution expression="mailServiceJNDI=${mailServiceJNDI}" />
+			<fileset file="${opsparamfile}" />
+		</replaceregexp>
+
+
+		<!-- replacing   webmasterEmailRecipient property with local settings  -->
+
+		<replaceregexp byline="true">
+			<regexp pattern="webmasterEmailRecipient=(.*)" />
+			<substitution expression="webmasterEmailRecipient=${webmasterEmailRecipient}" />
+			<fileset file="${opsparamfile}" />
+		</replaceregexp>
+
+
+		<!-- replacing  businessEmailRecipient  property with local settings  -->
+
+		<replaceregexp byline="true">
+			<regexp pattern="businessEmailRecipient=(.*)" />
+			<substitution expression="businessEmailRecipient=${businessEmailRecipient}" />
+			<fileset file="${opsparamfile}" />
+		</replaceregexp>
+
+		<!-- replacing  noreplyEmailRecipient  property with local settings  -->
+
+		<replaceregexp byline="true">
+			<regexp pattern="noreplyEmailRecipient=(.*)" />
+			<substitution expression="noreplyEmailRecipient=${noreplyEmailRecipient}" />
+			<fileset file="${opsparamfile}" />
+		</replaceregexp>
+
+
+
+
+		<!-- ****************************  -->
+		<!-- Rewrite navigation settings   -->
+		<!-- ****************************  -->
+
+		<property name="navparamfile" value="${build.dir}/WEB-INF/classes/de/avci/joride/navigation.properties" />
+
+
+		<!-- applying url for terms and conditions  -->
+
+		<replaceregexp byline="true">
+			<regexp pattern="termsURL=(.*)" />
+			<substitution expression="termsURL=${termsURL}" />
+			<fileset file="${navparamfile}" />
+		</replaceregexp>
+
+		<!-- applying url for imprint  -->
+
+		<replaceregexp byline="true">
+			<regexp pattern="imprintURL=(.*)" />
+			<substitution expression="imprintURL=${imprintURL}" />
+			<fileset file="${navparamfile}" />
+		</replaceregexp>
+
+		<!-- applying url for screen being shown after logging out -->
+		<replaceregexp byline="true">
+			<regexp pattern="urlLoggedOut=(.*)" />
+			<substitution expression="urlLoggedOut=${urlLoggedOut}" />
+			<fileset file="${navparamfile}" />
+		</replaceregexp>
+
+
+		<!--  applying url of OpenLayers library -->
+		<replaceregexp byline="true">
+			<regexp pattern="urlOpenLayers=(.*)" />
+			<substitution expression=" urlOpenLayers=${urlOpenLayers}" />
+			<fileset file="${navparamfile}" />
+		</replaceregexp>
+		
+		
+		<!-- ****************************  -->
+	 	<!-- Rewrite update parameters     -->
+		<!-- ****************************  -->
+
+				<property name="updateparamfile" value="${build.dir}/WEB-INF/classes/de/avci/joride/update.properties" />
+		
+		       <!-- apply update interval  -->
+
+				<replaceregexp byline="true">
+					<regexp pattern="updateInterval=(.*)" />
+					<substitution expression="updateInterval=${updateInterval}" />
+					<fileset file="${updateparamfile}" />
+				</replaceregexp>
+
+		        <!-- apply growl interval  -->
+
+				<replaceregexp byline="true">
+					<regexp pattern="growlInterval=(.*)" />
+					<substitution expression="growlInterval=${growlInterval}" />
+					<fileset file="${updateparamfile}" />
+				</replaceregexp>
+
+		
+		
+
+		<!-- ****************************  -->
+		<!-- Rewrite datetime settings   -->
+		<!-- ****************************  -->
+
+		<property name="datetimefile" value="${build.dir}/WEB-INF/classes/de/avci/joride/datetime.properties" />
+
+
+		<!--  apply user proved timezone -->
+		<replaceregexp byline="true">
+			<regexp pattern="defaulttimezone=(.*)" />
+			<substitution expression="defaulttimezone=${defaulttimezone}" />
+			<fileset file="${datetimefile}" />
+		</replaceregexp>
+
+
+
+		<!-- set theme to something different from default theme "aristo"-->
+
+		<antcall target="overwriteTheme" inheritAll="true" inheritRefs="true" />
+
+	</target>
+	<!--  end of target "apply local properties" -->
+
+
+
+	<!-- TARGET overwriteCSS -->
+	<!-- overwriteCSS property should have been set in "war" target                  -->
+	<!-- overwriteCSS is there to signify that a user defined stylesheet is in place -->
+	<target name="overwriteCSS" if="overwriteCSS" description="overwrite css if user defined css is present">
+		<property name="targetCSS" value="${build.dir}/resources/css/styles.css" />
+		<echo message="Found individual CSS file, Overwriting ${targetCSS}" />
+		<copy file="../OpenRideShareMaster/local.resources/css/local.styles.css" tofile="${targetCSS}" overwrite="true" verbose="true" />
+	</target>
+
+
+
+	<!-- TARGET overwriteTheme -->
+	<!-- overwrite Theme will overwrite the settings for theme in web.xml    -->
+	<!-- this task will be executed only if jquery.ui.theme parameter        -->
+	<!-- in local.properties is set by the user                              -->
+	<target name="overwriteTheme" if="jquery.ui.theme" description="overwrite primefaces theme on user request">
+
+		<echo message="Found individual theme setting, overwriting default theme to ${jquery.ui.theme}" />
+
+		<property name="webxmlFile" value="${build.dir}/WEB-INF/web.xml" />
+
+
+		<!--  applying url of OpenLayers library -->
+		<replaceregexp byline="true">
+			<regexp pattern="aristo" />
+			<substitution expression="${jquery.ui.theme}" />
+			<fileset file="${webxmlFile}" />
+		</replaceregexp>
+
+	</target>
+
+
+
+	<!-- TARGET compile -->
+	<target name="compile" depends="copy,apply-local-properties" description="Compile source files.">
+		<javac srcdir="${appdir}/src/java" destdir="${web-inf.dir}/classes" debug="true" includeantruntime="false" deprecation="true">
+			<compilerarg value="-Xlint:unchecked" />
+			<include name="**/*.java" />
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+
+	<!-- TARGET jsf-libs -->
+	<target name="jsf-libs" if="use-jsf-libs" unless="glassfish">
+		<mkdir dir="${web-inf.dir}/lib" />
+		<copy file="${jsf.api.jar}" todir="${web-inf.dir}/lib" verbose="true" />
+		<copy file="${jsf.impl.jar}" todir="${web-inf.dir}/lib" verbose="true" />
+	</target>
+
+	<!-- TARGET el-libs -->
+	<target name="el-libs" if="use-el-libs" unless="glassfish">
+		<copy file="${el.api.jar}" todir="${web-inf.dir}/lib" verbose="true" failonerror="false" />
+		<copy file="${el.impl.jar}" todir="${web-inf.dir}/lib" verbose="true" failonerror="false" />
+	</target>
+
+	<!-- TARGET bean-validation libs -->
+	<target name="bean-validation-libs" if="use-bean-validation-libs" unless="glassfish">
+		<copy file="${bean-validation.impl.jar}" todir="${web-inf.dir}/lib" verbose="true" failonerror="false" />
+		<copy todir="${web-inf.dir}/lib" verbose="true" failonerror="false">
+			<fileset dir="${bean-validation.lib.dir}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- TARGET cdi-libs -->
+	<target name="cdi-libs" if="use-cdi-libs" unless="glassfish">
+		<copy file="${cdi.impl.jar}" todir="${build.dir}/WEB-INF/lib" verbose="true" failonerror="false" />
+	</target>
+
+	<!-- TARGET tomcat-libs -->
+	<target name="tomcat-libs" depends="jsf-libs, el-libs, bean-validation-libs, cdi-libs" />
+
+	<!-- TARGET war -->
+	<target name="war" depends="clean, compile, tomcat-libs" description="Build WAR file.">
+
+
+		<!--Overwrite default css if localStyle has been defined elsewhere -->
+		<available file="../OpenRideShareMaster/local.resources/css/local.styles.css" property="overwriteCSS" />
+		<antcall target="overwriteCSS" inheritAll="true" inheritRefs="true" />
+
+		<!-- ***************************************************************************************************** -->
+		<!-- include all the jars in OpenRideShareMaster/local.resources/themes directory, so that custom themes will be supported -->
+		<mkdir dir="${web-inf.dir}/lib" />
+		<copy todir="${web-inf.dir}/lib" verbose="true">
+			<fileset dir="../OpenRideShareMaster/local.resources/themes/">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+
+		<delete file="${warfile}" />
+		<jar jarfile="${warfile}" basedir="${build.dir}" />
+	</target>
+
+
+	<!-- TARGET jar -->
+	<!-- create a jar for use in other subprojects -->
+	<target name="jar" depends="clean, compile, tomcat-libs" description="Build JAR file for use in other subprojects.">
+		<delete file="${jarfile}" />
+		<jar jarfile="${jarfile}" basedir="${web-inf.dir}/classes" />
+	</target>
+
+
+
+	<!-- TARGET build -->
+	<target name="build" depends="war,jar" description="build the deliverables (war and jar files)">
+	</target>
+
+
+	<!-- TARGET dist -->
+	<target name="dist" depends="build" description="create the distributables, but do not deploy">
+
+	</target>
+
+
+
+	<!-- TARGET install -->
+	<target name="install" depends="build" description="Deploy web application.">
+		<copy file="${warfile}" todir="${deploy.dir}" />
+	</target>
+
+	<!-- TARGET clean -->
+	<target name="clean" description="Clean everything.">
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+
 </project>

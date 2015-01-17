@@ -31,6 +31,19 @@ package de.fhg.fokus.openride.matching;
  * and can be configure via the variables 'priceMatrix' and 'detourKmPrice'.
  * @author fvi
  */
+
+
+
+/** This seems to be abandonened, unflexible and 
+ *  does not fit in the current philophy of staying
+ *  out of the user's way when it comes to payment.
+ *  
+ *  Hence marked as deprecated (jl)
+ * 
+ */
+
+@Deprecated
+
 abstract class PriceCalculator {
 
     private static final PriceCalculator STEPPED_PRICE_CALCULATOR = new PriceCalculator() {

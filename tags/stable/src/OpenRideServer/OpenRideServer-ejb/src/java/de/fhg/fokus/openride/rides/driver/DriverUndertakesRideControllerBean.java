@@ -22,15 +22,6 @@
  */
 package de.fhg.fokus.openride.rides.driver;
 
-import de.fhg.fokus.openride.customerprofile.CustomerControllerLocal;
-import de.fhg.fokus.openride.customerprofile.CustomerEntity;
-import de.fhg.fokus.openride.helperclasses.ControllerBean;
-import de.fhg.fokus.openride.matching.MatchEntity;
-import de.fhg.fokus.openride.matching.RouteMatchingBean;
-import de.fhg.fokus.openride.matching.RouteMatchingBeanLocal;
-import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideControllerLocal;
-import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideEntity;
-import de.fhg.fokus.openride.routing.RoutePoint;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,13 +30,29 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
+
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.UserTransaction;
+
 import org.postgis.Point;
+
+import de.avci.openrideshare.messages.MessageControllerLocal;
+import de.fhg.fokus.openride.customerprofile.CustomerControllerLocal;
+import de.fhg.fokus.openride.customerprofile.CustomerEntity;
+import de.fhg.fokus.openride.helperclasses.ControllerBean;
+import de.fhg.fokus.openride.matching.MatchEntity;
+import de.fhg.fokus.openride.matching.MatchingStatistics;
+import de.fhg.fokus.openride.matching.RouteMatchingBean;
+import de.fhg.fokus.openride.matching.RouteMatchingBeanLocal;
+import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideControllerLocal;
+import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideEntity;
+// FIXME: Import of Bean Impl is here to access some static constants.
+// this should not happen as such.
+// Outsource these constants to avoid importing implementation!
 
 /**
  *
@@ -54,257 +61,97 @@ import org.postgis.Point;
 @Stateless
 public class DriverUndertakesRideControllerBean extends ControllerBean implements DriverUndertakesRideControllerLocal {
 
-    
+    // TODO: rename "u" to some kind of sensible Name, or better remove it
     UserTransaction u;
-    
     @EJB
     private RouteMatchingBeanLocal routeMatchingBean;
     @EJB
     private RiderUndertakesRideControllerLocal riderUndertakesRideControllerBean;
     @EJB
     private CustomerControllerLocal customerControllerBean;
+    @EJB
+    private MessageControllerLocal messageController;
+    
     @PersistenceContext
     private EntityManager em;
     public static final long ACTIVE_DELAY_TIME = 60 * 60 * 1000;
-
-    // FIXME: these methods are not needed. They should be written in DriverUndertakesRideEntity Class
-    public Point getStartPoint() {
-        startUserTransaction();
-        commitUserTransaction();
-        return null;
-    }
-
-    public Point getEndPoint() {
-        startUserTransaction();
-        commitUserTransaction();
-        return null;
-    }
-
-    public String viaPoints() {
-        startUserTransaction();
-        commitUserTransaction();
-        return null;
-    }
-
-    public void persist(Object object) {
-        startUserTransaction();
-        commitUserTransaction();
-        em.persist(object);
-    }
-
-    @Override
-    @Deprecated
-    public int addRide(int cust_id, Point ridestartPt, Point rideendPt,
-            Date ridestartTime, String rideComment, Integer acceptableDetourInMin,
-            Integer acceptableDetourKm, Integer acceptableDetourPercent,
-            int offeredSeatsNo, RoutePoint[] routePoints, String startptAddressStreet, String startptAddressZipcode, String startptAddressCity,
-            String endptAddressStreet, String endptAddressZipcode, String endptAddressCity) {
-        logger.log(Level.INFO, "ridestartPt: " + ridestartPt + " rideendPt: " + rideendPt + " ridestartTime: " + ridestartTime
-                + "offeredSeatsNo: " + offeredSeatsNo + " routePoints: " + routePoints + " routePoints.length: " + (routePoints != null ? routePoints.length : -1)
-                + "acceptableDetourInMin: " + acceptableDetourInMin + " acceptableDetourKm: " + acceptableDetourKm + " acceptableDetourPercent: " + acceptableDetourPercent);
-        //check parameters
-        if (ridestartPt == null
-                || rideendPt == null
-                || ridestartTime == null
-                || offeredSeatsNo <= 0
-                || routePoints == null
-                || routePoints.length < 2
-                || (acceptableDetourInMin == null && acceptableDetourKm == null && acceptableDetourPercent == null)) {
-            logger.log(Level.INFO, "could not add drive: invalid params ::\n");
-            return -1;
-        }
-        startUserTransaction();
-        CustomerEntity customer = customerControllerBean.getCustomer(cust_id);
-
-        //add drive
-        DriverUndertakesRideEntity de = new DriverUndertakesRideEntity(
-                ridestartTime,
-                ridestartPt,
-                rideendPt,
-                offeredSeatsNo,
-                acceptableDetourInMin,
-                acceptableDetourKm,
-                acceptableDetourPercent,
-                0d);
-        de.setRideComment(rideComment);
-        de.setRideOfferedseatsNo(offeredSeatsNo);
-        de.setRideAcceptableDetourInMin(acceptableDetourInMin);
-        de.setCustId(customer);
-        de.setEndptAddress(endptAddressStreet);
-        de.setStartptAddress(startptAddressStreet);
-        em.persist(de);
-
-        //add route point entities
-        for (int i = 0; i < routePoints.length; i++) {
-            DriveRoutepointEntity drp = new DriveRoutepointEntity(
-                    de.getRideId(),
-                    i,
-                    new Point(
-                    routePoints[i].getCoordinate().getLongitude(),
-                    routePoints[i].getCoordinate().getLatititude()),
-                    routePoints[i].getTimeAt(),
-                    offeredSeatsNo,
-                    routePoints[i].getDistance());
-            em.persist(drp);
-        }
-        commitUserTransaction();
-
-        return de.getRideId();
-    }
-
-    @Override
-    @Deprecated
-    public int addRide(int cust_id, Point ridestartPt, Point rideendPt,
-            Date ridestartTime, String rideComment, Integer acceptableDetourInMin,
-            Integer acceptableDetourKm, Integer acceptableDetourPercent,
-            int offeredSeatsNo, RoutePoint[] routePoints) {
-        logger.log(Level.INFO, "ridestartPt: " + ridestartPt + " rideendPt: " + rideendPt + " ridestartTime: " + ridestartTime
-                + "offeredSeatsNo: " + offeredSeatsNo + " routePoints: " + routePoints + " routePoints.length: " + (routePoints != null ? routePoints.length : -1)
-                + "acceptableDetourInMin: " + acceptableDetourInMin + " acceptableDetourKm: " + acceptableDetourKm + " acceptableDetourPercent: " + acceptableDetourPercent);
-        //check parameters
-        if (ridestartPt == null
-                || rideendPt == null
-                || ridestartTime == null
-                || offeredSeatsNo <= 0
-                || routePoints == null
-                || routePoints.length < 2
-                || (acceptableDetourInMin == null && acceptableDetourKm == null && acceptableDetourPercent == null)) {
-            logger.log(Level.INFO, "could not add drive: invalid params ::\n");
-            return -1;
-        }
-        startUserTransaction();
-        CustomerEntity customer = customerControllerBean.getCustomer(cust_id);
-        /*if(customer == null || e.size() != 0) {
-         logger.log(Level.INFO, "could not add drive: customer does not exists or drive-name not unique");
-         commitUserTransaction();
-         return -1;
-         }
-         */
-
-
-
-
-        // Only add a DriverUndertakesRideEntity if a Ride with the same name is not(!) in the DB.
-
-        /*List vec = em.createNativeQuery("SELECT d FROM DriverUndertakesRide d WHERE d.ride_id ="+0+";").getResultList();
-         logger.log(Level.INFO, "Vec "+vec.get(0));
-         */
-//             logger.log(Level.INFO, "addRide 4");
-//             String str = "SELECT min(d.ride_id) + 1 FROM driverundertakesride d WHERE (d.ride_id + 1) NOT IN (SELECT ride_id FROM riderundertakesride);";
-//             List l = em.createNativeQuery(str).getResultList();
-//             if(l.size()==1){
-//                 logger.log(Level.INFO, " INDEX "+l.get(0));
-//                 index = (Integer)((Vector)l.get(0)).get(0);
-//             }
-
-        //em.createNativeQuery("SELECT d FROM driverundertakesride d WHERE d.ride_id ="+index+" ;").getResultList() != null){
-        //logger.log(Level.INFO, "addRide 5");
-                /*while ((em.find(DriverUndertakesRideEntity.class, index)) != null) {
-         index++;
-         }
-         */
-
-        //add drive
-        DriverUndertakesRideEntity de = new DriverUndertakesRideEntity(
-                ridestartTime,
-                ridestartPt,
-                rideendPt,
-                offeredSeatsNo,
-                acceptableDetourInMin,
-                acceptableDetourKm,
-                acceptableDetourPercent,
-                0d);
-        de.setRideComment(rideComment);
-        de.setRideOfferedseatsNo(offeredSeatsNo);
-        de.setRideAcceptableDetourInMin(acceptableDetourInMin);
-        de.setCustId(customer);
-        em.persist(de);
-
-        //add route point entities
-        for (int i = 0; i < routePoints.length; i++) {
-            DriveRoutepointEntity drp = new DriveRoutepointEntity(
-                    de.getRideId(),
-                    i,
-                    new Point(
-                    routePoints[i].getCoordinate().getLongitude(),
-                    routePoints[i].getCoordinate().getLatititude()),
-                    routePoints[i].getTimeAt(),
-                    offeredSeatsNo,
-                    routePoints[i].getDistance());
-            em.persist(drp);
-        }
-        commitUserTransaction();
-
-        return de.getRideId();
-    }
+    
+    
+   
+    
+    
+    
 
     @Override
     public boolean isDeletable(int rideId) {
 
+        // TODO: check, iff we really want to have transactions here
         startUserTransaction();
 
         List<MatchEntity> states = (List<MatchEntity>) em.createNamedQuery("MatchEntity.findByRideId").setParameter("rideId", rideId).getResultList();
         boolean deletable = true;
 
-        if (states.size() > 0) {
-            // state already exists
-            for (MatchEntity entity : states) {
-                if (entity.getDriverState() != null || entity.getRiderState() != null) {
-                    deletable = false;
-                }
-            }
+        // no matches, nothing to do
+        if (states == null || states.size() == 0) {
+            commitUserTransaction();
+            return true;
         }
 
-        return deletable;
+        // if there are matchings however, we will remove 
+        // this offer only if there are no adapted matches
+        MatchingStatistics ms = new MatchingStatistics();
+        ms.statisticsFromList(states);
+
+        if (ms.getNumberOfMatches() == ms.getNotAdaptedBoth()) {
+            commitUserTransaction();
+            return true;
+        }
+
+        commitUserTransaction();
+        return false;
     }
 
-    public boolean removeRide(int rideId) {
+    /**
+     * Completely remove this ride from database. This should only be done, if
+     * there are not matchings which have state other than "new"
+     *
+     * @param rideId
+     * @return
+     */
+    private boolean removeRide(int rideId) {
         startUserTransaction();
 
-        List<MatchEntity> states = (List<MatchEntity>) em.createNamedQuery("MatchEntity.findByRideId").setParameter("rideId", rideId).getResultList();
-
-        boolean deletable = this.isDeletable(rideId);
-
-
-        if (deletable) {
-            // entity can be changed
-
-
-            //TODO (03/09/10): Matches & Ride need to be removed in one transaction....!
-
-            for (Iterator<MatchEntity> it = states.iterator(); it.hasNext();) {
-                // delete Matches
-                em.remove(it.next());
-                //it.remove();
-            }
-
-            setDriveRoutePoints(rideId, new LinkedList());
-
-            // remove related RoutePointEntities
-            setRoutePoints(rideId, new LinkedList<RoutePointEntity>());
-
-            List<DriverUndertakesRideEntity> entity = em.createNamedQuery("DriverUndertakesRideEntity.findByRideId").setParameter("rideId", rideId).getResultList();
-            System.out.println("size entity: " + entity.size());
-            for (DriverUndertakesRideEntity ente : entity) {
-                // delete ride
-                em.remove(ente);
-            }
-            System.out.println("entity removed: " + rideId);
-
-        } else {
-            // all related states have to be adapted
-            for (Iterator<MatchEntity> it = states.iterator(); it.hasNext();) {
-                // mark Matches as countermanded
-                MatchEntity matchEntity = it.next();
-                matchEntity.setDriverState(MatchEntity.COUNTERMANDED);
-                matchEntity.setDriverChange(new java.util.Date());
-                em.merge(matchEntity);
-            }
+        if (!this.isDeletable(rideId)) {
+            throw new Error("Calling removeRide on ride which is not deletable");
         }
-        commitUserTransaction();
-        return deletable;
+
+        try {
+
+            List<MatchEntity> states = (List<MatchEntity>) em.createNamedQuery("MatchEntity.findByRideId").setParameter("rideId", rideId).getResultList();
+
+            for (MatchEntity me : states) {
+                em.remove(me);
+            }
+
+            this.removeAllDriveRoutepoints(rideId);
+            this.removeAllRoutepoints(rideId);
+            this.removeAllWaypoints(rideId);
+
+            DriverUndertakesRideEntity drive = this.getDriveByDriveId(rideId);
+            em.remove(drive);
+            em.flush();
+            commitUserTransaction();
+            return true;
+        } catch (Exception exc) {
+            logger.log(Level.SEVERE, "Error removing (purging) drive", exc);
+            throw new Error("Unexpected Exception while removing drive " + rideId);
+        }
     }
 
+    /**
+     * TODO: Implementation is obviously incomplete!
+     *
+     */
     public void updateDriverPosition() {
         startUserTransaction();
         commitUserTransaction();
@@ -335,6 +182,22 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
         List<RoutePointEntity> routePoints = q.getResultList();
         commitUserTransaction();
         return routePoints;
+    }
+
+    /**
+     * Get Waypoints for a given rideId
+     *
+     * @param rideId
+     * @return list of userdefined waypoints for this ride
+     */
+    @Override
+    public List<WaypointEntity> getWaypoints(int rideId) {
+        startUserTransaction();
+        Query q = em.createNamedQuery("WaypointEntity.findByRideId");
+        q.setParameter("rideId", rideId);
+        List<WaypointEntity> waypoints = q.getResultList();
+        commitUserTransaction();
+        return waypoints;
     }
 
     /**
@@ -560,9 +423,7 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
         //return getDrives(nickname);
     }
 
-    /**
-     * Returns all drives for a given driver that have startpoints defined after
-     * a given date.
+    /**  Returns all drives for a given driver that have startpoints defined after a given date.
      *
      *
      * @param customerId CustomerEntity for which to get drives
@@ -574,19 +435,19 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
      */
     public List<DriverUndertakesRideEntity> getDrivesAfterTime(CustomerEntity custId, Date rideStarttime) {
 
-        startUserTransaction();
-
-        List<DriverUndertakesRideEntity> res = (List<DriverUndertakesRideEntity>) em.createNamedQuery("DriverUndertakesRideEntity.findCustomerDrivesAfterTime").setParameter("custId", custId).setParameter("time", rideStarttime).getResultList();
+ 
+    	Query query=em.createNamedQuery("DriverUndertakesRideEntity.findCustomerDrivesAfterTime");
+    	query.setParameter("custId", custId).setParameter("time", rideStarttime);
+    	List<DriverUndertakesRideEntity> res = (List<DriverUndertakesRideEntity>) query.getResultList();
+    	this.refreshEntityList(res);
         return res;
     }
 
     public LinkedList<DriverUndertakesRideEntity> getAllDrives() {
-        startUserTransaction();
-
+    
         List<DriverUndertakesRideEntity> l = em.createNamedQuery("DriverUndertakesRideEntity.findAll").getResultList();
         LinkedList<DriverUndertakesRideEntity> ll = new LinkedList<DriverUndertakesRideEntity>(l);
 
-        commitUserTransaction();
         return ll;
     }
 
@@ -668,6 +529,8 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
      * @param startptAddress
      * @param endptAddress
      * @return either new rideId or -1 if update was not possible
+     *
+     * @deprecated currently, it's not clear if this is used at all.
      */
     public int updateRide(
             int rideId,
@@ -688,7 +551,7 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
         // remove old ride
         if (removeRide(rideId)) {
             // add ride with new informations
-            return addRide(cust_id, ridestartPt, rideendPt, intermediatePoints, ridestartTime, rideComment, acceptableDetourInMin, acceptableDetourKm, acceptableDetourPercent, offeredSeatsNo, startptAddress, endptAddress);
+            return addRide(cust_id, ridestartPt, rideendPt, intermediatePoints,null, ridestartTime, rideComment, acceptableDetourInMin, acceptableDetourKm, acceptableDetourPercent, offeredSeatsNo, startptAddress, endptAddress);
         } else {
             return -1;
         }
@@ -700,6 +563,7 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
             Point ridestartPt,
             Point rideendPt,
             Point[] intermediatePoints,
+            List<WaypointEntity> waypoints,
             Date ridestartTime,
             String rideComment,
             Integer acceptableDetourInMin,
@@ -740,32 +604,84 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
         drive.setCustId(customer);
         drive.setStartptAddress(startptAddress);
         drive.setEndptAddress(endptAddress);
-
+        drive.setWaypoints(waypoints);
+        //
+        // persist the drive, so that there is a (JPA-generated) drive id
+        em.persist(drive);
         // compute routes
         LinkedList<DriveRoutepointEntity> decomposedRoute = new LinkedList<DriveRoutepointEntity>();
         LinkedList<RoutePointEntity> route = new LinkedList<RoutePointEntity>();
         double distance = routeMatchingBean.computeInitialRoutes(drive, decomposedRoute, route);
 
+
         // if a route has been found, persist drive and routes
         if (distance != Double.MAX_VALUE) {
-            em.persist(drive);
-            for (DriveRoutepointEntity drp : decomposedRoute) {
-                drp.setDriveId(drive.getRideId());
-                em.persist(drp);
-            }
-
-            for (RoutePointEntity rp : route) {
-                rp.setRideId(drive.getRideId());
-                em.persist(rp);
-            }
-            commitUserTransaction();
+            this.persistRoutingInformation(drive, decomposedRoute, route);
+            logger.log(Level.INFO, "added drive, committed user transaction::\n");
+            em.flush();
         } else {
             logger.log(Level.INFO, "could not add drive: no route found ::\n");
-            commitUserTransaction();
+
+            em.flush();
             return -1;
         }
-        callAlgorithm(drive.getRideId(), true);
+
+        commitUserTransaction();
+
+        // TODO: enclose callMatchingAlgoritm inside of a thread
+        callMatchingAlgorithm(drive.getRideId(), true);
+
         return drive.getRideId();
+    }
+
+    /**
+     * persist routing information for this drive. This should be called after
+     * creating a drive initially, and after adding and routing waypoints.
+     * Technically, this fills the route_point and drive_route_point tables.
+     * with the lists of route_points and drive_route_points created previously
+     * in RouteMatchingBean.computeInitialRoute
+     *
+     *
+     * @param drive drive for which
+     * @param decomposedRoute list of drive_route_points, typically calculated
+     * in "RouteMatchingBean.computeInitialRoute"
+     * @param route list of route_points, typically calculated in
+     * "RouteMatchingBean.computeInitialRoute"
+     *
+     */
+    private void persistRoutingInformation(
+            DriverUndertakesRideEntity drive,
+            LinkedList<DriveRoutepointEntity> decomposedRoute,
+            LinkedList<RoutePointEntity> route) {
+
+        //  remove previously created route_points and drive_route_points for this ride
+        logger.info("persistRoutingInformation : 1");
+
+
+        this.removeAllRoutepoints(drive.getRideId());
+        this.removeAllDriveRoutepoints(drive.getRideId());
+        em.flush();
+
+        logger.info("persistRoutingInformation : 2");
+
+
+        // persist new drive_route_points
+        for (DriveRoutepointEntity drp : decomposedRoute) {
+            drp.setDriveId(drive.getRideId());
+            em.persist(drp);
+        }
+
+        logger.info("persistRoutingInformation : 3");
+
+
+        // perstist new_route_points
+        for (RoutePointEntity rp : route) {
+            rp.setRideId(drive.getRideId());
+            em.persist(rp);
+        }
+
+        logger.info("persistRoutingInformation : 4");
+
     }
 
     /**
@@ -773,7 +689,7 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
      *
      * @param rideid
      * @param riderrouteid
-     * @return null, if no entity was found; the entity
+     * @ return null, if no entity was found; the entity
      */
     private MatchEntity getMatch(int rideid, int riderrouteid) {
         List<MatchEntity> entities = (List<MatchEntity>) em.createNamedQuery("MatchEntity.findByRideIdRiderrouteId").setParameter("rideId", rideid).setParameter("riderrouteId", riderrouteid).getResultList();
@@ -793,9 +709,19 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
     public MatchEntity acceptRider(int rideid, int riderrouteid) {
         MatchEntity match = getMatch(rideid, riderrouteid);
         if (match != null) {
+        	
+        	startUserTransaction();
             match.setDriverState(MatchEntity.ACCEPTED);
             match.setDriverChange(new java.util.Date());
+            // change last access
+            CustomerEntity rider = match.getRiderUndertakesRideEntity().getCustId();
+            rider.updateCustLastMatchingChange();
+            em.merge(rider);
             em.merge(match);
+            // send system notifications
+            messageController.createMessagesOnAcceptance(match);
+            em.flush();
+            commitUserTransaction();
         } else {
             // Match does not exist!
             return null;
@@ -812,6 +738,10 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
             }
             match.setDriverState(MatchEntity.REJECTED);
             match.setDriverChange(new java.util.Date());
+            // change last access
+            CustomerEntity rider = match.getRiderUndertakesRideEntity().getCustId();
+            rider.updateCustLastMatchingChange();
+            em.merge(rider);
             em.merge(match);
         } else {
             // Match does not exist!
@@ -828,9 +758,19 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
     public MatchEntity acceptDriver(int rideid, int riderrouteid) {
         MatchEntity match = getMatch(rideid, riderrouteid);
         if (match != null) {
+        	
+        	startUserTransaction();
             match.setRiderState(MatchEntity.ACCEPTED);
             match.setRiderChange(new java.util.Date());
+            // change last change
+            CustomerEntity driver = match.getDriverUndertakesRideEntity().getCustId();
+            driver.updateCustLastMatchingChange();
+            em.merge(driver);
             em.merge(match);
+            messageController.createMessagesOnAcceptance(match);
+            em.flush();
+            commitUserTransaction();
+            
         } else {
             // Match does not exist!
             return null;
@@ -854,6 +794,10 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
             }
             match.setRiderState(MatchEntity.REJECTED);
             match.setRiderChange(new java.util.Date());
+            CustomerEntity driver = match.getDriverUndertakesRideEntity().getCustId();
+            driver.updateCustLastMatchingChange();
+            em.merge(driver);
+            em.merge(match);
             em.merge(match);
         } else {
             // Match does not exist!
@@ -866,14 +810,32 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
      * This method is called, when a new search or ride is persisted. It updates
      * the Matches table.
      */
-    public void callAlgorithm(int rideId, boolean setDriverAccess) {
+    @Override
+    public void callMatchingAlgorithm(int rideId, boolean setDriverAccess) {
+
+        startUserTransaction();
+
+        logger.info("callMatchAlgorithm for rideId : " + rideId + " driverAccess : " + setDriverAccess);
+
         // there are still free places
         List<MatchEntity> matches = routeMatchingBean.searchForRiders(rideId);
         matches = filter(matches);
         for (MatchEntity m : matches) {
             // persist match, so it can be found later on!
             em.persist(m);
+            // notify rider and driver
+            CustomerEntity rider = m.getRiderUndertakesRideEntity().getCustId();
+            rider.updateCustLastMatchingChange();
+            em.persist(rider);
+            CustomerEntity driver = m.getDriverUndertakesRideEntity().getCustId();
+            driver.updateCustLastMatchingChange();
+            em.persist(driver);
+            // send system notifications
+            messageController.createMessagesOnNewMatch(m);
         }
+
+        em.flush();
+        commitUserTransaction();   
     }
 
     /**
@@ -960,7 +922,15 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
                 // Generally don't remove matches with states 0, 2, 3 (rejected, countermanded, no more available),
                 // or matches accepted by both parties,
                 // or matches accepted by the other party only
-                if (!(m.getRiderState() == MatchEntity.ACCEPTED || m.getRiderState() == MatchEntity.REJECTED || m.getRiderState() == MatchEntity.COUNTERMANDED || m.getRiderState() == MatchEntity.NO_MORE_AVAILABLE || m.getDriverState() == MatchEntity.REJECTED || m.getDriverState() == MatchEntity.COUNTERMANDED || m.getDriverState() == MatchEntity.NO_MORE_AVAILABLE) && !(m.getRiderState() == MatchEntity.ACCEPTED && m.getDriverState() == MatchEntity.ACCEPTED)) {
+                if (!(m.getRiderState() == MatchEntity.ACCEPTED
+                        || m.getRiderState() == MatchEntity.REJECTED
+                        || m.getRiderState() == MatchEntity.RIDER_COUNTERMANDED
+                        || m.getRiderState() == MatchEntity.DRIVER_COUNTERMANDED
+                        || m.getRiderState() == MatchEntity.NO_MORE_AVAILABLE
+                        || m.getDriverState() == MatchEntity.REJECTED
+                        || m.getDriverState() == MatchEntity.RIDER_COUNTERMANDED
+                        || m.getDriverState() == MatchEntity.DRIVER_COUNTERMANDED
+                        || m.getDriverState() == MatchEntity.NO_MORE_AVAILABLE) && !(m.getRiderState() == MatchEntity.ACCEPTED && m.getDriverState() == MatchEntity.ACCEPTED)) {
                     if (unrejectedCount < matchCountLimit) {
                         // Keep this match in list
                         unrejectedCount++;
@@ -1100,59 +1070,383 @@ public class DriverUndertakesRideControllerBean extends ControllerBean implement
     @Override
     public boolean invalidateRide(Integer rideId) {
 
+        logger.info("invalidateRide : rideID " + rideId);
 
         DriverUndertakesRideEntity dure = this.getDriveByDriveId(rideId);
-        // TODO: check if we really want user transactions
-        startUserTransaction();
-        boolean deletable = this.isDeletable(rideId);
 
+        logger.info("invalidateRide : starting transaction ");
+
+        boolean deletable = this.isDeletable(rideId);
+        // if this can be removed, then do so
         if (deletable) {
+            logger.info("invalidateRide : ride is deletable ");
             this.removeRide(rideId);
-            commitUserTransaction();
-            logger.info("deleting drive with rideId : " + rideId + " the hard way by removing it");
+            logger.info("invalidateRide: deleted rideId : " + rideId + " the hard way by removing it");
             return true;
         }
 
+
+
+
+        // So, purging from database is no Option, hence we 
+        // must invalidate all Objects
+
+        startUserTransaction();
+
+        this.removeAllWaypoints(rideId);
+        this.removeAllDriveRoutepoints(rideId);
+        this.removeAllRoutepoints(rideId);
+
         // all related states have to be adapted
+        logger.info("invalidateRide : ride adapting matches");
         List<MatchEntity> states = (List<MatchEntity>) em.createNamedQuery("MatchEntity.findByRideId").setParameter("rideId", rideId).getResultList();
-        for (Iterator<MatchEntity> it = states.iterator(); it.hasNext();) {
-            // mark Matches as countermanded
-            MatchEntity matchEntity = it.next();
-            matchEntity.setDriverState(MatchEntity.COUNTERMANDED);
-            matchEntity.setDriverChange(new java.util.Date());
+        for (MatchEntity matchEntity : states) {
+            // normally, frontend should have enforced countermanding all
+            // relevant matches automatically
+            if (!(matchEntity.getDriverState() == MatchEntity.DRIVER_COUNTERMANDED)) {
+                matchEntity.setDriverState(MatchEntity.DRIVER_COUNTERMANDED);
+                matchEntity.setDriverMessage("System countermanded");
+                matchEntity.setDriverChange(new java.util.Date());
+            }
             em.merge(matchEntity);
         }
-
+        // all related states have to be adapted
+        logger.info("invalidateRide : mark ride as invalidated");
         // mark ride as invalidated
-
-        this.updateRide(dure.getRideId(), //  rideId
-                dure.getCustId().getCustId(), // customerId
-                dure.getRideStartpt(), // ridestartPoint
-                dure.getRideEndpt(), // rideendPoint
-                new Point[0], // intermediatePoints
-                new java.sql.Date(dure.getRideStarttime().getTime()), // ridestartTime
-                "COUNTERMANDED", // rideComment
-                dure.getRideAcceptableDetourInKm(), // acceptableDetourInMin
-                dure.getRideAcceptableDetourInMin(), // acceptableDetourKM
-                dure.getRideAcceptableDetourInPercent(), // acceptableDetourPercent
-                0, // offeredSeatsNo
-                dure.getStartptAddress(), // String startPtAddress
-                dure.getEndptAddress() // String endPtAddress
-                );
-
-
-        em.merge(this);
+        dure.setRideComment("COUNTERMANDED - " + dure.getRideComment());
+        // set Number of offered seats to 0, so that there will be no more matchings
+        dure.setRideOfferedseatsNo(0);
+        em.merge(dure);
         commitUserTransaction();
-
         return true;
     } // invalidateRide
 
     @Override
     public List<DriverUndertakesRideEntity> getDrivesInInterval(CustomerEntity custId, Date startDate, Date endDate) {
 
+        // note that result is sorted by virtue of the JPA Query
         List<DriverUndertakesRideEntity> res = (List<DriverUndertakesRideEntity>) em.createNamedQuery("DriverUndertakesRideEntity.findByCustIdBetweenDates").setParameter("custId", custId).setParameter("startdate", startDate).setParameter("enddate", endDate).getResultList();
-
         return res;
     }
-    
+
+    @Override
+    public List<WaypointEntity> getWaypoints(DriverUndertakesRideEntity drive) {
+
+        // note that result is sorted by virtue of the JPA Query
+        return this.getWaypoints(drive.getRideId());
+    }
+
+    @Override
+    public void addWaypoint(int rideId, WaypointEntity waypoint, int position) {
+        this.addWaypoint(rideId, waypoint, position, true);
+    }
+
+    /**
+     * Add a waypoint to a given drive. As this is not intended to be called
+     * from outside, it can be called with or without an explicite enclosing
+     * transaction
+     *
+     * @param rideId
+     * @param waypoint
+     * @param position
+     * @param transaction turn on transaction explicitely
+     */
+    protected void addWaypoint(int rideId, WaypointEntity wpt, int position, boolean transaction) {
+
+    		
+    	  // cannot add waypoint, if there is no ride...
+    	  DriverUndertakesRideEntity ride = this.getDriveByDriveId(rideId);
+          if (ride == null) {
+              logger.info("cannot addWaypoint: drive is null");
+              if (transaction) {
+                  rollbackUserTransaction();
+              }
+              return;
+          }
+    	
+       
+        logger.info("DriverUndertakesRideControllerBean removeWaypoint: rideId: " + rideId + " position : " + position + " transaction : " + transaction);
+
+        if (transaction) {
+            startUserTransaction();
+        }
+        
+        
+        // increment other route Indices to avoid duplication
+        for(WaypointEntity w: ride.getWaypoints()){
+        	if(w.getRouteIdx()>=position){
+        		w.setRouteIdx(w.getRouteIdx()+1);
+        	}
+        }
+  
+        // set routeIdx for waypoint   otherways a non-null violations
+        wpt.setRouteIdx(position);
+        wpt.setRideId(ride);
+        // merge in waypoint persist, and done!
+        ride.getWaypoints().add(wpt);
+      
+        //  ...and persist all waypoints
+        for(WaypointEntity w: ride.getWaypoints()){ em.persist(w);}
+        
+        // TODO: remove, just here to have a breakpoint
+        em.flush();
+        System.out.println("TODO: remove");
+        
+        // recalculate matchings!
+
+        LinkedList<DriveRoutepointEntity> decomposedRoute = new LinkedList<DriveRoutepointEntity>();
+        LinkedList<RoutePointEntity> route = new LinkedList<RoutePointEntity>();
+        double distance = routeMatchingBean.computeInitialRoutes(ride, decomposedRoute, route);
+
+        // if a route has been found, persist drive and routes
+        if (distance != Double.MAX_VALUE) {
+            logger.log(Level.INFO, "removeWaypoint: success, found route :\n");
+            this.persistRoutingInformation(ride, decomposedRoute, route);
+            logger.log(Level.INFO, "removeWaypoint, committed user transaction::\n");
+        } else {
+            logger.log(Level.INFO, "could not removeWaypoint: no route found ::\n");
+        }
+
+        em.flush();
+
+        // remove matchings
+        for (MatchEntity m : this.getMatches(rideId, false)) {
+            em.remove(m);
+        }
+        em.flush();
+
+        // TODO: enclose callMatchingAlgoritm inside of a thread
+        callMatchingAlgorithm(ride.getRideId(), true);
+
+
+        if (transaction) {
+            commitUserTransaction();
+        }
+
+    } // end of addWaypoint
+
+    /**
+     * Remove single waypoint. As this is intended to be called from outside,
+     * user transactions are set explicitely.
+     *
+     * @param rideID
+     * @param routeIdx
+     */
+    @Override
+    public void removeWaypoint(int rideID, int routeIdx) {
+        this.removeWaypoint(rideID, routeIdx, true);
+    }
+
+    /**
+     * Internal method for removing. Can be called with or without an eclosing
+     * transaction.
+     *
+     * @param rideID
+     * @param routeIdx
+     * @param transaction if true, method is called with enclosing transaction
+     */
+    private void removeWaypoint(int rideID, int routeIdx, boolean transaction) {
+
+
+        logger.info("DriverUndertakesRideControllerBean removeWaypoint: rideId: " + rideID + " routeIdx : " + routeIdx + " transaction : " + transaction);
+
+        if (transaction) {
+            startUserTransaction();
+        }
+
+
+        List<WaypointEntity> waypoints = this.getWaypoints(rideID);
+
+        logger.info("removeWaypoint: waypointIndices: ");
+        for (WaypointEntity w : waypoints) {
+            logger.info("" + w.getRouteIdx() + ", ");
+        }
+
+
+        if (waypoints.size() <= routeIdx) {
+            logger.severe("cannot removeWaypoint: waypoints.size : " + waypoints.size() + " <=  routeIdx" + routeIdx);
+            if (transaction) {
+                rollbackUserTransaction();
+            }
+            return;
+        }
+
+
+        WaypointEntity wpToRemove = (waypoints.get(routeIdx));
+        waypoints.remove(wpToRemove);
+        em.remove(wpToRemove);
+
+        // rearrange route indices!
+        for (int i = 0; i < waypoints.size(); i++) {
+            WaypointEntity wp = waypoints.get(i);
+            wp.setRouteIdx(i);
+            em.merge(wp);
+        }
+
+        em.flush();
+
+        DriverUndertakesRideEntity drive = this.getDriveByDriveId(rideID);
+
+        if (drive == null) {
+            logger.info("cannot removeWaypoint: drive is null");
+            if (transaction) {
+                rollbackUserTransaction();
+            }
+            return;
+        }
+
+        drive.setWaypoints(waypoints);
+        em.persist(drive);
+        em.flush();
+
+
+        LinkedList<DriveRoutepointEntity> decomposedRoute = new LinkedList<DriveRoutepointEntity>();
+        LinkedList<RoutePointEntity> route = new LinkedList<RoutePointEntity>();
+        double distance = routeMatchingBean.computeInitialRoutes(drive, decomposedRoute, route);
+
+        // if a route has been found, persist drive and routes
+        if (distance != Double.MAX_VALUE) {
+            logger.log(Level.INFO, "removeWaypoint: success, found route :\n");
+            this.persistRoutingInformation(drive, decomposedRoute, route);
+            logger.log(Level.INFO, "removeWaypoint, committed user transaction::\n");
+        } else {
+            logger.log(Level.INFO, "could not removeWaypoint: no route found ::\n");
+        }
+
+        em.flush();
+
+        // TODO: enclose callMatchingAlgoritm inside of a thread
+        callMatchingAlgorithm(drive.getRideId(), true);
+
+
+        if (transaction) {
+            commitUserTransaction();
+        }
+    }
+
+    /**
+     * Remove all Waypoints for driverUndertakesRideEntity given by param
+     * rideID.
+     *
+     * This does not care about transactions, since it is supposed to be called
+     * when deleting or invalidating drives, and hence be enclosed in a
+     * transaction
+     *
+     * @param rideID
+     */
+    private void removeAllWaypoints(int rideId) {
+
+        System.err.println("removeAllWaypoints : rideId: " + rideId);
+
+        List<WaypointEntity> waypoints = this.getWaypoints(rideId);
+        for (WaypointEntity w : waypoints) {
+            em.remove(w);
+        }
+
+        System.err.println("removeAllWaypoints : through");
+
+    }
+
+    /**
+     * Remove all routepoints for driverUndertakesRideEntity given by param
+     * rideID.
+     *
+     * This does not care about transactions, since it is supposed to be called
+     * when deleting or invalidating drives, and hence be enclosed in a
+     * transaction
+     *
+     * @param rideID
+     */
+    private void removeAllRoutepoints(int rideId) {
+        logger.info("removeAllRoutpoints : rideId : " + rideId);
+        List<RoutePointEntity> routepoints = this.getRoutePoints(rideId);
+        for (RoutePointEntity r : routepoints) {
+            em.remove(r);
+        }
+    }
+
+    /**
+     * Remove all Driveroutepoints for driverUndertakesRideEntity given by param
+     * rideID.
+     *
+     * This does not care about transactions, since it is supposed to be called
+     * when deleting or invalidating drives, and hence be enclosed in a
+     * transaction
+     *
+     * @param rideID
+     */
+    private void removeAllDriveRoutepoints(int rideId) {
+        logger.info("removeAllDriveRoutpoints : rideId : " + rideId);
+
+        List<DriveRoutepointEntity> drpts = this.getDriveRoutePoints(rideId);
+        for (DriveRoutepointEntity drpt : drpts) {
+            em.remove(drpt);
+        }
+    }
+
+    /**
+     *
+     * @param rideid
+     * @param riderrouteid
+     */
+    public void setDriverMessage(int rideid, int riderrouteid, String message) {
+        MatchEntity match = getMatch(rideid, riderrouteid);
+        if (match == null) {
+            logger.warning("Attempt to set message on null match : drive " + rideid + " ride : " + riderrouteid);
+            return;
+        }
+        match.setDriverMessage(message);
+        match.setDriverChange(new java.util.Date());
+        CustomerEntity rider = match.getRiderUndertakesRideEntity().getCustId();
+        rider.updateCustLastMatchingChange();
+        em.merge(rider);
+        em.merge(match);
+    }
+
+    /**
+     *
+     * @param rideid
+     * @param riderrouteid
+     */
+    public void setRiderMessage(int rideid, int riderrouteid, String message) {
+        MatchEntity match = getMatch(rideid, riderrouteid);
+        if (match == null) {
+            logger.warning("Attempt to set message on null match : drive " + rideid + " ride : " + riderrouteid);
+            return;
+        }
+
+        match.setRiderMessage(message);
+        match.setRiderChange(new java.util.Date());
+        CustomerEntity driver = match.getRiderUndertakesRideEntity().getCustId();
+        driver.updateCustLastMatchingChange();
+        em.merge(driver);
+        em.merge(match);
+    }
+
+    @Override
+    public List<MatchEntity> getMatchesByRideIdAndState(int rideId, int riderState, int driverState) {
+
+
+        Query q = em.createNamedQuery("MatchEntity.findByRideIdAndStates");
+        q.setParameter("rideId", rideId);
+        q.setParameter("riderState", riderState);
+        q.setParameter("driverState", driverState);
+        List<MatchEntity> matches = q.getResultList();
+
+        return matches;
+    }
+
+    @Override
+    public List<MatchEntity> getAcceptedMatches(int rideId) {
+
+        return this.getMatchesByRideIdAndState(rideId, MatchEntity.ACCEPTED, MatchEntity.ACCEPTED);
+    }
+
+	@Override
+	public List<MatchEntity> getAllMatches() {
+		
+		Query q = em.createNamedQuery("MatchEntity.findAll");
+        List<MatchEntity> matches = q.getResultList();
+		return matches;
+	}
 } // class

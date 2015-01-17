@@ -8,6 +8,8 @@ import de.avci.joride.utils.HTTPUtil;
 import de.fhg.fokus.openride.customerprofile.CustomerControllerBean;
 import de.fhg.fokus.openride.customerprofile.CustomerControllerLocal;
 import de.fhg.fokus.openride.customerprofile.CustomerEntity;
+
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.naming.InitialContext;
@@ -204,8 +206,12 @@ public class JCustomerEntityService {
                 jCustomerEntity.getCustDateofbirth(),
                 //String custEmail 
                 jCustomerEntity.getCustEmail(),
+                // data protection for mobile
+                jCustomerEntity.getShowEmailToPartners(),
                 //String custMobilePhoneNo 
                 jCustomerEntity.getCustMobilephoneno(),
+                // data protection for mobile
+                jCustomerEntity.getShowMobilePhoneToPartners(),
                 //String custFixedPhoneNo 
                 jCustomerEntity.getCustFixedphoneno(),
                 //String custAddrStreet
@@ -217,8 +223,10 @@ public class JCustomerEntityService {
                 //char custIssmoker
                 jCustomerEntity.getCustSmoker().charAt(0),
                 //Date custLicenseDate);
-                jCustomerEntity.getCustLicensedate()); // end of method call to setCustomerPersonalData
-
+                jCustomerEntity.getCustLicensedate(),
+        		// String preferredLanguage
+                jCustomerEntity.getPreferredLanguage()
+        		); // end of method call to setCustomerPersonalData
     }
 
     /**
@@ -341,6 +349,34 @@ public class JCustomerEntityService {
         return ce != null;
 
     } // email exists
+    
+    
+    
+    /**
+     * Returns true, if an account with that email address already exists in the
+     * db, else false.
+     *
+     * @param email email adress to be checked
+     *
+     * @return nickname if account exists for given email address, else null
+     */
+    public String getNicknameByEmail(String email) {
+
+        // with security checks beeing done,
+        // we can proceed to adding data to db        
+        CustomerControllerLocal cc = lookupCustomerControllerBeanLocal();
+        CustomerEntity ce = cc.getCustomerByEmail(email);
+
+        if(ce!=null){
+        	return ce.getCustNickname();
+        }
+
+        return null;
+    } // email exists
+    
+    
+    
+    
 
     /**
      * Returns true, if an account with that nickname address already exists in
@@ -396,6 +432,8 @@ public class JCustomerEntityService {
 
 
             // Create a customer Account
+            
+            int result=
             cc.addCustomer(
                     //String custNickname
                     jrr.getNickName(),
@@ -410,7 +448,15 @@ public class JCustomerEntityService {
                     //String custEmail
                     jrr.getEmailAddress(),
                     //String custMobilephoneno mobile phone may be added later
-                    null);
+                    null,
+                    // String preferredLanguage
+                    jrr.getPreferredLanguage()	
+            	);
+            
+            
+            
+            
+            
         } catch (Exception exc) {
             return false;
         }
@@ -514,8 +560,50 @@ public class JCustomerEntityService {
     }
     
     
+      
+    /** Invalidate account of the current customer.
+     *  Customer is determined using the 
+     *  http remote uid
+     * 
+     * @return true, if all went well.
+     * 
+     */
+    public void resetLastCustomerCheck(){
     
     
+        CustomerEntity ce=this.getCustomerEntitySafely();
+        CustomerControllerLocal ccl=this.lookupCustomerControllerBeanLocal();
+        
+        if(ce!=null){  ccl.resetLastCustomerCheck(ce.getCustId());
+        } else { 
+            throw new Error("Cannot resetLastCustomerCheck, customerID ist null");
+        }
+    }
+    
+   
+    /** 
+     *   @return  true, if calling customer has updated matches, else false.
+     */
+    public boolean isMatchUpdated(){
+   
+        CustomerEntity ce=this.getCustomerEntitySafely();
+        // this may happen before login
+        if(ce==null) {return false;}
+        
+        CustomerControllerLocal ccl=this.lookupCustomerControllerBeanLocal();
+       return ccl.isMatchUpdated(ce.getCustId());
+    
+    }
+    
+    
+    
+    /** Return the list of locales supported by the server
+     */
+    public Locale[] getSupportedLocales(){
+    	
+    	 CustomerControllerLocal ccl=this.lookupCustomerControllerBeanLocal();
+         return ccl.getSupportedLocales();
+    }
     
     
 } // class

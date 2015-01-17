@@ -26,9 +26,7 @@ package de.fhg.fokus.openride.rides.driver;
 import de.fhg.fokus.openride.customerprofile.CustomerEntity;
 import de.fhg.fokus.openride.matching.MatchEntity;
 import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideEntity;
-import de.fhg.fokus.openride.routing.RoutePoint;
 import java.sql.Date;
-import java.util.LinkedList;
 import java.util.List;
 import javax.ejb.Local;
 import org.postgis.Point;
@@ -40,17 +38,31 @@ import org.postgis.Point;
 @Local
 public interface DriverUndertakesRideControllerLocal {
 
-    public Point getStartPoint();
-
-    public Point getEndPoint();
-
-    public String viaPoints();
-
+    /**
+     * 
+     * @param cust_id                  Customer/Driver Id
+     * @param ridestartPt              Coordinates of starting point 
+     * @param rideendPt                Coordinates of endpoint
+     * @param intermediatePoints       currently ignored, using waypoints and addWaypoint instead
+     * @param WayPoints                Waypoints (driver defined)
+     * @param ridestartTime            Date/Time when ride starts
+     * @param rideComment              Driver's comment
+     * @param acceptableDetourInMin    currently ignored, using acceptable Detour in Km instead
+     * @param acceptableDetourKm       Acceptable Detour for picking up/dropping Riders in KM 
+     * @param acceptableDetourPercent  currently ignored, using acceptable Detour in Km instead
+     * @param offeredSeatsNo           Number of free seats to be offered
+     * @param startptAddress           Human Readable address of starting point
+     * @param endptAddress             Human Readable address of destination
+     * 
+     * @return  id of newly created driverundertakesridentity
+     */
+    
     public int addRide(
             int cust_id,
             Point ridestartPt,
             Point rideendPt,
             Point[] intermediatePoints,
+            List <WaypointEntity>  waypoints,
             Date ridestartTime,
             String rideComment,
             Integer acceptableDetourInMin,
@@ -60,52 +72,18 @@ public interface DriverUndertakesRideControllerLocal {
             String startptAddress,
             String endptAddress);
 
-    /**
-     *
-     * @param cust_id should exists.
-     * @param rideName not null.
-     * @param ridestartPt not null.
-     * @param rideendPt not null.
-     * @param ridestartTime not null.
-     * @param rideComment
-     * @param acceptableDetourInMin At least one of the three detour thresholds must be specified and valid.
-     * @param acceptableDetourKm At least one of the three detour thresholds must be specified and valid.
-     * @param acceptableDetourPercent At least one of the three detour thresholds must be specified and valid.
-     * @param offeredSeatsNo must be > 0.
-     * @param routePoints ordered from startpt to endpt. must not be null.
-     * @return if successfull : assigned drive id, else -1.
+   
+ 
+
+    /** Currently ignored. Meant to be implemented with car tracking
+     * 
      */
-    @Deprecated
-    public int addRide(int cust_id, Point ridestartPt, Point rideendPt,
-        Date ridestartTime, String rideComment, Integer acceptableDetourInMin,
-        Integer acceptableDetourKm, Integer acceptableDetourPercent,
-        int offeredSeatsNo, RoutePoint[] routePoints);
-
-    @Deprecated
-    public int addRide(int cust_id,
-            Point ridestartPt,
-            Point rideendPt,
-            Date ridestartTime,
-            String rideComment,
-            Integer acceptableDetourInMin,
-            Integer acceptableDetourKm,
-            Integer acceptableDetourPercent,
-            int offeredSeatsNo,
-            RoutePoint[] routePoints,
-            String startptAddressStreet,
-            String startptAddressZipcode,
-            String startptAddressCity,
-            String endptAddressStreet,
-            String endptAddressZipcode,
-            String endptAddressCity);
-
-    public boolean removeRide(int rideId);
-
     public void updateDriverPosition();
 
+   
     public List<DriverUndertakesRideEntity> getDrives(String nickname);
 
-    public LinkedList<DriverUndertakesRideEntity> getAllDrives();
+    public List<DriverUndertakesRideEntity> getAllDrives();
 
     public List<DriverUndertakesRideEntity> getActiveDrives(String nickname);
     
@@ -118,6 +96,13 @@ public interface DriverUndertakesRideControllerLocal {
 
     public DriverUndertakesRideEntity getDriveByDriveId(int driveId);
 
+    /**
+     *  Found in fokus code. Hopefully not used. 
+     *  Horrible implementation in DriverUndertakesRideControlerBean.
+     *  Remove unless there is a good reason for having it
+     * 
+     * @deprecated hopefully not used
+     */
     int updateRide(
             int rideId,
             int cust_id,
@@ -144,7 +129,30 @@ public interface DriverUndertakesRideControllerLocal {
     boolean isDriveUpdated(int rideId);
 
     // -------- MATCHING / ROUTES --------
+    /** Get list of matches for given ride with given states
+     *  mainly used to get all confirmed matches for a given ride
+     * 
+     * @param rideId rideId of DriverundertakesrideEntity for which to find matchings
+     * @param riderState  riderState which returned matches should have
+     * @param driverState driverState which returned matches should have
+     * @return 
+     */
+    public List<MatchEntity> getMatchesByRideIdAndState(int rideId, int riderState, int driverState);
+ 
+    
+    /** Fetch list of all Accepted matches. 
+     *  Convenience method, should return the same as
+     *  this.getMatchesByRideIdAndState(rideId, MatchEntity.ACCEPTED, MatchEntity.ACCEPTED);
+     * 
+     * @param rideId id of the DriverUndertakesRideEntity to be checked
+     * 
+     * @return  list of all Matches for this ride upon which a pickup has been agreed.
+     * 
+     */
+    public List<MatchEntity> getAcceptedMatches(int rideId);
 
+    
+    // found in ORS without documentation
     List<MatchEntity> getMatches(int rideId, boolean setDriverAccess);
     //points used for computing matches
     List<DriveRoutepointEntity> getDriveRoutePoints(int driveId);
@@ -157,7 +165,7 @@ public interface DriverUndertakesRideControllerLocal {
     // update route for matching algorithm - should be called together with setRoutePoints
     void setDriveRoutePoints(int rideId, List<DriveRoutepointEntity> routePoints);
 
-    void callAlgorithm(int rideId, boolean setDriverAccess);
+    void callMatchingAlgorithm(int rideId, boolean setDriverAccess);
 
     List<DriverUndertakesRideEntity> getInactiveDrives(String nickname);
 
@@ -198,12 +206,83 @@ public interface DriverUndertakesRideControllerLocal {
 
     /** Invalidate/countermand Ride with given Id.
      *  
+     *  That is: if ride has confirmed or countermanded matches, 
+     *  then invalidate the ride (i.e: leave it in the database).
+     *  If there are no relevant matching, then 
+     *  delete the ride from the database.
+     * 
      * 
      * @param rideId
      * @return  true, if countermanding was successful, else false.
      */
     public boolean invalidateRide(Integer rideId);
+    
+    
+    
+    /** Get waypoints for this ride.
+     *  List returned should be expected to be sorted by routeIdx.
+     *  (this is usually archieved by underlying JPA Query)
+     * 
+     * @param rideId rideId for ride we want to get the waypoints for
+     * @return 
+     */
+    public List<WaypointEntity> getWaypoints(int rideId);
+    
+        
+    /** Get waypoints for this ride.
+     * 
+     *   List returned should be expected to be sorted by routeIdx.
+     *  (this is usually archieved by underlying JPA Query)
+     * 
+     * @param drive
+     * @return 
+     */
+    public List<WaypointEntity> getWaypoints(DriverUndertakesRideEntity drive);
 
   
+     /** Add Waypoint for given drive
+      * add before the smalles position being larger then position parameter
+     * 
+     * @param rideId    Id of DriverUndertakesRideEntity to which the waypoint should be added
+     * @param position  position where to add to list
+     * @return 
+     */
+    public void addWaypoint(int rideId, WaypointEntity waypoint, int position);
+    
+    
+     /** Remove waypoint given by routeIdx from Ride given by rideId
+     * 
+     * @param rideID
+     * @param routeIdx 
+     */
+    public void removeWaypoint(int rideID, int routeIdx);
+    
+    /** Set the driver message inside a MatchEntity
+     * 
+     * @param rideId          rideId of the MatchEntity
+     * @param riderRouteId    riderRouteId of the MatchEntity
+     * @param message         message to be set
+     */
+    public void setDriverMessage(int rideId, int riderRouteId, String message);
+    
+    /** Set the rider message inside a MatchEntity
+     * 
+     * @param rideId          rideId of the MatchEntity
+     * @param riderRouteId    riderRouteId of the MatchEntity
+     * @param message         message to be set
+     */
+    public void setRiderMessage(int rideId, int riderRouteId, String message);
+    
+    
+    
+    
+     
+    /** List of all MatchEntites -- should be handled with CARE only used for automated testing 
+     *  
+     * @return List of all Matches
+     */
+    public List <MatchEntity> getAllMatches();
+    
+    
 
 }

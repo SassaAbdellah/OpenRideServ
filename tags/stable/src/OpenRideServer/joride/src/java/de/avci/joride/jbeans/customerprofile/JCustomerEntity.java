@@ -1,8 +1,10 @@
 package de.avci.joride.jbeans.customerprofile;
 
 import de.avci.joride.session.HTTPUser;
+import de.avci.joride.utils.HTTPUtil;
 import de.avci.joride.utils.PropertiesLoader;
 import java.util.Collection;
+import java.util.Locale;
 
 import de.fhg.fokus.openride.customerprofile.CustomerEntity;
 import java.awt.event.ActionEvent;
@@ -104,6 +106,7 @@ public class JCustomerEntity extends CustomerEntity {
         this.setCustPresencemssg(ce.getCustPresencemssg());
         this.setCustProfilepic(ce.getCustProfilepic());
         this.setCustRegistrdate(ce.getCustRegistrdate());
+        this.setPreferredLanguage(ce.getPreferredLanguage());
         //
         // Rider Preferences
         //
@@ -123,6 +126,10 @@ public class JCustomerEntity extends CustomerEntity {
         // Session ID
         //
         this.setCustSessionId(ce.getCustSessionId());
+        
+        // data protection settings
+        this.setShowEmailToPartners(ce.getShowEmailToPartners());
+        this.setShowMobilePhoneToPartners(ce.getShowMobilePhoneToPartners());
 
     } // update from DB
 
@@ -377,17 +384,20 @@ public class JCustomerEntity extends CustomerEntity {
      */
     public String getGenderLabel() {
 
-        PropertiesLoader loader = new PropertiesLoader();
+       
+        
+        Locale locale=new HTTPUtil().detectBestLocale();
+      
 
         if (this.getCustGender() == this.GENDER_MALE) {
-            return loader.getMessagesProps().getProperty("custGenderMale");
+            return PropertiesLoader.getMessageProperties(locale).getProperty("custGenderMale");
         }
 
         if (this.getCustGender() == this.GENDER_FEMALE) {
-            return loader.getMessagesProps().getProperty("custGenderFemale");
+            return PropertiesLoader.getMessageProperties(locale).getProperty("custGenderFemale");
         }
 
-        return loader.getMessagesProps().getProperty("custGenderOther");
+        return PropertiesLoader.getMessageProperties(locale).getProperty("custGenderOther");
     }
 
     
@@ -423,5 +433,16 @@ public class JCustomerEntity extends CustomerEntity {
 
    
     }
+    
+    
+    /** Set lastCustomerCheck Property to current date
+     */
+    public void resetLastCustomerCheck(){
+       new JCustomerEntityService().resetLastCustomerCheck();
+    }
+    
+    
+    
+    
 }// class
 

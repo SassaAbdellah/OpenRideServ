@@ -6,21 +6,26 @@
          http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
-  
-    <!-- Login Servlet -->
+
+
+
+	 <!-- Smart Login Servlet -->
     <servlet>
-        <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>de.avci.joride.session.LoginServlet</servlet-class>
+        <servlet-name>SmartLoginServlet</servlet-name>
+        <servlet-class>de.avci.joride.session.SmartLoginServlet</servlet-class>         
     </servlet>
+    
     <servlet-mapping>
-        <servlet-name>LoginServlet</servlet-name>
-        <url-pattern>/login/*</url-pattern>
+        <servlet-name>SmartLoginServlet</servlet-name>
+        <url-pattern>/*/smartlogin/*</url-pattern> 
     </servlet-mapping>
- 
-
-
-
-
+    <servlet-mapping>
+        <servlet-name>SmartLoginServlet</servlet-name>
+        <url-pattern>/smartlogin/*</url-pattern>
+    </servlet-mapping>
+	
+  
+  
     <!-- Logout Servlet -->
     <servlet>
         <servlet-name>LogoutServlet</servlet-name>
@@ -28,7 +33,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>LogoutServlet</servlet-name>
-        <url-pattern>/logout/*</url-pattern>
+        <url-pattern>*.logout</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>LogoutServlet</servlet-name>
@@ -50,22 +55,7 @@
         <url-pattern>/faces/*</url-pattern>
     </servlet-mapping>
    
-    <!--  jax-rs servlet -->
-   
-    <servlet>
-        <servlet-name>JAX-RS Servlet</servlet-name>
-        <servlet-class>
-            com.sun.jersey.spi.container.servlet.ServletContainer
-        </servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>JAX-RS Servlet</servlet-name>
-        <url-pattern>/jax-rs/*</url-pattern>
-    </servlet-mapping>
-
-
-
+  
 
 
     <welcome-file-list>
@@ -78,13 +68,11 @@
     <!--  This allows browsers to cache the JS resource instead of having to write it each time the page is accessed.  -->
    
     <context-param>
-        <param-name> com.sun.faces.externalizeJavaScript </param-name>
-        <param-value> true </param-value>  	
+        <param-name>com.sun.faces.externalizeJavaScript</param-name>
+        <param-value>true</param-value>  	
     </context-param>
 
 
-
-    
     <!-- TODO: change this when it comes to productive USE ! -->
     
     <context-param>
@@ -94,40 +82,26 @@
     
     
     
-    <!-- *** For the time beeing, we start with hardwired "smoothness" theme *** -->
-    <!-- *** TODO: make this configurable for packager                       *** -->
+  
+    <!-- ***  default theme "aristo" will be overwritten by the value of the jquery.ui.theme     *** -->
+    <!-- ***  in local.properties                                                                *** -->
     <context-param>   
         <param-name>primefaces.THEME</param-name>
-        <param-value>smoothness</param-value> 
+        <param-value>aristo</param-value> 
     </context-param>
    
    
    
-   
-    <!-- ** public access will be granted to:  ************** -->
-    <!-- **  * login servlet -->
-    
-    <security-constraint>
-        <web-resource-collection>
-            <web-resource-name>LoginServlet</web-resource-name>
-            <url-pattern>  /login/* </url-pattern>
-            <url-pattern> /faces/javax.faces.resource/* </url-pattern>
-        </web-resource-collection>
-    </security-constraint>
-   
-   
-  
-   
+
+     
     <!--  most of the jsfs and webservices are protected  -->
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Protected Pages</web-resource-name>
-            <url-pattern>/faces/*</url-pattern>
+            <url-pattern>*.xhtml</url-pattern>
           
         </web-resource-collection>
         <auth-constraint>
-            <role-name>registereduser</role-name>
-            <role-name>invitedguest</role-name>
             <role-name>customer</role-name>
         </auth-constraint>
     </security-constraint>
@@ -140,13 +114,6 @@
             <form-error-page>/faces/public/noauth.xhtml</form-error-page>
         </form-login-config>
     </login-config>
-
-    <security-role>
-        <role-name>registereduser</role-name>
-    </security-role>
-    <security-role>
-        <role-name>invitedguest</role-name>
-    </security-role>
     <security-role>
         <role-name>customer</role-name>
     </security-role>
@@ -175,7 +142,6 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
     
-    
-    
+   
     
 </web-app>

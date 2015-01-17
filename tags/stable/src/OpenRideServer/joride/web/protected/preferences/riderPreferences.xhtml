@@ -64,23 +64,19 @@
                     <div class="formInput">
 
 
-                        <h:selectOneMenu value="#{jprofile.custRiderprefSmoker}">
-                            <f:selectItem itemValue="#{jprofile.smokerChar}" itemLabel="#{msgs.custSmoker}" />
-                            <f:selectItem itemValue="#{jprofile.nonsmokerChar}" itemLabel="#{msgs.custNonSmoker}" />
-
-                        </h:selectOneMenu>
+                        <h:selectOneRadio value="#{jprofile.custRiderprefSmoker}">
+                        <div class="formLabel">
+                            <f:selectItem itemValue="#{jprofile.smokerChar}" itemLabel="#{msgs.custSmokeAcceptSmokingDriver}" />
+                        </div>
+                           <div class="formLabel">
+                            <f:selectItem itemValue="#{jprofile.nonsmokerChar}" itemLabel="#{msgs.custSmokeNotAcceptSmokingDriver}" />
+						</div>
+                        </h:selectOneRadio>
 
                     </div>
 
 
-
-
-
-
-
-
-
-                    <h:commandButton action="#{jprofile.updateRiderPreferencesToDB}"  value="#{msgs.formSubmit}" />
+                    <p:commandButton action="#{jprofile.updateRiderPreferencesToDB}"  value="#{msgs.formApply}" ajax="false" />
 
 
                 </h:form>

@@ -130,7 +130,8 @@
                             <p:outputLabel value="#{myride.endptAddress}" />
                         </p>
                         <p>
-                            <h:form>
+                        	<!-- full display of this ride only if displayable for rider -->
+                            <h:form rendered="#{myride.isCallerIsRider()}">
                                 <h:commandLink action="rider.rideDisplay" value="#{msgs.rideDisplayRequest}">
                                     <f:param  name="#{crud.paramNameCrudId}" value="#{myride.riderrouteId}"/>
                                     <f:param name="#{webflow.getParamBack()}" value="search.requests" />
