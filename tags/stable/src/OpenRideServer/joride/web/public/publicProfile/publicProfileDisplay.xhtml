@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:cc="http://java.sun.com/jsf/composite">
+
+<body>
+
+
+	<h:head>
+		<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	</h:head>
+
+
+
+
+	<ui:composition template="/templates/navbar1Layout.xhtml">
+
+
+
+
+
+		<ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+		<ui:define name="content">
+
+
+
+
+			<!-- Determine automatically by what parameter this was called -->
+
+                #{publicProfile.smartUpdate()}
+
+
+
+                <!-- if the profile does not seem to exist, then do not show it-->
+			<p:panel rendered="#{!publicProfile.seemsToExists()}">
+                    #{msgs.publicProfileDoesNotExist}
+                </p:panel>
+
+
+
+			<!-- display data only if the publicProfile exists -->
+			<p:panel rendered="#{publicProfile.seemsToExists()}">
+
+				<h1>#{publicProfile.custNickname}</h1>
+
+				<p>
+
+					<div class="formLabel">#{msgs.custIssmoker}:</div>
+					<div class="formInput">#{publicProfile.custIssmoker}</div>
+					<div class="formLabel">#{msgs.custLicensedate}:</div>
+					<div class="formInput">#{publicProfile.custLicensedate}</div>
+					<div class="formLabel">#{msgs.custPreferredLanguage}:</div>
+					<div class="formInput">#{publicProfile.getPreferredLanguageDisplayString()}</div>
+					<!-- show email only if user wants us to -->
+					<h:form name="email" rendered="#{publicProfile.showEmail}" >
+						<div class="formLabel">#{msgs.custEmail} </div>
+						<div class="Input"><a href="mailto:#{publicProfile.email}"> #{publicProfile.email} </a></div>
+					</h:form>
+					
+					<!-- show mobile phone only if user wants us to -->
+					<h:form name="mobile" rendered="#{publicProfile.showMobilePhoneno}">
+						<div class="formLabel">#{msgs.custMobilephoneno} </div>
+						<div class="formInput"><a href="tel:#{publicProfile.mobilePhoneno}"> #{publicProfile.mobilePhoneno} </a></div>
+					</h:form>
+					
+					
+				</p>
+
+				<h2>
+					#{msgs.driver} <br />
+					<p:rating value="#{publicProfile.driverStarRating}"
+						rendered="#{publicProfile.driverRated}" readonly="true" />
+				</h2>
+				<p>
+
+
+					<div class="formLabel">#{msgs.ratingsDriverRatingsAvg}:</div>
+					<div class="formInput">
+						#{publicProfile.driverRatingsRatioFormatted}</div>
+					<div class="formLabel">#{msgs.ratingsNumberOfDriverRatings}:</div>
+					<div class="formInput">#{publicProfile.driverRatingsCount}</div>
+
+					<div class="formLabel"><h:form>
+							<p:commandLink action="driverRatingsDisplay" ajax="false">
+
+								<h:outputFormat value="#{msgs.ratingsViewDriverRatings}">
+									<f:param value="#{publicProfile.custNickname}" />
+								</h:outputFormat>
+
+							</p:commandLink>
+						</h:form></div>
+				</p>
+				<p>
+
+					<h2>
+						#{msgs.rider} <br />
+						<p:rating value="#{publicProfile.riderStarRating}"
+							rendered="#{publicProfile.riderRated}" readonly="true" />
+					</h2>
+
+
+					<div class="formLabel">#{msgs.ratingsRiderRatingsAvg}:</div>
+				
+					<div class="formInput">
+						#{publicProfile.riderRatingsRatioFormatted}</div>
+
+					<div class="formLabel">#{msgs.ratingsNumberOfRiderRatings}:</div>
+					<div class="formInput">#{publicProfile.riderRatingsCount}</div>
+
+					<div class="formLabel"><h:form>
+							<p:commandLink action="riderRatingsDisplay" ajax="false">
+
+								<h:outputFormat value="#{msgs.ratingsViewRiderRatings}">
+									<f:param value="#{publicProfile.custNickname}" />
+								</h:outputFormat>
+
+							</p:commandLink>
+						</h:form></div>
+
+
+				</p>
+
+			</p:panel>
+
+
+		</ui:define>
+
+
+	</ui:composition>
+
+
+
+
+
+</body>
+</html>

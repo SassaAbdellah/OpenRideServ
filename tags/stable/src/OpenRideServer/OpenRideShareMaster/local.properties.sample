@@ -1,0 +1,145 @@
+##########################################################################
+#
+#  This is the local.properties.sample file.
+#  use this as a template to configure Your local installation
+#  of OpenRide 
+#
+##########################################################################  
+#
+#
+#
+#
+# directory with jee libs to be used during the build
+# do not change unless You really know what You are doing
+#
+jee.lib.basedir=build.headless.support/jee/libs.glassfish.3.0.2/
+#
+#
+#
+#
+####################################################
+#                                                  #
+# Options to govern what is build and deployed     #
+#                                                  #
+####################################################
+#
+# uncomment this to build "joride" frontend 
+build.joride=on
+#
+# uncomment this to build "joride-public" frontend 
+build.joride-public=on
+#
+#
+# Note that joride-rest is still under development, and adding
+# joride-rest to an installation may form  a security risk.
+# So, for the time beeing, do not add joride-rest to a productive installation
+#
+#
+# uncomment this to build "joride-rest" frontend
+#
+#build.joride-rest=on
+#
+#
+#
+# Global settings for the update/alert service in joride weblclient. 
+# currently, there is only one property "updateInterval" defining the 
+# interval in which the clients  update themselves.
+#
+#
+# Interval (in milliseconds) in which the client polls for updates.
+# For productive use, it is probably unwise to chose a value below 60.000 (aka 1 Minute)
+#
+updateInterval=60000
+#
+#
+#
+# Interval (in milliseconds) for which the popup notification ("growl")
+# should be visible.  Naturally, the growl should be visible for an amount
+# of time smaller or equal to the update interval
+# 
+growlInterval=3333
+#
+#
+# jndi name of the mail service
+#
+#
+#
+mailServiceJNDI=jorideMail
+#
+#
+#
+#
+#
+# default timezone 
+# this is the timezone used to calculate the dates displayed in the frontend
+# use ISO abbreviations (GMT, UTC,... )
+#
+# probably, this page will be helpful:
+# http://en.wikipedia.org/wiki/List_of_time_zone_abbreviations 
+#
+defaulttimezone=GMT
+#
+# 
+# email of the person/entity that gets messages 
+# concerning operational issues
+# (mailfunction) 
+#
+webmasterEmailRecipient=jochen@localhost
+#
+#  email of the person/entity that gets messages
+#  concerning business issues  (complaints etc...)
+#  also recipient for webfrontend
+#
+#
+businessEmailRecipient=jochen@localhost
+#
+#
+# noreply email that is used as sender/replyTo address
+# for messages that are not supposed to be replied
+#
+noreplyEmailRecipient=noreply@localhost
+#
+#
+# URL where terms and conditions are to be found
+# default setting points to a warning message.
+#
+termsURL=joride-public/faces/uninitialized.xhtml
+#
+# URL where imprint is to be found
+# default setting points to a warning message.
+#
+imprintURL=/joride-public/faces/uninitialized.xhtml
+#
+#
+# base URL for "relogin" section (without base url, since base-url is joride-public)
+# this is where users are sent after logging out
+#
+#
+urlLoggedOut=http://localhost:8080/joride-public/faces/public/loggedout.xhtml
+#
+# url where the openlayers library should be included.
+# by default, the standard URL for Openlayers:
+# http://www.openlayers.org/api/OpenLayers.js"
+#
+# If You are not a developer trying out other versions of OL, there 
+# should probably be no reason to change this value
+#
+urlOpenLayers=http://www.openlayers.org/api/OpenLayers.js
+#
+# How ever for developing offline, 
+# you may want to use the Url below:
+#
+#urlOpenLayers=/joride/faces/javax.faces.resource/OpenLayers.js?ln=js
+#
+#
+# You may set this to either one of the themes supported by default,
+# or to custom theme. Read README.THEMES.TXT for more information.
+# if this is not set, theme will be set to primefaces default (aristo)
+#  
+#jquery.ui.theme=swm
+
+
+
+
+
+

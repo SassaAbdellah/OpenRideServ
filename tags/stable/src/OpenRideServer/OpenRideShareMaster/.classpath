@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/commons-codec-1.6.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/commons-el.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/commons-fileupload-1.2.1.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/commons-lang-2.4.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/commons-lang-2.5.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/commons-logging-1.1.3.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/commons-validator-1.3.1.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/eclipselink.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/fluent-hc-4.3.3.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/graphhopper-0.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/httpclient-4.3.3.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/httpclient-cache-4.3.3.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/httpcore-4.3.2.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/httpmime-4.3.3.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/javaproj-1.0.6.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/osmosis-core-0.43.1.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/osmosis-osm-binary-0.43.1.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/postgis-jdbc-2.0.2SVN.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/postgresql-9.2-1003.jdbc4.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/protobuf.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/slf4j-api-1.5.8.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/slf4j-nop-1.5.8.jar"/>
+	<classpathentry kind="lib" path="/OpenRideServer-ejb/libs/trove-3.0.2.jar"/>
+	<classpathentry kind="src" path="/OpenRideServer-ejb"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

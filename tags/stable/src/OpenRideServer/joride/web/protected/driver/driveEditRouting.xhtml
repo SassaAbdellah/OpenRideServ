@@ -1,0 +1,286 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+
+<h:head>
+	<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</h:head>
+
+
+<body>
+
+
+	<ui:composition template="/templates/navbar1Layout.xhtml">
+
+
+		<!-- highlight "preferences" tab -->
+		<ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
+
+
+
+		<ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+		<ui:define name="content">
+
+
+                #{driverride.update()}
+                #{webflow.smartUpdate()}
+                <!-- request scoped driverride is here to circumvent JSF Bug -->
+			<!-- which allows no command links inside repeat elements    -->
+			<!-- unless the object being repeated is session scoped      -->
+			<!-- TODO: remove rscdriverride as soon as Oracle fixes this -->
+                #{rscdriverride.update()}
+
+                <h1>#{msgs.waypointEditRoute}</h1>
+
+
+			<table>
+
+
+				<!-- ********************************* -->
+				<!-- **    ride start section          -->
+				<!-- ********************************* -->
+
+				<tr>
+					<td colspan="3">
+						<h2>#{msgs.rideStart}</h2>
+					</td>
+				</tr>
+
+
+				<tr>
+					<td class="formLabel">#{msgs.rideStartptAddress}</td>
+					<td>:</td>
+					<td class="formInput">#{driverride.startptAddress}</td>
+				</tr>
+
+
+
+				<!-- ********************************* -->
+				<!-- **    waypoint section            -->
+				<!-- ********************************* -->
+
+				<tr>
+					<td colspan="3" class="formLabel">
+						<h2>#{msgs.waypoints}</h2>
+					</td>
+
+				</tr>
+				<tr>
+					<td class="formInput">
+						<!-- commandlink to add a waypoint right before the startpoint (position==0) -->
+						<h:form>
+							<p:commandButton id="addWaypoint" icon="ui-icon-plus"
+								action="driver.createWaypoint" ajax="false">
+								<f:param name="#{waypoint.paramNameRideId}"
+									value="#{rscdriverride.rideId}" />
+								<f:param name="#{waypoint.paramNamePosition}" value="0" />
+
+								<!-- Webflow parameters -->
+								<f:param name="#{crud.paramNameCrudId}"
+									value="#{rscdriverride.rideId}" />
+								<f:param name="#{webflow.getParamBack()}"
+									value="driver.driveDisplay" />
+							</p:commandButton>
+							<p:tooltip value="#{msgs.waypointAddWaypointAtPosition}"
+								for="addWaypoint" />
+						</h:form>
+					</td>
+					<td colspan="2">&nbsp;</td>
+					<!-- spacer to make add buttom appear in the 1th row -->
+				</tr>
+
+
+				<!-- ********************************* -->
+				<!-- **   list of waypoints            -->
+				<!-- ********************************* -->
+
+
+				<ui:repeat value="#{rscdriverride.jwaypoints}" var="wp">
+
+					<tr>
+
+						<td class="formInput">
+							<!-- commandlink to  remove *this* waypoint --> <h:form>
+								<p:commandButton id="deleteWaypoint" icon="ui-icon-trash"
+									actionListener="#{wp.removeFromDrive}" ajax="false">
+									<!-- Webflow parameters to enable reloading of page -->
+									<f:param name="#{crud.paramNameCrudId}"
+										value="#{rscdriverride.rideId}" />
+									<f:param name="#{webflow.getParamBack()}"
+										value="driver.driveDisplay" />
+								</p:commandButton>
+								<p:tooltip value="#{msgs.waypointRemoveWaypoint}"
+									for="deleteWaypoint" />
+							</h:form>
+						</td>
+						<td class="formLabel" colspan="2">#{wp.description}</td>
+					</tr>
+					<tr>
+						<td class="formInput">
+							<!-- commandlink to add a waypoint after *this* waypoint --> <h:form>
+								<p:commandButton id="addWaypoint" icon="ui-icon-plus"
+									action="driver.createWaypoint" ajax="false">
+									<f:param name="#{waypoint.paramNameRideId}"
+										value="#{rscdriverride.rideId}" />
+									<f:param name="#{waypoint.paramNamePosition}"
+										value="#{wp.positionValueAfter}" />
+
+									<!-- Webflow parameters -->
+									<f:param name="#{crud.paramNameCrudId}"
+										value="#{rscdriverride.rideId}" />
+									<f:param name="#{webflow.getParamBack()}"
+										value="driver.driveDisplay" />
+								</p:commandButton>
+								<p:tooltip value="#{msgs.waypointAddWaypointAtPosition}"
+									for="addWaypoint" />
+							</h:form>
+						</td>
+						<td colspan="2">&nbsp;</td>
+						<!-- spacer to make delete buttom appear in the 1th row -->
+					</tr>
+				</ui:repeat>
+
+				<!-- ********************************* -->
+				<!-- **  ride destination section      -->
+				<!-- ********************************* -->
+
+				<tr>
+					<td colspan="3">
+						<h2>#{msgs.rideDestination}</h2>
+					</td>
+				</tr>
+
+				<tr>
+					<td class="formLabel">#{msgs.rideDestinationAddress}</td>
+					<td>:</td>
+					<td class="formInput">#{driverride.endptAddress}</td>
+				</tr>
+
+			</table>
+
+
+
+			<!-- *************************************************** -->
+			<!--  Mechanism to show/hide map                         -->
+			<!-- *************************************************** -->
+
+			<h:form>
+
+				<div class="formLabel">
+					<p:commandLink value="#{msgs.mapsShowMaps}"
+						rendered="#{HTTPUser.hideMap}" action="driver.editRouting"
+						actionListener="#{HTTPUser.toggleMapVisibility(evt)}" ajax="false">
+						<f:param name="#{crud.paramNameCrudId}"
+							value="#{driverride.rideId}" />
+					</p:commandLink>
+					
+					<p>
+						<h:commandLink rendered="#{HTTPUser.hideMap}"
+							action="driver.driveEditRouting"
+							actionListener="#{HTTPUser.toggleMapVisibility(evt)}">
+							<p:graphicImage rendered="#{HTTPUser.hideMap}" library="images"
+								name="OpenStreetmapsLogo.png" width="64" heigth="64" />
+							<f:param name="#{crud.paramNameCrudId}"
+								value="#{driverride.rideId}" />
+						</h:commandLink>
+					</p>
+					
+					
+				</div>
+
+				<div class="formLabel">
+					<p:commandLink value="#{msgs.mapsHideMaps}"
+						rendered="#{HTTPUser.showMap}" action="driver.editRouting"
+						actionListener="#{HTTPUser.toggleMapVisibility(evt)}" ajax="false">
+						<f:param name="#{crud.paramNameCrudId}"
+							value="#{driverride.rideId}" />
+					</p:commandLink>
+					
+				</div>
+
+			</h:form>
+
+			<!-- ************************************** -->
+			<!-- Map Mech below                         -->
+			<!-- ************************************** -->
+
+			<ui:fragment rendered="#{HTTPUser.showMap}">
+
+
+
+				<!-- include standard jquery  -->
+				<h:outputScript library="js" name="jquery-1.4.1.js" />
+
+				<!-- we may deliver a local OpenLayers version 2.12              -->
+				<!-- alternatively, it can be included from OpenLayers.org   -->
+
+				<!-- h:outputScript library="js" name="OpenLayers.js" /      -->
+				<script src="#{HTTPUser.openLayersURL}"></script>
+
+				<!-- h:outputScript library="js" name="OpenLayers.js" /      -->
+
+				<!-- include functions for displaying the routing -->
+				<h:outputScript library="js" name="jorideRouting.js" />
+
+
+				<!-- **************************************************************************** -->
+				<!-- div to show the map  -->
+
+				<!-- **************************************************************************** -->
+
+				<p>
+					<div id="mapdiv">&nbsp;</div>
+				</p>
+				<script>
+
+                    myRoutePoints =#{driverride.routePointsAsJSON};
+                    myStartPoint =#{driverride.routePoints.startPointAsJSON};
+                    myEndPoint =#{driverride.routePoints.endPointAsJSON};
+                    myPickupPoints =#{driverride.routePoints.pickupRiderPointsAsJSON};
+                    myDropPoints =#{driverride.routePoints.dropRiderPointsAsJSON};
+                    myWayPoints =#{driverride.routePoints.wayPointsAsJSON};
+
+                    createMap("mapdiv", myStartPoint, myEndPoint, myRoutePoints, myPickupPoints, myDropPoints, myWayPoints);
+                    
+                </script>
+
+
+			</ui:fragment>
+			<!-- ********************************************* -->
+			<!-- End of Maps fragment                          -->
+			<!-- ********************************************* -->
+
+
+			<p>
+				<h:form>
+					<h:commandLink value="#{msgs.finish}" action="driver.driveDisplay">
+						<f:param name="#{crud.paramNameCrudId}"
+							value="#{driverride.rideId}" />
+					</h:commandLink>
+				</h:form>
+			</p>
+
+
+
+		</ui:define>
+
+
+
+
+	</ui:composition>
+
+
+
+</body>
+</html>

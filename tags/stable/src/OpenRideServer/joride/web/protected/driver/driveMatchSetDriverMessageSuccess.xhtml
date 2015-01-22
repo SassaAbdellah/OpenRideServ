@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<!-- ************************************************************** -->
+<!--    To be shown after succcessfull setting the driver message   -->
+<!-- ************************************************************** -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+
+<h:head>
+	<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</h:head>
+
+
+
+<body>
+
+
+	<ui:composition template="/templates/simpleLayout.xhtml">
+
+
+		<ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+		<ui:define name="content">
+
+
+			<h1>#{msgs.matchYourMessageToRider}</h1>
+                <p>
+					#{match.smartUpdate()}
+					#{match.sendDriverMessage()}
+					<div class="formInput">  #{match.driverMessage} </div>
+				</p>
+
+                
+                <h:form>
+                
+                 #{webflow.smartUpdate()}     
+			
+						<div><p:commandButton id="backlink"
+								icon="ui-icon-triangle-1-w" action="#{webflow.getBack()}"
+								ajax="false">
+							</p:commandButton> <p:tooltip for="backlink" value="#{msgs.back}" /></div>
+						<div><h:commandLink value="#{msgs.back}"
+								action="#{webflow.getBack()}" /></div>
+			
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

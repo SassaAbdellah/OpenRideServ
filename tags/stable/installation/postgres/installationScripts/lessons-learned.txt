@@ -1,0 +1,9 @@
+
+== lessions learned while trying to resurrect openride ==
+
+
+* postgis 1.5.xxx is missing library liblwgeom.so, thus 
+  undumping the openride_db dump fails. 
+  Allegdly, this is the case starting with postgis 1.4,
+  so I'll try postgis  <= 1.3.xx
+
