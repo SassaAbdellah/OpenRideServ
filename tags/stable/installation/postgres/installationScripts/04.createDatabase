@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+#
+#
+# create dabase for openride associated for user "openride"
+# 
+#
+#
+#
+#
+echo drop database openride | psql 
+#
+createdb -O openride openride 'Database for openride ridesharing app'

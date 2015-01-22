@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      >
+
+
+
+
+
+
+
+    <h:head> </h:head>
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+    <h:body>
+        <ui:composition template="/templates/navbar1Layout.xhtml">
+
+            <!-- highlight "accounts" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexAccounts}" />
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+            <ui:define name="content">
+
+                <ul>
+                    <!-- show a login link only if user is not logged in -->
+                    <li>
+                        <h:form rendered="#{!HTTPUser.loggedIn}">      
+                            <h:outputLink value="#{HTTPUser.getLoginURL()}">
+                                #{HTTPUser.loginLabel}
+                            </h:outputLink>
+                        </h:form>
+                    </li>
+
+                    <li> 
+                        <h:form>
+                            <h:commandLink value="#{msgs.registrationRegisterNewAccount}" action="registration" />
+                        </h:form>
+                    </li>
+
+                    <li>  
+                        <h:form>
+                            <h:commandLink value="#{msgs.resetPassword}" action="resetPassword" />
+                        </h:form>
+                    </li>
+                </ul>
+
+
+
+
+            </ui:define>
+
+
+
+
+        </ui:composition>
+
+
+    </h:body>
+
+
+
+</html>
+

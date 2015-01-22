@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+         http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+  
+    <!-- FacebookLogin Servlet -->
+    <servlet>
+        <servlet-name>FacebookLoginServlet</servlet-name>
+        <servlet-class>de.acando.facebooklogin.AuthorizationResponseServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FacebookLoginServlet</servlet-name>
+        <url-pattern>/login/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Show Parameter Servlet -->
+    <servlet>
+        <servlet-name>ShowParametersServlet</servlet-name>
+        <servlet-class>de.acando.facebooklogin.ShowParametersServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ShowParametersServlet</servlet-name>
+        <url-pattern>/showParameters/*</url-pattern>
+    </servlet-mapping>
+
+   <!-- Automated login with OAUth/facebook -->
+    <servlet>
+        <servlet-name>AutoLoginServlet</servlet-name>
+        <servlet-class>de.acando.facebooklogin.AutoLoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AutoLoginServlet</servlet-name>
+        <url-pattern>/autologin/*</url-pattern>
+    </servlet-mapping>
+    
+    
+        
+</web-app>

@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+
+<h:head>
+	<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</h:head>
+
+
+
+<body>
+
+
+	<ui:composition template="/templates/navbar1Layout.xhtml">
+
+
+		<!-- highlight "preferences" tab -->
+		<ui:param name="jrtabindex" value="#{jrtab.jorideTabindexPreferences}" />
+
+
+		<ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+		<ui:define name="content">
+
+
+                #{jfavpoint.updateFromDB()}
+
+                <h1>#{jfavpoint.favptDisplayname}</h1>
+
+			<p>
+				<div class="formLabel">#{msgs.favptAddressExplanation}</div>
+				#{jfavpoint.favptAddress}
+			</p>
+
+			<p>
+				<div class="formLabel">#{msgs.favptPoint}</div>
+				#{jfavpoint.favptPoint}
+			</p>
+
+
+
+			<h:inputHidden value="#{jfavpoint.favptId}" />
+
+			<!-- switches to show map -->
+
+			<h:form>
+
+				<div class="formLabel">
+					<p:commandLink value="#{msgs.mapsShowMaps}"
+						rendered="#{HTTPUser.hideMap}"
+						action="preferences.favoritePlacesDisplay"
+						actionListener="#{HTTPUser.toggleMapVisibility(evt)}" ajax="false">
+						<f:param name="#{crud.paramNameCrudId}"
+							value="#{jfavpoint.favptId}" />
+					</p:commandLink>
+
+					<p>
+						<h:commandLink rendered="#{HTTPUser.hideMap}"
+							action="preferences.favoritePlacesDisplay"
+							actionListener="#{HTTPUser.toggleMapVisibility(evt)}">
+							<p:graphicImage rendered="#{HTTPUser.hideMap}" library="images"
+								name="OpenStreetmapsLogo.png" width="64" heigth="64" />
+							<f:param name="#{crud.paramNameCrudId}"
+								value="#{jfavpoint.favptId}" />
+						</h:commandLink>
+					</p>
+
+				</div>
+
+			</h:form>
+
+
+
+			<!-- switch to hide map   -->
+			<div class="formLabel">
+				<h:form>
+					<p:commandLink value="#{msgs.mapsHideMaps}"
+						rendered="#{HTTPUser.showMap}"
+						action="preferences.favoritePlacesDisplay"
+						actionListener="#{HTTPUser.toggleMapVisibility(evt)}" ajax="false">
+						<f:param name="#{crud.paramNameCrudId}"
+							value="#{jfavpoint.favptId}" />
+					</p:commandLink>
+				</h:form>
+			</div>
+
+
+			<!-- ************************************** -->
+			<!-- Map Mech below                         -->
+			<!-- ************************************** -->
+
+			<ui:fragment rendered="#{HTTPUser.showMap}">
+
+				<p>
+					<!-- ***** div to show the map ***** -->
+					<div id="mapdiv">&nbsp;</div>
+				</p>
+
+				<!-- we may deliver a local OpenLayers version 2.12              -->
+				<!-- alternatively, it can be included from OpenLayers.org   -->
+				<!-- h:outputScript library="js" name="OpenLayers.js" /      -->
+				<script src="#{HTTPUser.openLayersURL}"></script>
+
+
+				<!-- include standard jquery  -->
+				<h:outputScript library="js" name="jquery-1.4.1.js" />
+
+
+				<!-- include pickpoint script  -->
+				<h:outputScript library="js" name="pickpoint.js" />
+
+
+
+
+				<!-- creation of map and control object ends above -->
+				<!-- code above has to be externalized first       -->
+
+
+
+				<!-- Show map with default click handler -->
+
+				<script>
+                                      
+                    var map=createOSMMap();	  
+
+                    // 
+                    //	
+                    var jorideMarkersLayer;	
+
+           
+                    // create markers layer, and center at lon/lat of favorite point
+                    createMarkersLayer( #{jfavpoint.lon}, #{jfavpoint.lat} , 16, map);
+		
+                </script>
+
+			</ui:fragment>
+
+			<!-- ********************************** -->
+			<!-- ***** End of map mechanism  ****** -->
+			<!-- ********************************** -->
+
+
+
+			<h:form>
+				<h:commandLink action="preferences.favoritePlaces"
+					value="#{msgs.back}" />
+			</h:form>
+
+
+
+
+
+		</ui:define>
+
+
+
+
+	</ui:composition>
+
+
+
+
+
+</body>
+</html>

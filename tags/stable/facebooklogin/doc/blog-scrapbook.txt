@@ -1,0 +1,53 @@
+
+
+
+
+
+Creating a fratzbuch app:
+
+https://developers.facebook.com/
+[Menu] Apps->Create a new App
+
+
+Joch­e­n­s­F­r­a­t­z­b­u­c­h­L­o­g­i­nApp
+This app is in development mode
+App ID
+926305047396104
+
+App Secret
+8adbed9ca3e351a17d15a8f5c2f01d30
+
+
+
+Add login for the web at:    
+https://developers.facebook.com/docs/facebook-login/v2.0
+
+Login for the Web:           
+https://developers.facebook.com/docs/facebook-login/login-flow-for-web/v2.0
+
+Login without Javascript:    
+https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2
+
+
+===== facebook mag die app nicht ====
+
+  This must be derived from Canvas-URL, Secure Canvas URL,
+  Unity Binary URL, Site URL, URL der Webseite für Mobilgeräte,
+  Page Tab URL oder Secure Page Tab URL.
+  Check and correct the following domains: localhost
+
+
+
+
+
+
+
+#
+# App access token wird gebraucht, um die Application Dinge tun zu lassen
+#
+#
+#App Access token URL
+#
+#
+
+https://developers.facebook.com/docs/facebook-login/access-tokens

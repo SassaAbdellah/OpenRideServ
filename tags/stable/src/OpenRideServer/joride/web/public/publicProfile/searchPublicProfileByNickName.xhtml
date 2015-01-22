@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core" 
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+    <body>
+
+
+        <ui:composition template="/templates/navbar1Layout.xhtml">
+
+            <!-- highlight "preferences" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
+
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+            <ui:define name="content">
+
+                <h:form>
+                    <p:panel>
+                        <p:panelGrid columns="1"> <!-- outer of 2 nested grids -->
+
+                            <f:facet name="header">
+                                #{msgs.rideSearchDrives}
+                            </f:facet>
+
+
+
+
+
+                            <p:row>
+                                <p:column>
+                                    <p:outputLabel value="#{msgs.custNickname}" />
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column>
+                                    <h:inputText value="#{publicProfile.custNickname}" />
+                                </p:column>
+                            </p:row>
+
+
+                            <f:facet name="footer">
+
+                                <h:commandButton  
+                                    value="#{msgs.formSearch}"
+                                    action="displayPublicProfile"
+                                    >
+                             
+
+                                    <f:param 
+                                        name="#{joRideConstants.paramNameNickname}" 
+                                        value="#{publicProfile.custNickname}"
+                                        />
+
+
+                                    <f:param 
+                                        name="#{webflow.paramBack}" 
+                                        value="search.drives"
+                                        />
+
+                                </h:commandButton>
+                            </f:facet>
+
+                        </p:panelGrid>
+
+                    </p:panel>
+
+                </h:form>
+
+
+
+
+
+
+
+
+
+            </ui:define>
+
+
+        </ui:composition>
+
+        <ui:debug />
+
+
+    </body>
+</html>

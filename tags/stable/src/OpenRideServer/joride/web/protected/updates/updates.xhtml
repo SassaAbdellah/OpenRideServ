@@ -1,0 +1,270 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<!-- ***************************************************** -->
+<!--    Display a list of Matchings for given ride         -->
+<!-- ***************************************************** -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+
+    <body>
+
+        <ui:composition template="/templates/navbar1Layout.xhtml"  >
+
+            <!-- highlight "preferences" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+            <ui:define name="content">
+
+
+                <div class="formLabel"> 
+                    <h:outputFormat value="#{msgs.updatesUpdatePageTitle}"  >
+                        <f:param value="#{updatemsg.timestampFormatted}" />
+                    </h:outputFormat>
+                </div>
+                <p>
+                    <div class="formInput">
+                        <h:outputFormat value="#{msgs.updatesIntervalLength}" >
+                            <f:param value="#{updatemsg.updateIntervalSec}" />
+                        </h:outputFormat>
+                    </div>
+                    
+                </p>
+                
+                
+                
+                
+                
+                <p>
+                    <p:panel rendered="#{updatemsg.hasUpdatedRides()}" >
+                        <!-- primefaces dynamic accordion COOL!  -->
+                        <p:accordionPanel  activeIndex="-1" value="#{updatemsg.updatedRides()}" var="ride">
+
+                            <p:tab title="#{msgs.rideRequest} #{ride.riderrouteId} ">
+
+
+                                <h:form>
+                                    <p>
+                                        <table> <!-- nested table #1 -->                         
+                                            <tr>
+                                                <td colspan="3">
+                                                    <span class="formLabel">
+                                                        <h:commandLink action="rider.rideDisplay" value="#{msgs.rideDisplayRequest}">
+                                                            <f:param  name="#{crud.paramNameCrudId}" value="#{ride.riderrouteId}"/>
+                                                            <f:param name="#{webflow.getParamBack()}" value="updates"          />
+                                                        </h:commandLink>
+                                                    </span>
+                                                </td>
+                                            </tr>
+
+                                            <!-- *** show matchings list only if there are matchings *** -->
+                                            <ui:fragment rendered="#{ride.hasMatches}">
+                                                <tr>
+                                                    <td colspan="3">
+                                                        <span class="formLabel">
+                                                            <h:commandLink action="rider.rideMatchingsList" value="#{msgs.rideMatchesShowOffers}">
+                                                                <f:param  name="#{crud.paramNameCrudId}"   value="#{ride.riderrouteId}"/>
+                                                                <f:param  name="#{webflow.getParamBack()}" value="updates"               />
+                                                            </h:commandLink>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </ui:fragment> 
+
+
+                                            <tr> 
+                                                <td>  <span class="formLabel">  #{msgs.rideStarttimeEarliest}  </span> </td>
+                                                <td> <span class="formLabel"> &nbsp;:&nbsp;  </span> </td>
+                                                <td>  <span class="formInput"> #{ride.starttimeEarliestFormatted} </span> </td>
+                                            </tr>
+
+                                            <tr> 
+                                                <td> <span class="formLabel">  #{msgs.rideStarttimeLatest}  </span> </td>
+                                                <td> <span class="formLabel"> &nbsp;:&nbsp;  </span> </td>
+                                                <td> <span class="formInput"> #{ride.starttimeLatestFormatted} </span> </td>
+                                            </tr>
+                                            <tr>
+                                                <td> <span class="formLabel">  #{msgs.rideComment}         </span> </td>
+                                                <td>  <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                                <td>  <span class="formInput">  #{ride.comment}  </span> </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td> <span class="formLabel">  #{msgs.rideStart}  </span> </td>
+                                                <td> <span class="formLabel"> &nbsp;:&nbsp;  </span> </td>
+                                                <td> <span class="formInput"> #{ride.startptAddress} </span> </td> 
+                                            </tr>
+
+                                            <tr>
+                                                <td> <span class="formLabel">  #{msgs.rideDestination} </span> </td>
+                                                <td> <span class="formLabel"> &nbsp;:&nbsp;  </span> </td>
+                                                <td> <span class="formInput">  #{ride.endptAddress} </span> </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td> <span class="formLabel">  #{msgs.rideNoMatchingOffers} </span> </td>
+                                                <td> <span class="formLabel"> &nbsp;:&nbsp;                 </span> </td>
+                                                <td> <span class="formInput">  #{ride.noMatches}            </span> </td>
+                                            </tr>
+
+                                            <!-- *** show matchings list only if there are matchings *** -->
+                                            <ui:fragment rendered="#{ride.hasMatches}">
+                                                <tr>
+                                                    <td colspan="3">
+                                                        <span class="formLabel">
+                                                            <h:commandLink action="rider.rideMatchingsList" value="#{msgs.rideMatchesShowOffers}">
+                                                                <f:param  name="#{crud.paramNameCrudId}"   value="#{ride.riderrouteId}"/>
+                                                                <f:param  name="#{webflow.getParamBack()}" value="updates"               />
+                                                            </h:commandLink>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </ui:fragment> 
+
+                                        </table> <!-- nested table #1 -->  
+                                    </p>
+                                </h:form>
+                            </p:tab>
+                        </p:accordionPanel>
+                    </p:panel>
+                </p>
+
+
+
+                <p>
+
+                    <p:panel 
+                        header="#{msgs.updateUpdatedDrivesMessage}"
+                        rendered="#{updatemsg.hasUpdatedDrives()}" 
+                        >
+
+                        <!-- primefaces dynamic accordion COOL!  -->
+                        <p:accordionPanel  activeIndex="-1" value="#{updatemsg.updatedDrives()}" var="drive">                  
+
+                            <p:tab title="#{msgs.rideOffer} #{drive.rideId} ">
+
+
+
+                                <!-- show link only if there are matches -->
+                                <ui:fragment rendered="#{drive.hasMatches}">
+                                    <div class="formLabel">
+                                        <h:form>
+                                            <h:commandLink action="driver.driveMatchingsList" value="#{msgs.rideMatchesShowRequests}">
+                                                <f:param   name="#{crud.paramNameCrudId}"   value="#{drive.rideId}"/>
+                                                <f:param   name="#{webflow.getParamBack()}" value="updates"              />
+                                            </h:commandLink>
+                                        </h:form>
+                                    </div>
+                                </ui:fragment>
+
+                                <h:form>
+                                    <table> <!-- nested three column table -->
+
+                                        <tr>
+                                            <td colspan="3">
+                                                <span class="formLabel">
+                                                    <h:commandLink action="driver.driveDisplay" value="#{msgs.formDisplay}">
+                                                        <f:param  name="#{crud.paramNameCrudId}" value="#{drive.rideId}"/>
+                                                        <f:param name="#{webflow.getParamBack()}" value="updates"          />
+                                                    </h:commandLink>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>                                            
+                                            <td>
+                                                <span class="formLabel">
+                                                    #{msgs.rideStarttime}
+                                                </span>
+                                            </td>
+                                            <td class="formLabel"> &nbsp;:&nbsp; </td>
+                                            <td>
+                                                <span class="formInput">
+                                                    #{drive.startDateFormatted} 
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="formLabel">  #{msgs.rideStart}  </td>
+                                            <td class="formLabel"> &nbsp;:&nbsp; </td>
+                                            <td class="formInput"> #{drive.startptAddress} </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="formLabel">   #{msgs.rideDestination}  </td>
+                                            <td class="formLabel"> &nbsp;:&nbsp; </td>
+                                            <td class="formInput"> #{drive.endptAddress} </td>
+                                        </tr>
+                                        <tr>
+                                            <td> <span class="formLabel">  #{msgs.rideComment} </span> </td>
+                                            <td> <span class="formLabel"> &nbsp;:&nbsp;                 </span> </td>
+                                            <td>  <span class="formInput">  #{drive.rideComment}            </span> </td>
+                                        </tr>
+                                        <tr>
+                                            <td> <span class="formLabel">  #{msgs.rideNoMatchingRequests} </span> </td>
+                                            <td> <span class="formLabel"> &nbsp;:&nbsp;                 </span> </td>
+                                            <td> <span class="formInput">  #{drive.noMatches}            </span> </td>
+                                        </tr>
+
+                                    </table>
+                                </h:form>  
+                            </p:tab>
+                        </p:accordionPanel>
+                    </p:panel>
+                </p>
+
+
+
+                <!-- short message that there are no updated offers, if that is the case -->
+
+                <h:panelGroup class="formInput" rendered="#{!updatemsg.hasUpdatedDrives()}"> 
+                    <p>
+                        <h:outputText  value="(#{msgs.updateDriveNoUpdateMessage})"/>
+                    </p>
+                </h:panelGroup>
+
+                <!-- short message that there are no updated requests, if that is the case -->
+                <h:panelGroup class="formInput"  rendered="#{!updatemsg.hasUpdatedRides()}" >  
+                    <p>
+                        <h:outputText 
+                            value="(#{msgs.updateRideNoUpdateMessage})"
+                            />
+                    </p>
+                </h:panelGroup>
+
+
+
+
+
+
+            </ui:define>
+
+
+
+
+        </ui:composition>
+
+
+
+
+
+    </body>
+</html>

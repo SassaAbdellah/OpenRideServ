@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
+         http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+
+
+
+	 <!-- Smart Login Servlet -->
+    <servlet>
+        <servlet-name>SmartLoginServlet</servlet-name>
+        <servlet-class>de.avci.joride.session.SmartLoginServlet</servlet-class>         
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>SmartLoginServlet</servlet-name>
+        <url-pattern>/*/smartlogin/*</url-pattern> 
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SmartLoginServlet</servlet-name>
+        <url-pattern>/smartlogin/*</url-pattern>
+    </servlet-mapping>
+	
+  
+  
+    <!-- Logout Servlet -->
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>de.avci.joride.session.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>*.logout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/*/logout/*</url-pattern>
+    </servlet-mapping>
+
+
+
+
+
+
+    <!-- Faces Servlet -->
+    <servlet>
+        <servlet-name>Faces Servlet</servlet-name>
+        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>/faces/*</url-pattern>
+    </servlet-mapping>
+   
+  
+
+
+    <welcome-file-list>
+        <welcome-file>faces/public/index.xhtml</welcome-file>
+    </welcome-file-list>
+    
+    
+
+    <!--  Context Params for SUN's Mojarra JSF Engine.  When true a script element with a src attribute                -->
+    <!--  This allows browsers to cache the JS resource instead of having to write it each time the page is accessed.  -->
+   
+    <context-param>
+        <param-name>com.sun.faces.externalizeJavaScript</param-name>
+        <param-value>true</param-value>  	
+    </context-param>
+
+
+    <!-- TODO: change this when it comes to productive USE ! -->
+    
+    <context-param>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>Production</param-value>
+    </context-param>
+    
+    
+    
+  
+    <!-- ***  default theme "aristo" will be overwritten by the value of the jquery.ui.theme     *** -->
+    <!-- ***  in local.properties                                                                *** -->
+    <context-param>   
+        <param-name>primefaces.THEME</param-name>
+        <param-value>aristo</param-value> 
+    </context-param>
+   
+   
+   
+
+     
+    <!--  most of the jsfs and webservices are protected  -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Protected Pages</web-resource-name>
+            <url-pattern>*.xhtml</url-pattern>
+          
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>customer</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <login-config>
+        <auth-method>FORM</auth-method>
+        <realm-name>jdbc_realm</realm-name>
+        <form-login-config>
+            <form-login-page>/faces/public/login.xhtml</form-login-page>
+            <form-error-page>/faces/public/noauth.xhtml</form-error-page>
+        </form-login-config>
+    </login-config>
+    <security-role>
+        <role-name>customer</role-name>
+    </security-role>
+    
+    
+    <!-- ******************************************************************** -->
+    <!-- ** Standar all-to-UTF8 encoding filter gets applied to everything ** -->
+    <!-- ******************************************************************** -->
+    
+    <filter>
+
+        <filter-name>EncodingFilter</filter-name>
+        <filter-class>
+            de.avci.joride.session.EncodingFilter
+        </filter-class>
+
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+
+    </filter>
+
+    <filter-mapping>
+        <filter-name>EncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+   
+    
+</web-app>
