@@ -1,7 +1,0 @@
-#!/bin/sh
-#
-#
-#
-# populate database for openride from dump 
-# 
-pg_restore  --clean -d  openride  ${HOME}/archives/openride-db.backup

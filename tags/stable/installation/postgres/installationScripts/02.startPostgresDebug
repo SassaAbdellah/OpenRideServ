@@ -1,5 +1,0 @@
-#!/bin/sh
-#
-# start postgres in debug mode
-#
-postmaster -i -d 2  -D  ${HOME}/data/${PG_VERSION} 2>&1 |  tee  postmaster.log
