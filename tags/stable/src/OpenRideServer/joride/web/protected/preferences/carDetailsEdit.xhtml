@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+    <body>
+
+
+
+        <ui:composition template="/templates/navbar1Layout.xhtml">
+
+            <!-- highlight "preferences" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexPreferences}" />
+
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+            <ui:define name="content">
+
+        
+
+                <h1>   #{msgs.nav1_pref_carDetailsLabel}  </h1>
+
+
+
+
+                <!-- the profile must be filled with data before anything -->   
+                <!-- useful can be done with it                           -->
+                #{jcardetails.updateFromDB()}
+
+                <h:form>
+
+
+                    <!-- Car details id is hidden! -->
+                    <h:inputHidden value="#{jcardetails.cardetId}"   />
+
+                    <!-- Brand -->
+
+                    <div class="formLabel"> #{msgs.cardetBrandLabel} </div>
+                    <div class="formInput">
+                        <h:inputText value="#{jcardetails.cardetBrand}"   />
+                    </div>
+
+
+
+
+                    <div class="formLabel"> #{msgs.cardetColorLabel} </div>
+                    <div class="formInput">
+                        <h:inputText value="#{jcardetails.cardetColor}"   />
+                    </div>
+
+                    <div class="formLabel"> #{msgs.cardetBuildyearLabel} </div>
+                    <div class="formInput">
+                        <h:inputText value="#{jcardetails.cardetBuildyear}"   />
+                    </div>
+
+                    <div class="formLabel">  #{msgs.cardetLicenseplateLabel} </div>
+                    <div class="formInput">
+                        <h:inputText value="#{jcardetails.cardetPlateno}"   />
+                    </div>
+
+                    <h:commandButton  actionListener="#{jcardetails.doCrudAction}"   action="preferences.driverPreferences"  value="#{msgs.formSave}" >
+                        <f:param  name="#{crud.paramNameCrudAction}" value="#{crud.paramValueCrudUpdate}"/>
+                    </h:commandButton>
+                </h:form>
+
+            </ui:define> <!-- content section -->
+
+
+
+
+
+
+        </ui:composition>
+
+
+
+
+
+    </body>
+</html>

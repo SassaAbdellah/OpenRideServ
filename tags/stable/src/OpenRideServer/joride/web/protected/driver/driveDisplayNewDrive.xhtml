@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+
+<h:head>
+	<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</h:head>
+
+
+<body>
+
+
+	<ui:composition template="/templates/navbar1Layout.xhtml">
+
+
+
+		<!-- highlight "preferences" tab -->
+		<ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
+
+
+
+		<ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+		<ui:define name="content">
+
+
+			<!-- page to display a new drive offer          -->
+			<!-- i.e: the newdriverride bean                -->
+			<!-- this is meant to be the end of workflow    -->
+			<!-- for creating a new drive                   -->
+
+
+
+			<h1>#{msgs.rideNewOffer} #{newdriverride.rideId}</h1>
+
+
+			<div class="formLabel">#{msgs.rideStarttime}:</div>
+			<div class="formInput">#{newdriverride.rideStarttime}</div>
+			<div class="formLabel">#{msgs.rideComment}:</div>
+
+			<div class="formInput">#{newdriverride.rideComment}</div>
+
+			<div class="formLabel">#{msgs.rideStartptAddress}:</div>
+
+			<div class="formInput">#{newdriverride.startptAddress}</div>
+
+
+			<div class="formLabel">
+				<h:form>
+					<p:commandButton id="editRouting" icon="ui-icon-plus"
+						action="driver.editRouting">
+						<f:param name="#{crud.paramNameCrudId}"
+							value="#{newdriverride.rideId}" />
+						<f:param name="#{webflow.getParamBack()}" value="driver" />
+					</p:commandButton>
+
+					<p:tooltip value="#{msgs.waypointAddWaypoints}" for="editRouting" />
+					&nbsp;
+					<h:commandLink action="driver.editRouting"
+						value="#{msgs.waypointAddWaypoints}">
+						<f:param name="#{crud.paramNameCrudId}"
+							value="#{newdriverride.rideId}" />
+						<f:param name="#{webflow.getParamBack()}" value="driver" />
+					</h:commandLink>
+				</h:form>
+			</div>
+
+			<div class="formLabel">#{msgs.rideDestination}:</div>
+			<div class="formInput">#{newdriverride.endptAddress}</div>
+
+			<div class="formLabel">#{msgs.rideAcceptableDetourInKm}:</div>
+			<div class="formInput">#{newdriverride.rideAcceptableDetourInKm}</div>
+
+			<div class="formLabel">#{msgs.rideOfferedseatsNo}:</div>
+			<div class="formInput">#{newdriverride.rideOfferedseatsNo}</div>
+
+
+
+			<!-- *************************************************** -->
+			<!--  Mechanism to show/hide map                         -->
+			<!-- *************************************************** -->
+
+			<h:form>
+
+				<div class="formLabel">
+					<p:commandLink value="#{msgs.mapsShowMaps}"
+						rendered="#{HTTPUser.hideMap}"
+						action="driver.driveDisplayNewDrive"
+						actionListener="#{HTTPUser.toggleMapVisibility(evt)}" ajax="false">
+						<f:param name="#{crud.paramNameCrudId}"
+							value="#{newdriverride.rideId}" />
+					</p:commandLink>
+					
+					<p>
+						<h:commandLink rendered="#{HTTPUser.hideMap}"
+							action="driver.driveDisplayNewDrive"
+							actionListener="#{HTTPUser.toggleMapVisibility(evt)}">
+							<p:graphicImage rendered="#{HTTPUser.hideMap}" library="images"
+								name="OpenStreetmapsLogo.png" width="64" heigth="64" />
+							<f:param name="#{crud.paramNameCrudId}"
+								value="#{newdriverride.rideId}" />
+						</h:commandLink>
+					</p>
+					
+				</div>
+
+				<div class="formLabel">
+					<p:commandLink value="#{msgs.mapsHideMaps}"
+						rendered="#{HTTPUser.showMap}"
+						action="driver.driveDisplayNewDrive"
+						actionListener="#{HTTPUser.toggleMapVisibility(evt)}" ajax="false">
+						<f:param name="#{crud.paramNameCrudId}"
+							value="#{newdriverride.rideId}" />
+					</p:commandLink>
+				</div>
+
+			</h:form>
+
+			<!-- ************************************** -->
+			<!-- Map Mech below                         -->
+			<!-- ************************************** -->
+
+			<ui:fragment rendered="#{HTTPUser.showMap}">
+
+
+
+				<!-- include standard jquery  -->
+				<h:outputScript library="js" name="jquery-1.4.1.js" />
+
+				<!-- we may deliver a local OpenLayers version 2.12              -->
+				<!-- alternatively, it can be included from OpenLayers.org   -->
+
+
+				<!-- h:outputScript library="js" name="OpenLayers.js" /      -->
+				<script src="#{HTTPUser.openLayersURL}"></script>
+
+
+
+				<!-- h:outputScript library="js" name="OpenLayers.js" /      -->
+
+				<!-- include functions for displaying the routing -->
+				<h:outputScript library="js" name="jorideRouting.js" />
+
+
+				<!-- **************************************************************************** -->
+				<!-- div to show the map  -->
+
+				<!-- **************************************************************************** -->
+
+				<p>
+					<div id="mapdiv">&nbsp;</div>
+				</p>
+
+				<script>
+
+                    myRoutePoints =#{newdriverride.routePointsAsJSON};
+                    myStartPoint =#{newdriverride.routePoints.startPointAsJSON};
+                    myEndPoint =#{newdriverride.routePoints.endPointAsJSON};
+                    myPickupPoints =#{newdriverride.routePoints.pickupRiderPointsAsJSON};
+                    myDropPoints =#{newdriverride.routePoints.dropRiderPointsAsJSON};
+                    myWayPoints =#{newdriverride.routePoints.wayPointsAsJSON};
+
+                    createMap("mapdiv", myStartPoint, myEndPoint, myRoutePoints, myPickupPoints, myDropPoints, myWayPoints);
+
+                </script>
+
+			</ui:fragment>
+			<!-- ********************************************* -->
+			<!-- End of Maps fragment                          -->
+			<!-- ********************************************* -->
+				
+		
+
+			
+                    #{webflow.smartUpdate()}  
+                       <h:form>
+
+				<div>
+					<p:commandButton id="backlink" icon="ui-icon-triangle-1-w"
+						action="#{webflow.getFinish()}" ajax="false" />
+					<p:tooltip for="backlink" value="#{msgs.finish}" />
+					&nbsp;
+					<h:commandLink value="#{msgs.finish}"
+						action="#{webflow.getFinish()}" />
+				</div>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

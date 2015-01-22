@@ -1,0 +1,271 @@
+<project name="OpenRideServer-ejb" default="all">
+
+	<!-- ********************************** -->
+	<!-- ***** projectwide properties ***** -->
+	<!-- ********************************** -->
+
+
+
+	<!-- this is where the jee configuration files are (currently only persistence.xml) -->
+	<property name="conf.dir" value="config" />
+
+	<!-- this is where the sources live -->
+	<property name="src.dir" value="src/java" />
+
+
+	<!-- this is where the compiled classes go  -->
+	<property name="build.dir" value="build" />
+
+	<!-- this is where required libraries (except JEE libs) are -->
+	<property name="lib.dir" value="libs" />
+
+	<!-- this is where finally the ejb.jar gets created  -->
+	<property name="dist.dir" value="dist" />
+
+
+
+	<!-- ************************************************************ -->
+	<!-- ** target "check" :check local conditions before build    ** -->
+	<!-- ************************************************************ -->
+
+	<target name="check">
+
+		<!-- Check that we have at least ant 1.7.1 or higher in place  -->
+		<fail message="Please build using Ant 1.7.1 or higher.">
+			<condition>
+				<not>
+					<antversion atleast="1.7.1" />
+				</not>
+			</condition>
+		</fail>
+
+	</target>
+	<!-- end of the target "check" -->
+
+
+
+
+	<!-- ************************************************************************ -->
+	<!-- *** Load local properties file from OpenRideServer project           *** -->
+	<!-- ************************************************************************ -->
+	<target name="loadLocalProperties">
+
+		<fail message="../OpenRideShareMaster/local.properties file is missing! -- You will probably have to create one, see included local.properties.sample file. ">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset id="fs" dir="../OpenRideShareMaster/" includes="local.properties" />
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+
+		<!-- *** So, as localconf is in place, we can happily load the local.properties  *** -->
+		<loadproperties>
+			<file file="../OpenRideShareMaster/local.properties" />
+		</loadproperties>
+
+	</target>
+	<!-- end of target load local properties -->
+
+
+
+	<!-- ****************************************************************************** -->
+	<!-- *** Load graphhopper properties file from OpenRideServer project           *** -->
+	<!-- ****************************************************************************** -->
+	<target name="loadGraphHopperProperties">
+
+		<fail message=" ../OpenRideShareMaster/ghrouter.properties file is missing! -- You will probably have to create one, see included ghrouter.properties.sample file. ">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset id="fs" dir="../OpenRideShareMaster" includes="ghrouter.properties" />
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+
+		<!-- *** for the time beeing, ghrouter is moved to config dir. It will be moved further at build stage  *** -->
+		<copy file="../OpenRideShareMaster/ghrouter.properties" todir="${conf.dir}/" />
+
+
+	</target>
+	<!-- end of target load graphhopperProperties -->
+
+
+
+
+
+	<!-- ************************************************** -->
+	<!-- ***** target "compile": compile java classes ***** -->
+	<!-- ************************************************** -->
+
+	<target name="compile" depends="check,loadLocalProperties,loadGraphHopperProperties" description="Compile java classes">
+
+		<mkdir dir="${build.dir}" />
+
+		<!-- get jee libs from master project -->
+		<property name="jee.lib.dir" value="../OpenRideShareMaster/${jee.lib.basedir}" />
+
+		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="true" includeantruntime="false">
+			<classpath>
+				<fileset dir="${lib.dir}">
+					<include name="**/*.jar" />
+				</fileset>
+
+				<fileset dir="${jee.lib.dir}">
+					<include name="**/*.jar" />
+				</fileset>
+
+			</classpath>
+
+		</javac>
+
+	</target>
+	<!-- end of target "compile"  -->
+
+
+	<!-- copy *.properties files to build directory -->
+	<target name="copyProperties">
+
+		<mkdir dir="${build.dir}/de/avci/openrideshare/properties/" />
+
+		<copy todir="${build.dir}/de/avci/openrideshare/properties/">
+			<fileset dir="${src.dir}/de/avci/openrideshare/properties/" />
+		</copy>
+
+		<copy todir="${build.dir}/de/avci/openrideshare/utils/" file="${src.dir}/de/avci/openrideshare/utils/supportedLanguages.properties" />
+
+
+	</target>
+
+	<!-- end of "copy properties" -->
+
+
+
+	<!-- ************************************************************************ -->
+	<!-- *** Rewrite operational properties with values from local.properties *** -->
+	<!-- ************************************************************************ -->
+
+	<!-- TARGET apply-local-properties -->
+	<target name="applyLocalProperties" depends="copyProperties" description="rewrite properties files with local properties">
+
+		<!-- check, that user has a local.properties file in place in master project -->
+
+
+		<property file="../OpenRideShareMaster/local.properties" />
+
+		<fail message=" ../OpenRideShareMaster/local.properties file is missing! -- You will probably have to create one, see included local.properties.sample file. ">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset id="fs" dir="../OpenRideShareMaster/" includes="local.properties" />
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+
+
+		<!-- ******************************** -->
+		<!--   Rewrite operational settings   -->
+		<!-- ******************************** -->
+
+		<property name="opsparamfile" value="${build.dir}/de/avci/openrideshare/properties/operational.properties" />
+		<!-- replace email target -->
+
+
+		<!-- replacing mailServiceJNDI property with local settings  -->
+		<replaceregexp byline="true">
+			<regexp pattern="mailServiceJNDI=(.*)" />
+			<substitution expression="mailServiceJNDI=${mailServiceJNDI}" />
+			<fileset file="${opsparamfile}" />
+		</replaceregexp>
+
+
+		<!-- replacing   webmasterEmailRecipient property with local settings  -->
+		<replaceregexp byline="true">
+			<regexp pattern="webmasterEmailRecipient=(.*)" />
+			<substitution expression="webmasterEmailRecipient=${webmasterEmailRecipient}" />
+			<fileset file="${opsparamfile}" />
+		</replaceregexp>
+
+
+		<!-- replacing  businessEmailRecipient  property with local settings  -->
+		<replaceregexp byline="true">
+			<regexp pattern="businessEmailRecipient=(.*)" />
+			<substitution expression="businessEmailRecipient=${businessEmailRecipient}" />
+			<fileset file="${opsparamfile}" />
+		</replaceregexp>
+
+		<!-- replacing  noreplyEmailRecipient  property with local settings  -->
+		<replaceregexp byline="true">
+			<regexp pattern="noreplyEmailRecipient=(.*)" />
+			<substitution expression="noreplyEmailRecipient=${noreplyEmailRecipient}" />
+			<fileset file="${opsparamfile}" />
+		</replaceregexp>
+
+	</target>
+	<!--  end of target "apply local properties" -->
+
+
+
+
+
+
+
+	<!-- *******************i***************************** -->
+	<!-- ***** targed "dist": package ejb-jar archive **** -->
+	<!-- ************************************************* -->
+
+	<target name="dist" depends="compile,applyLocalProperties" description="package the dist/OpenRideServer-ejb.jar">
+
+
+
+		<echo>  Start packaging the  dist/OpenRideServer-ejb.jar... </echo>
+
+
+
+		<!-- add EJB configuration (currently only the persistance configuration) -->
+		<property name="meta-inf.dir" value="META-INF" />
+		<mkdir dir="${build.dir}/${meta-inf.dir}" />
+		<copy file="${conf.dir}/persistence.xml" todir="${build.dir}/${meta-inf.dir}" />
+		<!--  **** copy graphhopper configuration into the code  **** -->
+		<copy file="${conf.dir}/ghrouter.properties" todir="${build.dir}/de/fhg/fokus/openride/routing/graphhopper/configuration/" />
+
+
+
+		<!-- create the jar  -->
+
+		<mkdir dir="${dist.dir}" />
+
+
+
+		<jar destfile="${dist.dir}/${ant.project.name}.jar" basedir="${build.dir}">
+
+		</jar>
+
+
+		<echo>  ...done with packaging the dist/OpenRideServer-ejb.jar. </echo>
+
+	</target>
+	<!-- end of target "dist" -->
+
+
+	<!-- ****************************************************************** -->
+	<!-- ****  target "clean": cleanup "dist" and "build" directories  **** -->
+	<!-- ****************************************************************** -->
+
+	<target name="clean" description="clean up">
+		<!-- Delete the ${build.dir} and ${dist.dir} directory trees -->
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+	</target>
+	<!-- end of target  "clean" -->
+
+	<!-- ******************************************* -->
+	<!-- *** target "all" :  do clean, then dist *** -->
+	<!-- ******************************************* -->
+	<target name="all" depends="clean,dist" />
+
+
+</project>

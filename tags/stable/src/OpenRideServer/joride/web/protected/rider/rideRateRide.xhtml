@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+    <body>
+
+
+
+        <ui:composition template="/templates/simpleLayout.xhtml">
+
+
+
+            <!-- highlight "preferences" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexRider}" />
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+            <ui:define name="content">
+
+                #{ratingride.update()}
+
+                <h:form>
+                    <p>
+                        <p:panel header="#{msgs.rideRateThisRide}" >
+
+                            #{ratingride.update()}
+
+                            <table>   
+                                <tr>
+                                    <th colspan="3">
+                                        #{msgs.rideRequest} #{ratingride.riderrouteId} 
+                                    </th>
+                                </tr>
+
+                                <tr>
+                                    <td> <span class="formLabel">  #{msgs.rideComment}         </span> </td>
+                                    <td>  <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td>  <span class="formInput">  #{ratingride.comment}  </span> </td>
+                                </tr>
+
+                                <tr>
+                                    <td>  <span class="formLabel">  #{msgs.rideStartptAddress} </span> </td>
+                                    <td>  <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td>  <span class="formInput">  #{ratingride.startptAddress} </span> </td>
+                                </tr>
+
+                                <tr>
+                                    <td>  <span class="formLabel">  #{msgs.rideDestinationAddress} </span> </td>
+                                    <td>  <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td>  <span class="formInput">  #{ratingride.endptAddress} </span> </td>
+                                </tr>
+
+                                <tr>
+                                    <td> <span class="formLabel">  #{msgs.rideTimestampbooked}  </span> </td>
+                                    <td> <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td> <span class="formInput">  #{ratingride.timestampbooked} </span> </td>
+                                </tr>
+
+                                <tr>
+                                    <td> <span class="formLabel">  #{msgs.rideTimestamprealized} </span> </td>
+                                    <td> <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td> <span class="formInput">  #{ratingride.timestamprealized} </span> </td>   
+                                </tr>
+
+
+                                <tr>
+                                    <td colspan="3"> <h3> #{msgs.rideRatings}  </h3> </td>
+                                </tr>
+
+                                <tr>
+                                    <td> <span class="formLabel">  #{msgs.rideGivenRating} </span>  </td>
+                                    <td> <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td>
+                                        <span class="formInput">  
+                                            <p:rating value="#{ratingride.givenrating}"  readonly="#{!ratingride.riderRateable}" />
+                                        </span> 
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td> <span class="formLabel">  #{msgs.rideGivenRatingComment} </span> </td>
+                                    <td> <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td> 
+                                        <span class="formInput"> 
+                                            <h:inputTextarea value="#{ratingride.givenratingComment}"  readonly="#{!ratingride.riderRateable}"/>
+                                        </span> 
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td> <span class="formLabel">  #{msgs.rideGivenRatingDate} </span> </td>
+                                    <td> <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td> <span class="formInput">  #{ratingride.givenratingDate} </span> </td>
+                                </tr>
+
+                                <tr>
+                                    <td> <span class="formLabel">  #{msgs.rideReceivedRating} </span>  </td>
+                                    <td> <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td> 
+                                        <span class="formInput"> 
+                                            <p:rating value="#{ratingride.receivedrating}"  readonly="#{!ratingride.driverRateable}" />
+                                        </span> 
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td> <span class="formLabel">  #{msgs.rideReceivedRatingComment} </span> </td>
+                                    <td> <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td> 
+                                        <span class="formInput"> 
+                                            <h:inputTextarea value="#{ratingride.receivedratingComment}"  readonly="#{!ratingride.driverRateable}"/>
+                                        </span> 
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td> <span class="formLabel">  #{msgs.rideReceivedRatingDate} </span> </td>
+                                    <td> <span class="formLabel"> &nbsp;:&nbsp; </span> </td>
+                                    <td> <span class="formInput">  #{ratingride.receivedratingDate} </span> </td>
+                                </tr>
+
+                            </table>
+
+                            <!-- fetch riderroute id, for other data may be incompletely transmitted  -->
+                            <h:inputHidden value="#{ratingride.riderrouteId}"/>
+
+
+                            #{webflow.smartUpdate()}
+                            <!-- show button to do rider rating only if caller is rider -->                      
+                            <h:commandButton 
+                                action="#{webflow.getBack()}" 
+                                actionListener="#{ratingride.doSetGivenRating(evt)}"  
+                                value="#{msgs.rideRateThisRide}" 
+                                rendered="#{ratingride.callerIsRider}"
+                                >
+                                <f:param name="#{crud.paramNameCrudId}" value="#{ratingride.riderrouteId}" />
+                            </h:commandButton>
+
+                            <!-- show button to do driver rating only if caller is driver -->                      
+                            <h:commandButton 
+                                action="#{webflow.getBack()}" 
+                                actionListener="#{ratingride.doSetReceivedRating(evt)}"  
+                                value="#{msgs.rideRateThisRide}" 
+                                rendered="#{ratingride.callerIsDriver}"
+                                >
+                                <f:param name="#{crud.paramNameCrudId}" value="#{ratingride.riderrouteId}" />
+                            </h:commandButton>
+                        </p:panel>
+                    </p>
+
+                  
+                    <!-- webflow stanza -->
+                    #{webflow.smartUpdate()}
+                    <h:form>
+                        <table>
+                            <tr>
+                                <td>
+                                    <p:commandButton id="backlink" icon="ui-icon-triangle-1-w" action="#{webflow.getBack()}" ajax="false" >
+                                        <f:param   name="#{crud.paramNameCrudId}"   value="#{ratingride.riderrouteId}"/>
+                                    </p:commandButton>
+                                    <p:tooltip for="backlink" value="#{msgs.back}"  />
+                                </td>
+                                <td>
+                                    <h:commandLink value="#{msgs.back}" action="#{webflow.getBack()}">
+                                        <f:param   name="#{crud.paramNameCrudId}"   value="#{ratingride.riderrouteId}"/>
+                                    </h:commandLink>
+                                </td>
+                            </tr>
+                        </table>
+                    </h:form>
+
+
+
+
+
+
+                </h:form>
+
+            </ui:define>
+
+        </ui:composition>
+
+
+
+
+
+    </body>
+</html>

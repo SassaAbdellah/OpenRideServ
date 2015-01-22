@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+
+<h:head>
+	<!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</h:head>
+
+
+
+<body>
+
+	<ui:composition template="/templates/navbar1Layout.xhtml">
+
+		<ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+
+
+		<ui:define name="content">
+
+			<h1>
+				<h:outputFormat value="#{msgs.msg_fromTo}">
+					<f:param value="#{messageSearch.getStartDateFormatted()}" />
+					<f:param value="#{messageSearch.getStartDateFormatted()}" />
+				</h:outputFormat>
+			</h1>
+
+			<p>
+				<p:dataTable var="myMessage"
+					value="#{messageSearch.messagesInInterval}" paginator="true"
+					rows="30">
+					<f:facet name="header" />
+
+
+					<!-- ************************************** -->
+					<!-- *** Column for                     *** -->
+					<!-- *** date, sender,reference         *** -->
+					<!-- ************************************** -->
+
+					<p:column width="40%">
+						<div class="formLabel">
+							<!-- if incoming message, show sender  -->
+							<h:outputFormat value="#{msgs.msg_FromFormat}"
+								rendered="#{myMessage.isIncoming()}">
+								<f:param value="#{myMessage.sender.custNickname}" />
+							</h:outputFormat>
+
+							<!-- if outgoing message, show recipient  -->
+							<h:outputFormat value="#{msgs.msg_ToFormat}"
+								rendered="#{myMessage.isOutgoing()}">
+								<f:param value="#{myMessage.recipient.custNickname}" />
+							</h:outputFormat>
+							
+							<!-- if message is System message, show System message label  -->
+							<h:outputFormat value="#{msgs.msg_systemMessageLabel}"
+								rendered="#{myMessage.isSystemMessage()}">
+					    	</h:outputFormat>
+							
+						</div>
+
+
+						<!-- show created/sent information -->
+						<div class="formInput">
+							<h:outputFormat value="#{msgs.msg_sentFormat}">
+								<f:param value="#{myMessage.createdFormatted}" />
+							</h:outputFormat>
+						</div>
+
+						<!-- show read/unread information -->
+						<div class="formInput">
+							<h:outputFormat value="#{msgs.msg_receivedFormat}">
+								<f:param value="#{myMessage.receivedFormatted}" />
+							</h:outputFormat>
+						</div>
+
+						<!-- show reference to request from driver's view, if caller is driver  -->
+						<h:form rendered="#{myMessage.callerIsDriver}">
+							<div class="formInput">
+								<h:commandLink action="driver.matchDisplay"
+									value="#{msgs.msg_showConservation}">
+									<f:param name="#{match.paramRideID}"
+										value="#{myMessage.offer.rideId}" />
+									<f:param name="#{match.paramRiderrouteId}"
+										value="#{myMessage.request.riderrouteId}" />
+									<f:param name="#{webflow.paramBack}" value="messages.search" />
+								</h:commandLink>
+							</div>
+						</h:form>
+
+						<!-- show reference to request from rider's view, if caller is rider  -->
+						<h:form rendered="#{myMessage.callerIsRider}">
+							<div class="formInput">
+								<h:commandLink action="rider.matchDisplay"
+									value="#{msgs.msg_showConservation}">
+									<f:param name="#{match.paramRideID}"
+										value="#{myMessage.offer.rideId}" />
+									<f:param name="#{match.paramRiderrouteId}"
+										value="#{myMessage.request.riderrouteId}" />
+									<f:param name="#{webflow.paramBack}" value="messages.search" />
+								</h:commandLink>
+							</div>
+						</h:form>
+
+
+
+
+
+					</p:column>
+
+
+
+					<!-- ************************************** -->
+					<!-- *** Message Column ******************* -->
+					<!-- ************************************** -->
+
+					<p:column headerText="#{msgs.msg_message}" width="60%">
+						<div class="formInput">
+							<h:outputText value="#{myMessage.message}" />
+						</div>
+					</p:column>
+
+				</p:dataTable>
+			</p>
+
+
+
+			<p>
+
+				<h:form>
+					<!-- backlink le ading to search Interval start -->
+					<table>
+						<tr>
+							<td><p:commandButton id="backlink"
+									icon="ui-icon-triangle-1-w" action="messages.search"
+									ajax="false" />
+									 <p:tooltip for="backlink" value="#{msgs.back}" />
+							</td>
+							<td><h:commandLink value="#{msgs.back}"
+									action="messages.search" /></td>
+						</tr>
+					</table>
+				</h:form>
+
+			</p>
+
+
+
+		</ui:define>
+
+
+
+
+	</ui:composition>
+
+	<ui:debug />
+
+
+</body>
+</html>
