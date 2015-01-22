@@ -1,5 +1,0 @@
-#!/bin/sh
-#
-#
-#
-postmaster -i -D  ${HOME}/data/${PG_VERSION} 2>&1 |  tee  postmaster.log
