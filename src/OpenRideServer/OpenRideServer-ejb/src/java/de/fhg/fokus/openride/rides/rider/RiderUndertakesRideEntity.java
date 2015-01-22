@@ -220,7 +220,7 @@ public class RiderUndertakesRideEntity implements Serializable {
     private Boolean countermanded;
     // Fetch type eager is here, because of a lesson learned. 
     @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "riderroute_id")
+    @JoinColumn(name = "riderroute_id", referencedColumnName = "riderroute_id" )
     private List<MatchEntity> matchings;
 
     public RiderUndertakesRideEntity() {

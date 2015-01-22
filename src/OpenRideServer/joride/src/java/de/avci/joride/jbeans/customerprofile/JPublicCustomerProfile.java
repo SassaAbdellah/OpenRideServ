@@ -192,10 +192,20 @@ public class JPublicCustomerProfile implements Serializable {
         this.custIssmoker = ce.getCustIssmoker();
         this.preferredLanguage=ce.getPreferredLanguage();
         // set email only if user wants to display it
-        this.showEmail=ce.getShowEmailToPartners();
+        Boolean showEmailArg=ce.getShowEmailToPartners();
+        if(showEmailArg==null){
+        	this.showEmail=false;
+        }else{
+        	this.showEmail=ce.getShowEmailToPartners();
+        }
         if(this.showEmail){ this.setEmail(ce.getCustEmail());}
         // set public profile only if user wants us to
-        this.showMobilePhoneno=ce.getShowMobilePhoneToPartners();
+        Boolean showMobilePhoneNoArg=ce.getShowMobilePhoneToPartners();
+        if(showMobilePhoneNoArg==null){
+        	this.showMobilePhoneno=false;
+        } else{
+        	this.showMobilePhoneno=ce.getShowMobilePhoneToPartners();
+        }
         if(this.showMobilePhoneno){this.setMobilePhoneno(ce.getCustMobilephoneno());}
     }
 

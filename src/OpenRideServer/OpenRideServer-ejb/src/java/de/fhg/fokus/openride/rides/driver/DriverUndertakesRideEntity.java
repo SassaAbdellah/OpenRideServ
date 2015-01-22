@@ -27,16 +27,11 @@
  */
 package de.fhg.fokus.openride.rides.driver;
 
-import de.fhg.fokus.openride.customerprofile.CustomerEntity;
-import de.fhg.fokus.openride.helperclasses.converter.PointConverter;
-import de.fhg.fokus.openride.matching.MatchEntity;
-import de.fhg.fokus.openride.matching.MatchingStatistics;
-import de.fhg.fokus.openride.matching.RideNegotiationConstants;
-import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideEntity;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -54,9 +49,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.Converter;
 import org.postgis.Point;
+
+import de.fhg.fokus.openride.customerprofile.CustomerEntity;
+import de.fhg.fokus.openride.helperclasses.converter.PointConverter;
+import de.fhg.fokus.openride.matching.MatchEntity;
+import de.fhg.fokus.openride.matching.MatchingStatistics;
+import de.fhg.fokus.openride.rides.rider.RiderUndertakesRideEntity;
 
 /**
  *
@@ -126,8 +128,8 @@ public class DriverUndertakesRideEntity implements Serializable {
     private List<WaypointEntity> waypoints;
     // fetch type eager, because of lesson learned. Better pay for EAGER loading then for
     // repeatedly calling server for matchings from frontend!
+    @JoinColumn(name = "ride_id", referencedColumnName="ride_id")
     @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ride_id")
     private List<MatchEntity> matchings;
     @JoinColumn(name = "cust_id", referencedColumnName = "cust_id")
     @ManyToOne
