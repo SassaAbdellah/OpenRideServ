@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+    <body>
+
+        <ui:composition template="/templates/navbar1Layout.xhtml">
+
+            <!-- highlight "preferences" tab -->
+            <ui:param name="jrtabindex" value="#{jrtab.jorideTabindexDriver}" />
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+            <ui:define name="content">
+
+                <h:form> <!-- have a single form enclose the whole content area -->
+
+                    #{waypoint.smartUpdate()}
+
+                    <h1> #{msgs.waypointAddWaypoint} </h1>
+
+                    <table>
+
+                        <!--  do not display ride id      -->        
+                        <!--  do not display position     --> 
+                        <!--  do not display routeIdx     -->
+
+
+                        <tr> 
+                            <td class="formLabel"> #{msgs.waypointDescription} </td>
+                            <td class="formLabel"> : </td>
+                            <td class="formInput">     
+                                <h:inputText value="#{waypoint.description}" />                   
+                            </td>
+                        </tr>
+
+                        <tr> 
+                            <td class="formLabel"> #{msgs.geolocationLongitude} </td>
+                            <td class="formLabel"> : </td>
+                            <td class="formInput"> #{waypoint.longitude} </td>
+                        </tr>
+
+                        <tr> 
+                            <td class="formLabel"> #{msgs.geolocationLatitude} </td>
+                            <td class="formLabel"> : </td>
+                            <td class="formInput"> #{waypoint.latitude} </td>
+                        </tr>
+
+                        <!-- do not display isLocationSet -->
+                        <!-- do not display rideAttached -->
+                        <!-- do not display readyForPersisting -->
+
+
+
+
+
+
+                        <tr>
+                            <td class="formInput" colspan="3">
+
+                                <h:commandLink value="#{msgs.geolocationSelectPlace}" action="pickpoint">
+
+
+                                    <!-- point parameters -->
+                                    <f:param name="#{point.paramTargetURL}" value="#{HTTPUser.URLBase}/faces/protected/driver/createWaypoint.xhtml"/>
+                                    <!-- set the target parameters, so we know which point to update -->
+                                    <f:param name="#{point.paramTarget}"    value="#{newdriverride.paramValueTargetEndpoint}"/>
+
+                                    <!-- webflow parameters -->
+
+                                    <f:param name="#{webflow.paramBack}"    value="driver.createWaypoint" /> 
+                                    <f:param name="#{webflow.paramFinish}"  value="driver.createWaypoint" /> 
+                                    <f:param name="#{webflow.paramCancel}"  value="driver.createWaypoint" /> 
+
+
+                                </h:commandLink>
+
+
+                            </td>
+                        </tr>
+
+                        <tr> <!--  -->
+                            <td class="formInput">
+
+                                #{webflow.smartUpdate()}
+
+                                <h:commandButton value="#{msgs.cancel}" action="driver.driveDisplay">
+                                    <f:param  name="#{crud.paramNameCrudId}"   value="#{waypoint.rideId}"/>
+                                </h:commandButton>
+                            </td>
+                            <td> 
+                                &nbsp; 
+                            </td>
+                            <td>
+
+                                <!-- Add New Drive to Database, then display it -->
+
+                                <h:commandButton 
+                                    value="#{msgs.waypointCreateWaypoint}" 
+                                    actionListener="#{waypoint.addToDrive()}"
+                                    action="driver.editRouting" 
+                                    >
+
+                                    <f:param  name="#{crud.paramNameCrudId}"   value="#{waypoint.rideId.rideId}"/>
+                                </h:commandButton>
+                                
+                            </td> 
+                        </tr>
+                    </table>
+
+                </h:form>
+
+            </ui:define>
+
+        </ui:composition>
+
+    </body>
+
+</html>
