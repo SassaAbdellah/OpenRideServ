@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<!-- ***************************************************** -->
+<!--    Display a list of Matchings for given ride         -->
+<!-- ***************************************************** -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+    <body>
+
+
+
+        <ui:composition template="/templates/simpleLayout.xhtml">
+
+
+
+         
+
+            <ui:define name="windowTitle">
+                #{msgs.title}
+            </ui:define>
+
+            <ui:define name="content">
+
+
+
+             
+
+
+
+
+
+                <!-- this will only work, it timeinterval's data are transferred via http params -->
+
+
+                <!-- Result Section -->
+
+
+
+                <p:dataTable 
+                    value="#{ride.rideReport}" 
+                    var="myride" 
+                    paginator="true" 
+                    rows="1" 
+                    >
+
+                    <p:column> 
+                        <f:facet name="header">
+
+                        </f:facet>
+
+
+                        <p>
+                            <div class="formLabel">
+                                <p:outputLabel value="#{myride.startDateFormatted}" />
+                            </div>
+                        </p>
+
+                        <p>
+                            
+                            <!-- link to rate the ride the -->
+                            <div class="formLabel">  
+                                #{msgs.rideGivenRating} 
+                            </div>  
+                            <div class="formInput">  
+                                <p:outputLabel value="#{msgs.rideNoGivenRating}" rendered="#{!myride.riderRated}"                /> 
+                                <p:rating value="#{myride.givenrating}"          rendered="#{myride.riderRated}" readonly="true" /> 
+                            </div> 
+
+                            <div class="formInput"> 
+                                #{myride.givenratingComment} 
+                            </div> 
+
+                        </p>
+
+                        <p>
+                            <div class="formLabel"> 
+                                #{msgs.rideReceivedRating} 
+                            </div>  
+
+                            <div class="formInput">
+                                <!-- show rating if there is one, or message else -->
+                                <p:outputLabel  value="#{msgs.rideNoReceivedRating}"  rendered="#{!myride.driverRated}"            />
+                                <p:rating       value="#{myride.receivedrating}"        rendered="#{myride.driverRated}" readonly="true"  />
+                            </div> 
+
+                            <div class="formInput"> 
+                                #{myride.receivedratingComment}
+                            </div> 
+                        </p>
+
+                        <p>
+                            <div class="formLabel">
+                                <h:form rendered="#{myride.rateable}">
+                                    <h:commandLink action="rider.riderRateRide"  value="#{msgs.rideRateThisRide}"    >
+                                        <f:param  name="#{crud.paramNameCrudId}"   value="#{myride.riderrouteId}" />
+                                        <f:param  name="#{webflow.getParamBack()}" value="search.requests" />
+                                    </h:commandLink>
+                                </h:form>
+                            </div>
+                        </p>
+
+
+
+
+
+
+
+                    </p:column>
+
+                    <p:column> 
+                        <f:facet name="header">
+
+                        </f:facet>
+                        <p>
+                            <p:outputLabel value="#{myride.endptAddress}" />
+                        </p>
+                        <p>
+                        	<!-- full display of this ride only if displayable for rider -->
+                            <h:form rendered="#{myride.isCallerIsRider()}">
+                                <h:commandLink action="rider.rideDisplay" value="#{msgs.rideDisplayRequest}">
+                                    <f:param  name="#{crud.paramNameCrudId}" value="#{myride.riderrouteId}"/>
+                                    <f:param name="#{webflow.getParamBack()}" value="search.requests" />
+                                </h:commandLink>
+                            </h:form>
+                        </p>
+
+
+                    </p:column>
+
+                </p:dataTable>
+
+
+
+
+
+
+
+
+
+
+
+
+                <p> <!-- webflow stanza -->
+
+                    #{webflow.smartUpdate()}
+
+                    <h:form>
+                        <h:commandLink value="#{msgs.back}" action="#{webflow.getBack()}">
+                            <f:param name="#{ridesearchparams.paramEndDate}"   value="#{ridesearchparams.endDate}"   />
+                            <f:param name="#{ridesearchparams.paramStartDate}" value="#{ridesearchparams.startDate}" />
+                        </h:commandLink>
+                    </h:form>
+                </p>
+
+
+
+
+
+
+
+
+
+            </ui:define>
+
+
+
+
+        </ui:composition>
+
+
+
+
+
+    </body>
+</html>

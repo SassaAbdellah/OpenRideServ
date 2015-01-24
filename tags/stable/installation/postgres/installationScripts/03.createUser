@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+#
+#
+# drop potentially existing openride user, 
+# to make this idempotent
+#
+dropuser openride 
+#
+# create user openride, 
+# with grants to create databases, new users, log in to db, create new roles
+#
+#
+#
+createuser                  \
+             --createdb     \
+             --createrole   \
+             --login        \
+             --superuser    \
+             --unencrypted  \
+             -P             \
+             openride 

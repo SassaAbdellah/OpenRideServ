@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+    <!-- A footer for joride -->
+
+    <body>        
+        <ui:composition>   
+
+            <h:form>
+                <h:outputLink value="#{nav.termsURL}">   #{msgs.terms}  </h:outputLink>
+                |
+                <h:outputLink value="#{nav.imprintURL}"> #{msgs.imprint} </h:outputLink>
+                |
+                <h:commandLink action="contact" value="#{msgs.contact}"/>
+            </h:form>
+
+        </ui:composition>
+    </body>
+
+
+
+</html> 

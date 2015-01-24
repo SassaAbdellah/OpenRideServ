@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />     
+        <title> #{msgs.geolocationSelectPlace} </title>
+    </h:head>
+
+    <h:body>
+
+
+
+        <ui:composition template="/templates/simpleLayout.xhtml">
+
+
+            <ui:define name="windowTitle">
+                #{msgs.geolocationPickFromFavorites}
+            </ui:define>
+
+
+
+            <ui:define name="content"> 
+
+
+
+                <h:form>
+
+
+                    <h1> #{msgs.contactSendEmail} </h1>
+
+
+
+          
+
+
+                    <!--
+                    
+                   
+                    -->
+                    
+                    <h2> #{msgs.messageSubject} : </h2>
+                    <p>
+                        <h:inputText value="#{contactFormMessage.subject}"/>
+                    </p>
+
+                    <h2>  #{msgs.messageContent} : </h2>
+                    <p>
+                        <h:inputTextarea value="#{contactFormMessage.message}" /> 
+                    </p>
+
+
+
+                    <p>
+                        <h:commandButton value="submit" action="#{contactFormMessage
+                                                                  .sendContactFormMail()}">
+                            <f:param name="#{webflow.paramBack}"            value="contactForm" /> 
+                            <p:growl id="growl"  severity="error" />
+                        </h:commandButton>
+                    </p>
+                </h:form>
+
+ 
+
+
+
+
+
+
+
+            </ui:define>
+
+        </ui:composition>
+
+
+
+
+
+    </h:body>
+</html>
+

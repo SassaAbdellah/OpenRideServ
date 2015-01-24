@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
+
+
+    <h:head> <!-- enforce UTF 8. also, header is needed for primefaces to work  -->
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    </h:head>
+
+
+
+    <body>
+
+
+
+
+        <ui:composition template="/templates/simpleLayout.xhtml">
+
+
+
+
+            <ui:define name="windowTitle">
+                #{msgs.favptPointPickFromFavorites}
+            </ui:define>
+
+            <ui:define name="content">
+
+                #{webflow.smartUpdate()}
+
+                <p>
+                    <p:panel header="#{msgs.favptPointPickFromFavorites}" > 
+                        <!-- Displaying favorite places and links for deleting them  -->
+                        <!-- Currently, no editing facilities offered                -->
+
+                        <h:form>    
+                            <p:accordionPanel
+                                value="#{jfavpoint.favoritePointList}"
+                                var="fp" activeIndex="-1" >
+
+
+                                <p:tab title="#{fp.favptDisplayname}">                
+                                    #{fp.favptAddress} <br/>
+                                    #{fp.favptPoint}   <br/> 
+                                    <!-- column containing delete action --> 
+                                    <h:commandLink  action="#{webflow.getFinish()}">
+                                        #{msgs.formAccept}
+                                        <f:param name="#{point.paramLat}"           value="#{fp.lat}"              />
+                                        <f:param name="#{point.paramLon}"           value="#{fp.lon}"              />                                    
+                                        <f:param name="#{point.paramAddress}"       value="#{fp.favptAddress}"     />
+                                        <f:param name="#{point.paramDisplaystring}" value="#{fp.favptDisplayname}" />
+                                        <f:param name="#{point.paramTarget}" value="#{point.target}" />
+                                    </h:commandLink>
+                                </p:tab>
+                            </p:accordionPanel>
+                        </h:form>   
+                    </p:panel>
+                </p>
+
+                <p>
+                    <h:form>
+                        <table>
+                            <tr>
+                                <td>
+                                    <p:commandButton id="backlink" icon="ui-icon-triangle-1-w" action="#{webflow.getBack()}" ajax="false" />
+                                    <p:tooltip for="backlink" value="#{msgs.back}"  />
+                                </td>
+                                <td>
+                                    <h:commandLink value="#{msgs.back}" action="#{webflow.getBack()}"/>
+                                </td>
+                                <td>
+                                     &nbsp; &nbsp;
+                                    <h:commandLink value="#{msgs.cancel}" action="#{webflow.getCancel()}"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </h:form>
+                </p>
+
+
+
+            </ui:define>
+
+        </ui:composition>
+
+
+
+    </body>
+</html>

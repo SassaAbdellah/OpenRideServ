@@ -1,0 +1,123 @@
+
+/* ******************************************************** */
+/*   Styles mimicing corporate style of kreis-swm.de        */
+/*                                                          */
+/* ******************************************************** */
+
+
+body {
+    color:#000000;
+    background-color:F0F0F0;
+    // background-color:#84BF01;
+    font-family:sans-serif;
+    font-size:1.2em;
+}
+
+
+a {
+    color:#003499;
+    text-decoration:underline;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration:none; 
+}
+
+
+#header{
+    vertical-align:middle;
+    text-align:left;
+}
+
+
+#updateAlert{
+    font-size:1.25em;
+}
+
+
+
+#content{
+
+	
+	/* SWM Color scheme*/
+	color:#000000;
+    background-color:#FFFFFF;
+	
+    padding-top:15px;
+    padding-bottom:15px;
+    padding-right:15px; 
+    padding-left:15px; 
+   
+}
+
+
+#footer{
+    font-size:0.75em; 
+
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+
+form{
+    padding:0px;
+    margin:0px;
+}
+
+.formLabel{
+    font-style: normal;
+    font-weight: bold;
+
+    margin-top: 5px;
+    margin-bottom: 5px;
+
+}
+
+.formInput{
+
+}
+
+
+
+
+/* Results from Geosearch come inside 
+ * divs of class geosearch_result'.
+ * have a big margin to help distinguish
+ * each individual item 
+ *
+*/
+.geosearch_result {
+    margin-top:15px;
+    margin-left:15px;
+    margin-right:15px;
+    margin-bottom:30px;
+}
+
+
+
+
+/** JSF Tables
+*/
+.table {
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+td {
+    margin-top:5px;
+    margin-bottom:5px;
+    margin-right:5px;
+    margin-left:5px;
+}
+
+
+
+/* back| cancel | next | finish link at the bottom of a page
+*/
+.webflow{
+    font-size:1.0em;
+    margin-top:50px;
+    padding:0px;
+}
+
