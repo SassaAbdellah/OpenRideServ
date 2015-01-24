@@ -1,2 +1,0 @@
-
-asadmin list-javamail-resources 

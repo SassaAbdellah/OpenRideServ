@@ -1,5 +1,0 @@
-#!/bin/sh
-#
-#
-#
-initdb ${HOME}/data/${PG_VERSION} 
