@@ -3,7 +3,8 @@
 --
 
 SET statement_timeout = 0;
-SET client_encoding = 'UTF8';
+SET lock_timeout = 0;
+SET client_encoding = 'SQL_ASCII';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
@@ -46,17 +47,6 @@ COMMENT ON EXTENSION postgis IS 'PostGIS geometry, geography, and raster spatial
 SET search_path = public, pg_catalog;
 
 --
--- Name: _st_asgml(integer, geometry, integer, integer, text); Type: FUNCTION; Schema: public; Owner: openride
---
-
-CREATE FUNCTION _st_asgml(integer, geometry, integer, integer, text) RETURNS text
-    LANGUAGE c IMMUTABLE
-    AS '$libdir/postgis-2.1', 'LWGEOM_asGML';
-
-
-ALTER FUNCTION public._st_asgml(integer, geometry, integer, integer, text) OWNER TO openride;
-
---
 -- Name: _st_asgml(integer, geography, integer, integer, text); Type: FUNCTION; Schema: public; Owner: openride
 --
 
@@ -66,6 +56,17 @@ CREATE FUNCTION _st_asgml(integer, geography, integer, integer, text) RETURNS te
 
 
 ALTER FUNCTION public._st_asgml(integer, geography, integer, integer, text) OWNER TO openride;
+
+--
+-- Name: _st_asgml(integer, geometry, integer, integer, text); Type: FUNCTION; Schema: public; Owner: openride
+--
+
+CREATE FUNCTION _st_asgml(integer, geometry, integer, integer, text) RETURNS text
+    LANGUAGE c IMMUTABLE
+    AS '$libdir/postgis-2.1', 'LWGEOM_asGML';
+
+
+ALTER FUNCTION public._st_asgml(integer, geometry, integer, integer, text) OWNER TO openride;
 
 --
 -- Name: adjustgeomdriveroutepoint(); Type: FUNCTION; Schema: public; Owner: postgres
@@ -103,24 +104,6 @@ $$;
 ALTER FUNCTION public.adjustgeomriderundertakesride() OWNER TO postgres;
 
 --
--- Name: st_asgml(integer, geometry, integer, integer, text); Type: FUNCTION; Schema: public; Owner: openride
---
-
-CREATE FUNCTION st_asgml(version integer, geom geometry, maxdecimaldigits integer DEFAULT 15, options integer DEFAULT 0, nprefix text DEFAULT NULL::text) RETURNS text
-    LANGUAGE sql IMMUTABLE
-    AS $_$ SELECT _ST_AsGML($1, $2, $3, $4,$5); $_$;
-
-
-ALTER FUNCTION public.st_asgml(version integer, geom geometry, maxdecimaldigits integer, options integer, nprefix text) OWNER TO openride;
-
---
--- Name: FUNCTION st_asgml(version integer, geom geometry, maxdecimaldigits integer, options integer, nprefix text); Type: COMMENT; Schema: public; Owner: openride
---
-
-COMMENT ON FUNCTION st_asgml(version integer, geom geometry, maxdecimaldigits integer, options integer, nprefix text) IS 'args: version, geom, maxdecimaldigits=15, options=0, nprefix=null - Return the geometry as a GML version 2 or 3 element.';
-
-
---
 -- Name: st_asgml(integer, geography, integer, integer, text); Type: FUNCTION; Schema: public; Owner: openride
 --
 
@@ -136,6 +119,24 @@ ALTER FUNCTION public.st_asgml(version integer, geog geography, maxdecimaldigits
 --
 
 COMMENT ON FUNCTION st_asgml(version integer, geog geography, maxdecimaldigits integer, options integer, nprefix text) IS 'args: version, geog, maxdecimaldigits=15, options=0, nprefix=null - Return the geometry as a GML version 2 or 3 element.';
+
+
+--
+-- Name: st_asgml(integer, geometry, integer, integer, text); Type: FUNCTION; Schema: public; Owner: openride
+--
+
+CREATE FUNCTION st_asgml(version integer, geom geometry, maxdecimaldigits integer DEFAULT 15, options integer DEFAULT 0, nprefix text DEFAULT NULL::text) RETURNS text
+    LANGUAGE sql IMMUTABLE
+    AS $_$ SELECT _ST_AsGML($1, $2, $3, $4,$5); $_$;
+
+
+ALTER FUNCTION public.st_asgml(version integer, geom geometry, maxdecimaldigits integer, options integer, nprefix text) OWNER TO openride;
+
+--
+-- Name: FUNCTION st_asgml(version integer, geom geometry, maxdecimaldigits integer, options integer, nprefix text); Type: COMMENT; Schema: public; Owner: openride
+--
+
+COMMENT ON FUNCTION st_asgml(version integer, geom geometry, maxdecimaldigits integer, options integer, nprefix text) IS 'args: version, geom, maxdecimaldigits=15, options=0, nprefix=null - Return the geometry as a GML version 2 or 3 element.';
 
 
 SET default_tablespace = '';
@@ -230,7 +231,12 @@ CREATE TABLE customer (
     cust_riderpref_smoker character(1),
     cust_session_id integer,
     is_logged_in boolean,
-    cust_group character varying(255)
+    cust_group character varying(255),
+    last_customer_check timestamp without time zone,
+    last_matching_change timestamp without time zone,
+    preferred_language character varying(10),
+    show_email boolean,
+    show_mobile boolean
 );
 
 
@@ -276,7 +282,9 @@ CREATE TABLE driverundertakesride (
     endpt_addr character varying(255),
     ride_acceptable_detour_in_km integer,
     ride_acceptable_detour_in_percent integer,
-    ride_route_point_distance_meters double precision NOT NULL
+    ride_route_point_distance_meters double precision NOT NULL,
+    last_matching_state integer,
+    is_countermanded boolean
 );
 
 
@@ -336,11 +344,33 @@ CREATE TABLE match (
     driver_access timestamp without time zone,
     rider_access timestamp without time zone,
     driver_state integer,
-    rider_state integer
+    rider_state integer,
+    rider_message character varying(255),
+    driver_message character varying(255)
 );
 
 
 ALTER TABLE public.match OWNER TO openride;
+
+--
+-- Name: message; Type: TABLE; Schema: public; Owner: openride; Tablespace: 
+--
+
+CREATE TABLE message (
+    message_id integer,
+    subject character varying(128),
+    sender_id integer,
+    recipient_id integer,
+    match_request integer,
+    match_offer integer,
+    created timestamp without time zone,
+    received timestamp without time zone,
+    message character varying(255),
+    deliverytype integer
+);
+
+
+ALTER TABLE public.message OWNER TO openride;
 
 --
 -- Name: registration_pass; Type: TABLE; Schema: public; Owner: openride; Tablespace: 
@@ -406,6 +436,8 @@ CREATE TABLE riderundertakesride (
     startpt_c geometry,
     endpt_c geometry,
     comment character varying(255),
+    last_matching_state integer,
+    is_countermanded boolean,
     CONSTRAINT enforce_dims_endpt_c CHECK ((st_ndims(endpt_c) = 2)),
     CONSTRAINT enforce_dims_startpt_c CHECK ((st_ndims(startpt_c) = 2)),
     CONSTRAINT enforce_geotype_endpt_c CHECK (((geometrytype(endpt_c) = 'POINT'::text) OR (endpt_c IS NULL))),
@@ -444,6 +476,22 @@ CREATE TABLE sequence (
 
 
 ALTER TABLE public.sequence OWNER TO openride;
+
+--
+-- Name: waypoint; Type: TABLE; Schema: public; Owner: openride; Tablespace: 
+--
+
+CREATE TABLE waypoint (
+    waypoint_id integer NOT NULL,
+    ride_id integer NOT NULL,
+    route_idx integer NOT NULL,
+    longitude double precision NOT NULL,
+    latitude double precision NOT NULL,
+    description text
+);
+
+
+ALTER TABLE public.waypoint OWNER TO openride;
 
 --
 -- Name: cardet_id; Type: DEFAULT; Schema: public; Owner: openride
@@ -493,7 +541,7 @@ SELECT pg_catalog.setval('cardetails_cardet_id_seq', 1, false);
 -- Data for Name: customer; Type: TABLE DATA; Schema: public; Owner: openride
 --
 
-COPY customer (cust_id, cust_addr_zipcode, cust_addr_city, cust_nickname, cust_driverpref_age, cust_firstname, cust_driverpref_gender, cust_dateofbirth, cust_driverpref_musictaste, cust_mobilephoneno, cust_riderpref_age, cust_email, cust_riderpref_gender, cust_issmoker, cust_riderpref_musictaste, cust_postident, cust_bank_account, cust_bank_code, cust_lastname, cust_presencemssg, cust_fixedphoneno, cust_registrdate, cust_licensedate, cust_account_balance, cust_passwd, cust_profilepic, cust_gender, cust_addr_street, cust_driverpref_smoker, cust_riderpref_smoker, cust_session_id, is_logged_in, cust_group) FROM stdin;
+COPY customer (cust_id, cust_addr_zipcode, cust_addr_city, cust_nickname, cust_driverpref_age, cust_firstname, cust_driverpref_gender, cust_dateofbirth, cust_driverpref_musictaste, cust_mobilephoneno, cust_riderpref_age, cust_email, cust_riderpref_gender, cust_issmoker, cust_riderpref_musictaste, cust_postident, cust_bank_account, cust_bank_code, cust_lastname, cust_presencemssg, cust_fixedphoneno, cust_registrdate, cust_licensedate, cust_account_balance, cust_passwd, cust_profilepic, cust_gender, cust_addr_street, cust_driverpref_smoker, cust_riderpref_smoker, cust_session_id, is_logged_in, cust_group, last_customer_check, last_matching_change, preferred_language, show_email, show_mobile) FROM stdin;
 \.
 
 
@@ -509,7 +557,7 @@ COPY drive_route_point (drive_id, route_idx, coordinate, expected_arrival, seats
 -- Data for Name: driverundertakesride; Type: TABLE DATA; Schema: public; Owner: openride
 --
 
-COPY driverundertakesride (ride_id, ride_weekdays, ride_series_id, ride_starttime, ride_comment, ride_acceptable_detour_in_min, ride_offeredseats_no, cust_id, ride_startpt, ride_endpt, ride_currpos, startpt_addr, endpt_addr, ride_acceptable_detour_in_km, ride_acceptable_detour_in_percent, ride_route_point_distance_meters) FROM stdin;
+COPY driverundertakesride (ride_id, ride_weekdays, ride_series_id, ride_starttime, ride_comment, ride_acceptable_detour_in_min, ride_offeredseats_no, cust_id, ride_startpt, ride_endpt, ride_currpos, startpt_addr, endpt_addr, ride_acceptable_detour_in_km, ride_acceptable_detour_in_percent, ride_route_point_distance_meters, last_matching_state, is_countermanded) FROM stdin;
 \.
 
 
@@ -532,7 +580,15 @@ SELECT pg_catalog.setval('favoritepoints_favpt_id_seq', 1, false);
 -- Data for Name: match; Type: TABLE DATA; Schema: public; Owner: openride
 --
 
-COPY match (riderroute_id, ride_id, match_shared_distance_meters, match_detour_meters, match_expected_start_time, match_drive_remaining_distance_meters, match_price_cents, driver_change, rider_change, driver_access, rider_access, driver_state, rider_state) FROM stdin;
+COPY match (riderroute_id, ride_id, match_shared_distance_meters, match_detour_meters, match_expected_start_time, match_drive_remaining_distance_meters, match_price_cents, driver_change, rider_change, driver_access, rider_access, driver_state, rider_state, rider_message, driver_message) FROM stdin;
+\.
+
+
+--
+-- Data for Name: message; Type: TABLE DATA; Schema: public; Owner: openride
+--
+
+COPY message (message_id, subject, sender_id, recipient_id, match_request, match_offer, created, received, message, deliverytype) FROM stdin;
 \.
 
 
@@ -555,7 +611,7 @@ SELECT pg_catalog.setval('registration_pass_id_seq', 4, true);
 -- Data for Name: riderundertakesride; Type: TABLE DATA; Schema: public; Owner: openride
 --
 
-COPY riderundertakesride (riderroute_id, ride_id, starttime_latest, timestamprealized, price, cust_id, no_passengers, timestampbooked, account_timestamp, starttime_earliest, startpt, endpt, startpt_addr, endpt_addr, givenrating, givenrating_comment, givenrating_date, receivedrating, receivedrating_comment, receivedrating_date, startpt_c, endpt_c, comment) FROM stdin;
+COPY riderundertakesride (riderroute_id, ride_id, starttime_latest, timestamprealized, price, cust_id, no_passengers, timestampbooked, account_timestamp, starttime_earliest, startpt, endpt, startpt_addr, endpt_addr, givenrating, givenrating_comment, givenrating_date, receivedrating, receivedrating_comment, receivedrating_date, startpt_c, endpt_c, comment, last_matching_state, is_countermanded) FROM stdin;
 \.
 
 
@@ -573,15 +629,23 @@ COPY route_point (ride_id, route_idx, longitude, latitude, riderroute_id, is_req
 
 COPY sequence (seq_name, seq_count) FROM stdin;
 SEQ_GEN\n	1000
-SEQ_GEN	24450
+SEQ_GEN	57850
 \.
 
 
 --
--- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: public; Owner: openride
+-- Data for Name: spatial_ref_sys; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text) FROM stdin;
+\.
+
+
+--
+-- Data for Name: waypoint; Type: TABLE DATA; Schema: public; Owner: openride
+--
+
+COPY waypoint (waypoint_id, ride_id, route_idx, longitude, latitude, description) FROM stdin;
 \.
 
 
@@ -698,24 +762,11 @@ ALTER TABLE ONLY favoritepoint
 
 
 --
--- Name: geometry_columns_delete; Type: RULE; Schema: public; Owner: openride
+-- Name: waypoint_pkey; Type: CONSTRAINT; Schema: public; Owner: openride; Tablespace: 
 --
 
-CREATE RULE geometry_columns_delete AS ON DELETE TO geometry_columns DO INSTEAD NOTHING;
-
-
---
--- Name: geometry_columns_insert; Type: RULE; Schema: public; Owner: openride
---
-
-CREATE RULE geometry_columns_insert AS ON INSERT TO geometry_columns DO INSTEAD NOTHING;
-
-
---
--- Name: geometry_columns_update; Type: RULE; Schema: public; Owner: openride
---
-
-CREATE RULE geometry_columns_update AS ON UPDATE TO geometry_columns DO INSTEAD NOTHING;
+ALTER TABLE ONLY waypoint
+    ADD CONSTRAINT waypoint_pkey PRIMARY KEY (waypoint_id);
 
 
 --
@@ -789,6 +840,22 @@ ALTER TABLE ONLY riderundertakesride
 
 
 --
+-- Name: message_recipient_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: openride
+--
+
+ALTER TABLE ONLY message
+    ADD CONSTRAINT message_recipient_id_fkey FOREIGN KEY (recipient_id) REFERENCES customer(cust_id) ON DELETE SET NULL;
+
+
+--
+-- Name: message_sender_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: openride
+--
+
+ALTER TABLE ONLY message
+    ADD CONSTRAINT message_sender_id_fkey FOREIGN KEY (sender_id) REFERENCES customer(cust_id) ON DELETE SET NULL;
+
+
+--
 -- Name: registration_pass_custid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: openride
 --
 
@@ -818,6 +885,14 @@ ALTER TABLE ONLY match
 
 ALTER TABLE ONLY route_point
     ADD CONSTRAINT route_point_ride_id_fkey FOREIGN KEY (ride_id) REFERENCES driverundertakesride(ride_id);
+
+
+--
+-- Name: waypoint_ride_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: openride
+--
+
+ALTER TABLE ONLY waypoint
+    ADD CONSTRAINT waypoint_ride_id_fkey FOREIGN KEY (ride_id) REFERENCES driverundertakesride(ride_id);
 
 
 --
